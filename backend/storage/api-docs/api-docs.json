@@ -1,0 +1,31 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sons of Aral API",
+        "description": "Documentación de la API del proyecto Sons of Aral",
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/productos": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Lista de productos",
+                "description": "Obtiene la lista de productos disponibles",
+                "operationId": "getProductos",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida correctamente"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Productos",
+            "description": "Productos"
+        }
+    ]
+}
