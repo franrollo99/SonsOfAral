@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Producto extends Model
 {
-    protected $table = 'pedidos';
+    protected $table = 'productos';
 
     protected $fillable = [
         'nombre',
@@ -18,9 +18,25 @@ class Producto extends Model
         'activo',
     ];
 
+    protected $casts = [
+        'es_ropa' => 'boolean',
+        'activo' => 'boolean',
+        'precio' => 'float',
+    ];
+
     public function pedidoProductos()
     {
         return $this->hasMany(PedidoProducto::class);
+    }
+
+    public function imagenes()
+    {
+        return $this->hasMany(Imagen::class);
+    }
+
+    public function imagenPrincipal()
+    {
+        return $this->hasOne(Imagen::class)->where('es_principal', true);
     }
 
     public function activar()

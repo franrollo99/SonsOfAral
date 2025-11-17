@@ -18,4 +18,9 @@ class Album extends Model
     {
         return $this->hasMany(Cancion::class);
     }
+
+    public function imagen()
+    {
+        return $this->hasOne(Imagen::class);
+    }
 }

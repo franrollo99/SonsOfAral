@@ -15,8 +15,7 @@ class ConciertoSeeder extends Seeder
         DB::table('conciertos')->insert([
             [
                 'fecha' => '2024-04-15',
-                'lugar' => 'Sala Rockville',
-                'ciudad' => 'Madrid',
+                'ubicacion' => 'Sala Rockville',
                 'descripcion' => 'Presentación del nuevo álbum con bandas invitadas.',
                 'precio_entrada' => 15.00,
                 'entrada_anticipada' => true,
@@ -26,8 +25,7 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2024-06-08',
-                'lugar' => 'Kafe Antzokia',
-                'ciudad' => 'Bilbao',
+                'ubicacion' => 'Kafe Antzokia',
                 'descripcion' => 'Evento solidario junto a bandas locales de metal.',
                 'precio_entrada' => 12.00,
                 'entrada_anticipada' => true,
@@ -37,8 +35,7 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2024-09-21',
-                'lugar' => 'Sala Master',
-                'ciudad' => 'Santiago de Compostela',
+                'ubicacion' => 'Sala Master',
                 'descripcion' => 'Gira norte: cierre de verano con espectáculo audiovisual.',
                 'precio_entrada' => 10.00,
                 'entrada_anticipada' => false,
@@ -48,8 +45,7 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2024-11-02',
-                'lugar' => 'Sala Monasterio',
-                'ciudad' => 'Barcelona',
+                'ubicacion' => 'Sala Monasterio',
                 'descripcion' => 'Halloween Metal Fest — con bandas internacionales.',
                 'precio_entrada' => 18.00,
                 'entrada_anticipada' => true,
@@ -59,8 +55,7 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2025-02-14',
-                'lugar' => 'Sala Búnker',
-                'ciudad' => 'Santander',
+                'ubicacion' => 'Sala Búnker',
                 'descripcion' => 'Concierto especial por San Valentín — setlist acústico.',
                 'precio_entrada' => 8.00,
                 'entrada_anticipada' => false,

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('album_id')->constrained('albums')->cascadeOnDelete();
             $table->string('titulo', 255);
             $table->unsignedSmallInteger('duracion');
+            $table->unsignedSmallInteger('track_number');
             $table->timestamps();
         });
     }

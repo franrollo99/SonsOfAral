@@ -18,6 +18,12 @@ class PedidoProducto extends Model
         'subtotal',
     ];
 
+    protected $casts = [
+        'cantidad' => 'integer',
+        'precio_unitario_snapshot' => 'float',
+        'subtotal' => 'float',
+    ];
+
     public function pedido()
     {
         return $this->belongsTo(Pedido::class);

@@ -14,6 +14,10 @@ class Pedido extends Model
         'precio_total',
     ];
 
+    protected $casts = [
+        'precio_total' => 'float',
+    ];
+
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -23,9 +27,10 @@ class Pedido extends Model
     {
         return $this->hasMany(PedidoProducto::class);
     }
-    
+
     public function calcularTotal()
     {
+        $this->loadMissing('productos');
         $this->precio_total = $this->productos->sum('subtotal');
         $this->save();
     }

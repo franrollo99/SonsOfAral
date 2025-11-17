@@ -11,28 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('imagenes', function (Blueprint $table) {
+        Schema::create('galerias', function (Blueprint $table) {
             $table->id();
-            $table->string('ruta', 2048);
-            $table->string('alt', 255)->nullable();
-            $table->string('mime', 100)->nullable();
+            $table->string('titulo', 200);
+            $table->string('slug', 220)->unique();
+            $table->boolean('activo')->default(true);
             $table->timestamps();
-        });
-
-        Schema::create('imageables', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('imagen_id')->constrained('imagenes')->cascadeOnDelete();
-            $table->unsignedBigInteger('imageable_id');
-            $table->string('imageable_type', 191);
-            $table->boolean('is_principal')->default(false);
-            $table->timestamps();
-            $table->index(['imageable_type','imageable_id']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('imageables');
-        Schema::dropIfExists('imagenes');
+        Schema::dropIfExists('galerias');
     }
 };

@@ -10,21 +10,15 @@ class Concierto extends Model
 
     protected $fillable = [
         'fecha',
-        'lugar',
-        'ciudad',
+        'ubicacion',
         'descripcion',
         'precio_entrada',
         'entrada_anticipada',
         'enlace_entrada_anticipada',
     ];
 
-    public function esProximo()
+    public function imagen()
     {
-        return $this->fecha > now();
-    }
-
-    public function tieneEntradaAnticipada()
-    {
-        return $this->entrada_anticipada && $this->enlace_entrada_anticipada;
+        return $this->hasOne(Imagen::class);
     }
 }
