@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cancion;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\CancionResource;
 
 class CancionController extends Controller
 {
@@ -11,7 +14,12 @@ class CancionController extends Controller
      */
     public function index()
     {
-        //
+        $canciones = Cancion::select('id', 'album_id', 'titulo', 'duracion')
+            ->orderBy('album_id')
+            ->orderBy('id')
+            ->get();
+
+        return CancionResource::collection($canciones);
     }
 
     /**
@@ -35,7 +43,10 @@ class CancionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $cancion = Cancion::with('album')
+            ->findOrFail($id);
+
+        return new CancionResource($cancion);
     }
 
     /**

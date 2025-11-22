@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Concierto;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ConciertoResource;
 
-class ConciertosController extends Controller
+class ConciertoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +22,8 @@ class ConciertosController extends Controller
      */
     public function create()
     {
-        //
+        $conciertos = Concierto::orderBy('fecha', 'asc')->get();
+        return ConciertoResource::collection($conciertos);
     }
 
     /**
@@ -35,7 +39,8 @@ class ConciertosController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $concierto = Concierto::findOrFail($id);
+        return new ConciertoResource($concierto);
     }
 
     /**

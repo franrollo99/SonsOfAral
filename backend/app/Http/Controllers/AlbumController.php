@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Album;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\AlbumResource;
 
 class AlbumController extends Controller
 {
@@ -11,7 +14,11 @@ class AlbumController extends Controller
      */
     public function index()
     {
-        //
+        $albums = Album::select('id', 'titulo', 'fecha_lanzamiento', 'descripcion')
+            ->orderBy('fecha_lanzamiento', 'desc')
+            ->get();
+
+        return AlbumResource::collection($albums);
     }
 
     /**
@@ -35,7 +42,10 @@ class AlbumController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $album = Album::with('canciones'/* , 'imagen' */)
+            ->findOrFail($id);
+
+        return new AlbumResource($album);
     }
 
     /**

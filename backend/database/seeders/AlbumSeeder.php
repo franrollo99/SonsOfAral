@@ -21,11 +21,11 @@ class AlbumSeeder extends Seeder
         ]);
 
         DB::table('canciones')->insert([
-            ['album_id' => $album1Id, 'titulo' => 'Into the Abyss', 'duracion' => 242, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album1Id, 'titulo' => 'Burn the Silence', 'duracion' => 198, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album1Id, 'titulo' => 'Crimson Horizon', 'duracion' => 256, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album1Id, 'titulo' => 'Chains of Tomorrow', 'duracion' => 233, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album1Id, 'titulo' => 'Fractured Light', 'duracion' => 211, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album1Id, 'titulo' => 'Into the Abyss', 'duracion' => 242, 'track_number' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album1Id, 'titulo' => 'Burn the Silence', 'duracion' => 198, 'track_number' => 2, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album1Id, 'titulo' => 'Crimson Horizon', 'duracion' => 256, 'track_number' => 3, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album1Id, 'titulo' => 'Chains of Tomorrow', 'duracion' => 233, 'track_number' => 4, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album1Id, 'titulo' => 'Fractured Light', 'duracion' => 211, 'track_number' => 5, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Álbum 2
@@ -38,11 +38,11 @@ class AlbumSeeder extends Seeder
         ]);
 
         DB::table('canciones')->insert([
-            ['album_id' => $album2Id, 'titulo' => 'Rise Again', 'duracion' => 221, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album2Id, 'titulo' => 'The Last Flame', 'duracion' => 247, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album2Id, 'titulo' => 'Echoes of the Fall', 'duracion' => 204, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album2Id, 'titulo' => 'Beneath the Ashes', 'duracion' => 230, 'created_at' => now(), 'updated_at' => now()],
-            ['album_id' => $album2Id, 'titulo' => 'Rebirth', 'duracion' => 193, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album2Id, 'titulo' => 'Rise Again', 'duracion' => 221, 'track_number' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album2Id, 'titulo' => 'The Last Flame', 'duracion' => 247, 'track_number' => 2, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album2Id, 'titulo' => 'Echoes of the Fall', 'duracion' => 204, 'track_number' => 3, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album2Id, 'titulo' => 'Beneath the Ashes', 'duracion' => 230, 'track_number' => 4, 'created_at' => now(), 'updated_at' => now()],
+            ['album_id' => $album2Id, 'titulo' => 'Rebirth', 'duracion' => 193, 'track_number' => 5, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

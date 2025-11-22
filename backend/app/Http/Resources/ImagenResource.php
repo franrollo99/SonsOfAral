@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CancionResource extends JsonResource
+class ImagenResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,10 +16,10 @@ class CancionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'albumId' => $this->album_id,
-            'titulo' => $this->titulo,
-            'duracion' => $this->duracion,
-            'posicion' => $this->posicion,
+            'url' => Storage::url($this->ruta),
+            'alt' => $this->alt,
+            'mime' => $this->mime,
+            'esPrincipal' => (bool) $this->es_principal,
         ];
     }
 }
