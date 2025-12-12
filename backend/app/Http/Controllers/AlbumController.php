@@ -10,7 +10,29 @@ use App\Http\Resources\AlbumResource;
 class AlbumController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/albums",
+     *     summary="Obtener todos los álbumes",
+     *     tags={"Albums"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de álbumes",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="titulo", type="string"),
+     *                     @OA\Property(property="fechaLanzamiento", type="string"),
+     *                     @OA\Property(property="descripcion", type="string")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function index()
     {
@@ -22,53 +44,60 @@ class AlbumController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/albums/{id}",
+     *     summary="Obtener un álbum por ID",
+     *     tags={"Albums"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del álbum",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Información del álbum con sus canciones e imagen",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer"),
+     *             @OA\Property(property="titulo", type="string"),
+     *             @OA\Property(property="fechaLanzamiento", type="string"),
+     *             @OA\Property(property="descripcion", type="string"),
+     * 
+     *             @OA\Property(
+     *                 property="canciones",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="titulo", type="string"),
+     *                     @OA\Property(property="duracion", type="integer")
+     *                 )
+     *             ),
+     *
+     *             @OA\Property(
+     *                 property="imagen",
+     *                 type="object",
+     *                 nullable=true,
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="url", type="string"),
+     *                 @OA\Property(property="alt", type="string"),
+     *                 @OA\Property(property="mime", type="string"),
+     *                 @OA\Property(property="esPrincipal", type="boolean")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Álbum no encontrado"
+     *     )
+     * )
      */
     public function show(string $id)
     {
-        $album = Album::with('canciones'/* , 'imagen' */)
+        $album = Album::with('canciones', 'imagen')
             ->findOrFail($id);
 
         return new AlbumResource($album);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

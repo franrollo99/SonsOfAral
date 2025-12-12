@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ConciertoResource extends JsonResource
@@ -16,8 +17,10 @@ class ConciertoResource extends JsonResource
         return [
             'id' => $this->id,
             'fecha' => (string) $this->fecha,
-            'lugar' => $this->lugar,
-            'ciudad' => $this->ciudad,
+            'fecha_formateada'  => $this->fecha 
+                ? Carbon::parse($this->fecha)->format('d/m')
+                : null,
+            'ubicacion' => $this->ubicacion,
             'descripcion' => $this->descripcion,
             'precioEntrada' => $this->precio_entrada,
             'entradaAnticipada' => (bool) $this->entrada_anticipada,

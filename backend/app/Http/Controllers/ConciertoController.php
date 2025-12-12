@@ -10,32 +10,89 @@ use App\Http\Resources\ConciertoResource;
 class ConciertoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/conciertos",
+     *     summary="Obtener todos los conciertos",
+     *     tags={"Conciertos"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de conciertos",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="fecha", type="string"),
+     *                     @OA\Property(property="ubicacion", type="string"),
+     *                     @OA\Property(property="descripcion", type="string"),
+     *                     @OA\Property(property="precioEntrada", type="number"),
+     *                     @OA\Property(property="entradaAnticipada", type="boolean"),
+     *                     @OA\Property(property="enlaceEntradaAnticipada", type="string", nullable=true)
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
     {
         $conciertos = Concierto::orderBy('fecha', 'asc')->get();
         return ConciertoResource::collection($conciertos);
     }
 
+
     /**
-     * Store a newly created resource in storage.
+     * No se usa en APIs.
+     */
+    public function create()
+    {
+        //
+    }
+
+
+    /**
+     * No se usa en APIs.
      */
     public function store(Request $request)
     {
         //
     }
 
+
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/conciertos/{id}",
+     *     summary="Obtener un concierto por ID",
+     *     tags={"Conciertos"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del concierto",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Información del concierto",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer"),
+     *             @OA\Property(property="fecha", type="string"),
+     *             @OA\Property(property="ubicacion", type="string"),
+     *             @OA\Property(property="descripcion", type="string"),
+     *             @OA\Property(property="precioEntrada", type="number"),
+     *             @OA\Property(property="entradaAnticipada", type="boolean"),
+     *             @OA\Property(property="enlaceEntradaAnticipada", type="string", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Concierto no encontrado"
+     *     )
+     * )
      */
     public function show(string $id)
     {
@@ -43,25 +100,19 @@ class ConciertoController extends Controller
         return new ConciertoResource($concierto);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
         //

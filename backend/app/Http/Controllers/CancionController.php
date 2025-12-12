@@ -10,11 +10,34 @@ use App\Http\Resources\CancionResource;
 class CancionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/canciones",
+     *     summary="Obtener todas las canciones",
+     *     tags={"Canciones"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de canciones",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="albumId", type="integer"),
+     *                     @OA\Property(property="titulo", type="string"),
+     *                     @OA\Property(property="duracion", type="integer", description="Duración en segundos"),
+     *                     @OA\Property(property="trackNumber", type="integer")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function index()
     {
-        $canciones = Cancion::select('id', 'album_id', 'titulo', 'duracion')
+        $canciones = Cancion::select('id', 'album_id', 'titulo', 'duracion', 'track_number')
             ->orderBy('album_id')
             ->orderBy('id')
             ->get();
@@ -23,23 +46,34 @@ class CancionController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/canciones/{id}",
+     *     summary="Obtener una canción por ID",
+     *     tags={"Canciones"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la canción",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Información de la canción",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer"),
+     *             @OA\Property(property="albumId", type="integer"),
+     *             @OA\Property(property="titulo", type="string"),
+     *             @OA\Property(property="duracion", type="integer"),
+     *             @OA\Property(property="trackNumber", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Canción no encontrada"
+     *     )
+     * )
      */
     public function show(string $id)
     {
@@ -47,29 +81,5 @@ class CancionController extends Controller
             ->findOrFail($id);
 
         return new CancionResource($cancion);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

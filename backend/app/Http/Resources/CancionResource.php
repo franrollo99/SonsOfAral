@@ -18,7 +18,7 @@ class CancionResource extends JsonResource
             'albumId' => $this->album_id,
             'titulo' => $this->titulo,
             'duracion' => $this->duracion,
-            'posicion' => $this->posicion,
+            'trackNumber' => $this->track_number,
         ];
     }
 }

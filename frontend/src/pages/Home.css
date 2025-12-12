@@ -1,0 +1,31 @@
+.home-page {
+  /* aquí puedes meter algo concreto de la home si quieres */
+}
+
+/* HERO específico de la home */
+
+.hero {
+  padding: 4rem 2rem;
+  text-align: center;
+  background: radial-gradient(circle at top, #1e1e1e 0, #121212 55%);
+}
+
+.hero__content h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+}
+
+.hero__content p {
+  max-width: 600px;
+  margin: 0.5rem auto 2rem;
+  color: var(--muted);
+}
+
+.hero__buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}

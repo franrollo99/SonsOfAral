@@ -1,0 +1,14 @@
+.release-list{
+    
+}
+
+.release-card {
+    align-items: flex-start;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 224px;
+    padding-left: 60px;
+    position: relative;
+}
