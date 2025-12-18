@@ -15,7 +15,9 @@ class ConciertoSeeder extends Seeder
         DB::table('conciertos')->insert([
             [
                 'fecha' => '2024-04-15',
-                'ubicacion' => 'Sala Rockville',
+                'provincia' => 'Cantabria',
+                'ciudad' => 'Santander',
+                'lugar' => 'Sala Rockville',
                 'descripcion' => 'Presentación del nuevo álbum con bandas invitadas.',
                 'precio_entrada' => 15.00,
                 'entrada_anticipada' => true,
@@ -25,7 +27,9 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2024-06-08',
-                'ubicacion' => 'Kafe Antzokia',
+                'provincia' => 'Cantabria',
+                'ciudad' => 'Santander',
+                'lugar' => 'Kafe Antzokia',
                 'descripcion' => 'Evento solidario junto a bandas locales de metal.',
                 'precio_entrada' => 12.00,
                 'entrada_anticipada' => true,
@@ -35,7 +39,9 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2024-09-21',
-                'ubicacion' => 'Sala Master',
+                'provincia' => 'Galicia',
+                'ciudad' => 'Vigo',
+                'lugar' => 'Sala Master',
                 'descripcion' => 'Gira norte: cierre de verano con espectáculo audiovisual.',
                 'precio_entrada' => 10.00,
                 'entrada_anticipada' => false,
@@ -45,7 +51,9 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2024-11-02',
-                'ubicacion' => 'Sala Monasterio',
+                'provincia' => 'Asturias',
+                'ciudad' => 'Oviedo',
+                'lugar' => 'Sala Monasterio',
                 'descripcion' => 'Halloween Metal Fest — con bandas internacionales.',
                 'precio_entrada' => 18.00,
                 'entrada_anticipada' => true,
@@ -55,9 +63,11 @@ class ConciertoSeeder extends Seeder
             ],
             [
                 'fecha' => '2025-02-14',
-                'ubicacion' => 'Sala Búnker',
+                'provincia' => 'Cantabria',
+                'ciudad' => 'Torrelavega',
+                'lugar' => 'Sala Búnker',
                 'descripcion' => 'Concierto especial por San Valentín — setlist acústico.',
-                'precio_entrada' => 8.00,
+                'precio_entrada' => 0,
                 'entrada_anticipada' => false,
                 'enlace_entrada_anticipada' => null,
                 'created_at' => now(),

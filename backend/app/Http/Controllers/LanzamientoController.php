@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Album;
-use Illuminate\Http\Request;
+use App\Models\Lanzamiento;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\AlbumResource;
+use App\Http\Resources\LanzamientoResource;
 
-class AlbumController extends Controller
+class LanzamientoController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/albums",
-     *     summary="Obtener todos los álbumes",
-     *     tags={"Albums"},
+     *     path="/api/lanzamientos",
+     *     summary="Obtener todos los lanzamientos",
+     *     tags={"Lanzamientos"},
      *     @OA\Response(
      *         response=200,
-     *         description="Lista de álbumes",
+     *         description="Lista de lanzamientos",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(
@@ -36,28 +35,25 @@ class AlbumController extends Controller
      */
     public function index()
     {
-        $albums = Album::select('id', 'titulo', 'fecha_lanzamiento', 'descripcion')
-            ->orderBy('fecha_lanzamiento', 'desc')
-            ->get();
-
-        return AlbumResource::collection($albums);
+        $lanzamientos = Lanzamiento::orderBy('fecha_lanzamiento', 'desc')->get();
+        return LanzamientoResource::collection($lanzamientos);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/albums/{id}",
-     *     summary="Obtener un álbum por ID",
-     *     tags={"Albums"},
+     *     path="/api/lanzamientos/{id}",
+     *     summary="Obtener un lanzamiento por ID",
+     *     tags={"Lanzamientos"},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID del álbum",
+     *         description="ID del lanzamiento",
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Información del álbum con sus canciones e imagen",
+     *         description="Información del lanzamiento con sus canciones e imagen",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="id", type="integer"),
@@ -95,9 +91,9 @@ class AlbumController extends Controller
      */
     public function show(string $id)
     {
-        $album = Album::with('canciones', 'imagen')
+        $lanzamiento = Lanzamiento::with('canciones', 'imagen')
             ->findOrFail($id);
 
-        return new AlbumResource($album);
+        return new LanzamientoResource($lanzamiento);
     }
 }

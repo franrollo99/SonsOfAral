@@ -9,14 +9,14 @@ class Cancion extends Model
     protected $table = 'canciones';
 
     protected $fillable = [
-        'album_id',
+        'lanzamiento_id',
         'titulo',
         'duracion',
     ];
 
-    public function album()
+    public function lanzamiento()
     {
-        return $this->belongsTo(Album::class);
+        return $this->belongsTo(Lanzamiento::class);
     }
 
     public function duracionFormateada()

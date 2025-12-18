@@ -15,7 +15,7 @@ class CancionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'albumId' => $this->album_id,
+            'lanzamientoId' => $this->lanzamiento_id,
             'titulo' => $this->titulo,
             'duracion' => $this->duracion,
             'trackNumber' => $this->track_number,

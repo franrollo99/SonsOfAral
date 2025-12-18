@@ -1,70 +1,80 @@
-// src/pages/Musica.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./Musica.css";
 
-function Musica() {
-  const [albums, setAlbums] = useState([]);
+export function Musica() {
+  const [lanzamientos, setLanzamientos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [filtro, setFiltro] = useState("all");
 
   useEffect(() => {
-    async function cargarAlbums() {
+    async function cargarLanzamientos() {
       try {
         setCargando(true);
         setError(null);
 
         const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-        const respuesta = await fetch(`${baseUrl}/albums`);
+        const res = await fetch(`${baseUrl}/lanzamientos`);
+        if (!res.ok) throw new Error("Error al cargar lanzamientos");
 
-
-        if (!respuesta.ok) {
-          throw new Error("Error al cargar albums");
-        }
-
-        const data = await respuesta.json();
-        console.log(data);
+        const data = await res.json();
         const lista = Array.isArray(data) ? data : data.data;
-
-        setAlbums(lista || []);
-      } catch (err) {
-        console.error(err);
-        setError("No se pudieron cargar los albums.");
+        setLanzamientos(lista || []);
+      } catch (e) {
+        setError("No se pudieron cargar los discos.");
       } finally {
         setCargando(false);
       }
     }
 
-    cargarAlbums();
+    cargarLanzamientos();
   }, []);
 
+  // useMemo memoriza el resultado para no repetirlo en cada render si los datos no han cambiado
+  const lanzamientosFiltrados = useMemo(() => {
+    if (filtro === "all") return lanzamientos;
+    if (filtro === "albums") return lanzamientos.filter(l => l.tipo == "album");
+    if (filtro === "singles") return lanzamientos.filter(l => l.tipo == "single");
+    return lanzamientos;
+  }, [lanzamientos, filtro]);
+
   return (
-      <section id="musica" className="section">
-        
-        {/* Bloque de albums */}
-        <div className="cardsConcerts">
-          {cargando && <p>Cargando albums...</p>}
+    <section className="section musica">
+      <div className="d-flex align-items-end justify-content-between gap-3">
+        <h1>Explorar lanzamientos</h1>
 
-          {error && !cargando && (
-            <p className="cardsConcerts__error">{error}</p>
-          )}
-
-          {!cargando && !error && albums.length === 0 && (
-            <p>No hay albums disponibles por ahora.</p>
-          )}
-
-          <div className="release-list">
-          {!cargando &&
-            !error &&
-            albums.length > 0 &&
-            albums.map((album) => (
-              <div className="release-card">
-
-              </div>
-            ))}
-          </div>
-
+        <div className="d-flex flex-wrap justify-content-end gap-2">
+          <button className={`filtroMusica ${filtro == "all" ? "isActive" : ""}`} onClick={() => setFiltro("all")} type="button">All</button>
+          <button className={`filtroMusica ${filtro == "albums" ? "isActive" : ""}`} onClick={() => setFiltro("albums")} type="button">Albums</button>
+          <button className={`filtroMusica ${filtro == "singles" ? "isActive" : ""}`} onClick={() => setFiltro("singles")} type="button">Singles</button>
         </div>
-      </section>
+      </div>
+      <hr />
+
+      {cargando && <p>Cargando música...</p>}
+      {error && !cargando && <p className="errorMessage">{error}</p>}
+      {!cargando && !error && lanzamientosFiltrados.length === 0 && (<p>No hay lanzamientos disponibles por ahora.</p>)}
+
+      {!cargando && !error && lanzamientosFiltrados.length > 0 && (
+        <div className="row g-4">
+          {lanzamientosFiltrados.map((lanzamiento) => (
+            <div key={lanzamiento.id} className="py-3 col-12 col-sm-6 col-lg-3">
+              <article className="lanzamiento">
+                <div className="lanzamientoPortada">
+                  {/* loading lazy descarga las imagenes cuando el usuario se acerca a ellas al hacer scroll */}
+                  <img src={lanzamiento.imagen_url ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamiento.titulo}`} loading="lazy" />
+                </div>
+
+                <div className="lanzamientoDatos">
+                  <div className="lanzamientoFecha">{lanzamiento.fechaFormateada} <span className="p-2">•</span> {lanzamiento.tipo}</div>
+                  <div className="lanzamientoTitulo">{lanzamiento.titulo}</div>
+                </div>
+              </article>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

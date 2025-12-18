@@ -38,43 +38,7 @@ function Register() {
 
   return (
     <div className="home-page">
-      <section id="conciertos" className="section">
-        <div className="imageContainer">
-          <div className="imgWrapper">
-            <img src="/images/portadaConciertos.png" alt="Portada conciertos"/>
-            <h1>SONS OF ARAL</h1>
-          </div>
-        </div>
-
-        {/* Bloque de conciertos */}
-        <div className="cardsConcerts">
-          {cargando && <p>Cargando conciertos...</p>}
-
-          {error && !cargando && (
-            <p className="cardsConcerts__error">{error}</p>
-          )}
-
-          {!cargando && !error && conciertos.length === 0 && (
-            <p>No hay conciertos disponibles por ahora.</p>
-          )}
-
-          {!cargando &&
-            !error &&
-            conciertos.length > 0 &&
-            conciertos.map((concierto) => (
-              <article key={concierto.id} className="card">
-                <div className="tituloFechaConcierto">
-                    <h1>{concierto.ubicacion}</h1>
-                    <h2>{concierto.fecha}</h2>
-                </div>
-                  <p>{concierto.descripcion}</p>
-                  <p className="card__note">Entrada: {concierto.precioEntrada} €</p>
-                  {concierto.entradaAnticipada && <a className="btn">Hola!</a>}
-
-              </article>
-            ))}
-        </div>
-      </section>
+      
     </div>
   );
 }

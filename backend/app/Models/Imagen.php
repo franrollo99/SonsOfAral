@@ -14,7 +14,7 @@ class Imagen extends Model
         'mime',
         'producto_id',
         'concierto_id',
-        'album_id',
+        'lanzamiento_id',
         'galeria_id',
         'es_principal',
     ];
@@ -33,9 +33,9 @@ class Imagen extends Model
         return $this->belongsTo(Concierto::class);
     }
 
-    public function album()
+    public function lanzamiento()
     {
-        return $this->belongsTo(Album::class);
+        return $this->belongsTo(Lanzamiento::class);
     }
 
     public function galeria()

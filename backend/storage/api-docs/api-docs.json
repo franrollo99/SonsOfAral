@@ -9,16 +9,239 @@
         "version": "1.0"
     },
     "paths": {
-        "/api/albums": {
+        "/api/canciones": {
             "get": {
                 "tags": [
-                    "Albums"
+                    "Canciones"
                 ],
-                "summary": "Obtener todos los álbumes",
-                "operationId": "735609843dcfb89ee4e12e340eddca25",
+                "summary": "Obtener todas las canciones",
+                "operationId": "6da63c0dd890173a5268f67bfd7c1740",
                 "responses": {
                     "200": {
-                        "description": "Lista de álbumes",
+                        "description": "Lista de canciones",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "lanzamientoId": {
+                                                        "type": "integer"
+                                                    },
+                                                    "titulo": {
+                                                        "type": "string"
+                                                    },
+                                                    "duracion": {
+                                                        "description": "Duración en segundos",
+                                                        "type": "integer"
+                                                    },
+                                                    "trackNumber": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/canciones/{id}": {
+            "get": {
+                "tags": [
+                    "Canciones"
+                ],
+                "summary": "Obtener una canción por ID",
+                "operationId": "52569f57d43923ee38ddcdfcd5c65724",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la canción",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Información de la canción",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "lanzamientoId": {
+                                            "type": "integer"
+                                        },
+                                        "titulo": {
+                                            "type": "string"
+                                        },
+                                        "duracion": {
+                                            "type": "integer"
+                                        },
+                                        "trackNumber": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Canción no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/conciertos": {
+            "get": {
+                "tags": [
+                    "Conciertos"
+                ],
+                "summary": "Obtener todos los conciertos",
+                "operationId": "84d62df96cbe7f163c4661bbe2dcbd33",
+                "responses": {
+                    "200": {
+                        "description": "Lista de conciertos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "fecha": {
+                                                        "type": "string"
+                                                    },
+                                                    "provincia": {
+                                                        "type": "string"
+                                                    },
+                                                    "ciudad": {
+                                                        "type": "string"
+                                                    },
+                                                    "lugar": {
+                                                        "type": "string"
+                                                    },
+                                                    "descripcion": {
+                                                        "type": "string"
+                                                    },
+                                                    "precioEntrada": {
+                                                        "type": "number"
+                                                    },
+                                                    "entradaAnticipada": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "enlaceEntradaAnticipada": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/conciertos/{id}": {
+            "get": {
+                "tags": [
+                    "Conciertos"
+                ],
+                "summary": "Obtener un concierto por ID",
+                "operationId": "92f05c7517f0817785abd2f4afc4f8bc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del concierto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Información del concierto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "fecha": {
+                                            "type": "string"
+                                        },
+                                        "provincia": {
+                                            "type": "string"
+                                        },
+                                        "ciudad": {
+                                            "type": "string"
+                                        },
+                                        "lugar": {
+                                            "type": "string"
+                                        },
+                                        "descripcion": {
+                                            "type": "string"
+                                        },
+                                        "precioEntrada": {
+                                            "type": "number"
+                                        },
+                                        "entradaAnticipada": {
+                                            "type": "boolean"
+                                        },
+                                        "enlaceEntradaAnticipada": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Concierto no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/lanzamientos": {
+            "get": {
+                "tags": [
+                    "Lanzamientos"
+                ],
+                "summary": "Obtener todos los lanzamientos",
+                "operationId": "a3b0344d06ca9da97b794a601b105b12",
+                "responses": {
+                    "200": {
+                        "description": "Lista de lanzamientos",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -52,18 +275,18 @@
                 }
             }
         },
-        "/api/albums/{id}": {
+        "/api/lanzamientos/{id}": {
             "get": {
                 "tags": [
-                    "Albums"
+                    "Lanzamientos"
                 ],
-                "summary": "Obtener un álbum por ID",
-                "operationId": "71e9c4179582355e89419e6f6994c418",
+                "summary": "Obtener un lanzamiento por ID",
+                "operationId": "b1ceb33c1c3904ea7eeabc1aee91c3c9",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID del álbum",
+                        "description": "ID del lanzamiento",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -72,7 +295,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Información del álbum con sus canciones e imagen",
+                        "description": "Información del lanzamiento con sus canciones e imagen",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -138,224 +361,9 @@
                     }
                 }
             }
-        },
-        "/api/canciones": {
-            "get": {
-                "tags": [
-                    "Canciones"
-                ],
-                "summary": "Obtener todas las canciones",
-                "operationId": "6da63c0dd890173a5268f67bfd7c1740",
-                "responses": {
-                    "200": {
-                        "description": "Lista de canciones",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "albumId": {
-                                                        "type": "integer"
-                                                    },
-                                                    "titulo": {
-                                                        "type": "string"
-                                                    },
-                                                    "duracion": {
-                                                        "description": "Duración en segundos",
-                                                        "type": "integer"
-                                                    },
-                                                    "trackNumber": {
-                                                        "type": "integer"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/canciones/{id}": {
-            "get": {
-                "tags": [
-                    "Canciones"
-                ],
-                "summary": "Obtener una canción por ID",
-                "operationId": "52569f57d43923ee38ddcdfcd5c65724",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID de la canción",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Información de la canción",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "albumId": {
-                                            "type": "integer"
-                                        },
-                                        "titulo": {
-                                            "type": "string"
-                                        },
-                                        "duracion": {
-                                            "type": "integer"
-                                        },
-                                        "trackNumber": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Canción no encontrada"
-                    }
-                }
-            }
-        },
-        "/api/conciertos": {
-            "get": {
-                "tags": [
-                    "Conciertos"
-                ],
-                "summary": "Obtener todos los conciertos",
-                "operationId": "84d62df96cbe7f163c4661bbe2dcbd33",
-                "responses": {
-                    "200": {
-                        "description": "Lista de conciertos",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "fecha": {
-                                                        "type": "string"
-                                                    },
-                                                    "ubicacion": {
-                                                        "type": "string"
-                                                    },
-                                                    "descripcion": {
-                                                        "type": "string"
-                                                    },
-                                                    "precioEntrada": {
-                                                        "type": "number"
-                                                    },
-                                                    "entradaAnticipada": {
-                                                        "type": "boolean"
-                                                    },
-                                                    "enlaceEntradaAnticipada": {
-                                                        "type": "string",
-                                                        "nullable": true
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/conciertos/{id}": {
-            "get": {
-                "tags": [
-                    "Conciertos"
-                ],
-                "summary": "Obtener un concierto por ID",
-                "operationId": "92f05c7517f0817785abd2f4afc4f8bc",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID del concierto",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Información del concierto",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "fecha": {
-                                            "type": "string"
-                                        },
-                                        "ubicacion": {
-                                            "type": "string"
-                                        },
-                                        "descripcion": {
-                                            "type": "string"
-                                        },
-                                        "precioEntrada": {
-                                            "type": "number"
-                                        },
-                                        "entradaAnticipada": {
-                                            "type": "boolean"
-                                        },
-                                        "enlaceEntradaAnticipada": {
-                                            "type": "string",
-                                            "nullable": true
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Concierto no encontrado"
-                    }
-                }
-            }
         }
     },
     "tags": [
-        {
-            "name": "Albums",
-            "description": "Albums"
-        },
         {
             "name": "Canciones",
             "description": "Canciones"
@@ -363,6 +371,10 @@
         {
             "name": "Conciertos",
             "description": "Conciertos"
+        },
+        {
+            "name": "Lanzamientos",
+            "description": "Lanzamientos"
         }
     ]
 }

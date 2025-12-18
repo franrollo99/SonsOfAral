@@ -13,8 +13,7 @@ function Conciertos() {
         setCargando(true);
         setError(null);
 
-        const baseUrl =
-          import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+        const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
         const respuesta = await fetch(`${baseUrl}/conciertos`);
 
         if (!respuesta.ok) {
@@ -37,66 +36,41 @@ function Conciertos() {
   }, []);
 
   return (
-    <section id="conciertos" className="section">
-      {/* <div className="imageContainer">
-        <div className="imgWrapper">
-          <img src="/images/portadaConciertos.png" alt="Portada conciertos" />
-          <h1>SONS OF ARAL</h1>
-        </div>
-      </div> */}
+    <section className="section">
+      {cargando && <p>Cargando conciertos...</p>}
+      {error && !cargando && <p className="errorMessage">{error}</p>}
+      {!cargando && !error && conciertos.length === 0 && (<p>No hay conciertos disponibles por ahora.</p>)}
 
-      {/* Bloque de conciertos */}
-      <div className="cardsConcerts">
-        {cargando && <p>Cargando conciertos...</p>}
-
-        {error && !cargando && (
-          <p className="cardsConcerts__error">{error}</p>
-        )}
-
-        {!cargando && !error && conciertos.length === 0 && (
-          <p>No hay conciertos disponibles por ahora.</p>
-        )}
-
-        {!cargando &&
-          !error &&
-          conciertos.length > 0 &&
-          conciertos.map((concierto) => (
-            <article key={concierto.id} className="card card--concierto">
-              <div className="tituloFechaConcierto">
-                <h2 className="concierto__sala">{concierto.ubicacion}</h2>
-                <span className="concierto__fecha">
-                  {concierto.fecha_formateada}
-                </span>
+      {!cargando && !error && conciertos.length > 0 && (
+        <div className="d-flex flex-column gap-4 py-3">
+          {conciertos.map((concierto) => (
+            <article key={concierto.id} className="concierto card gap-3">
+              <div className="d-flex align-items-baseline justify-content-between gap-5">
+                <div>
+                  <h1>{concierto.lugar} <span>{concierto.ciudad}, {concierto.provincia}</span></h1>
+                </div>
+                <h2>{concierto.fecha_formateada}</h2>
               </div>
+              <div className="d-flex justify-content-between align-items-end">
 
-              {concierto.descripcion && (
-                <p className="concierto__descripcion">
-                  {concierto.descripcion}
-                </p>
-              )}
-
-              <div className="concierto__meta">
-                {concierto.precioEntrada && (
-                  <span className="concierto__precio">
-                    Entrada: {concierto.precioEntrada} €
-                  </span>
+                {concierto.descripcion && (
+                  <p className="descripcion w-50">{concierto.descripcion}</p>
                 )}
-
-                {concierto.entradaAnticipada &&
-                  concierto.enlaceEntradaAnticipada && (
-                    <a
-                      href={concierto.enlaceEntradaAnticipada}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn concierto__cta"
-                    >
-                      Entradas
-                    </a>
+                {/* <div className="entrada d-flex flex-column justify-content-end align-items-center gap-3"> */}
+                <div className="entrada d-flex align-items-center gap-3">
+                  {concierto.precioEntrada && (
+                    <h4 className="m-0">Entrada {concierto.precioEntrada == 0 ? 'gratis' : `: ${concierto.precioEntrada} €`}</h4>
                   )}
+                  {concierto.entradaAnticipada &&
+                    concierto.enlaceEntradaAnticipada && (
+                      <a href={concierto.enlaceEntradaAnticipada} className="btn btn-secondary">Entrada anticipada</a>
+                    )}
+                </div>
               </div>
             </article>
           ))}
-      </div>
+        </div>
+      )}
     </section>
   );
 }

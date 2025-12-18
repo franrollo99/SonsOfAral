@@ -10,7 +10,9 @@ class Concierto extends Model
 
     protected $fillable = [
         'fecha',
-        'ubicacion',
+        'provincia',
+        'ciudad',
+        'lugar',
         'descripcion',
         'precio_entrada',
         'entrada_anticipada',

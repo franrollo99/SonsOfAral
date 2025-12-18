@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('mime', 100)->nullable();
             $table->foreignId('producto_id')->nullable()->constrained('productos')->cascadeOnDelete();
             $table->foreignId('concierto_id')->unique()->nullable()->constrained('conciertos')->cascadeOnDelete();
-            $table->foreignId('album_id')->unique()->nullable()->constrained('albums')->cascadeOnDelete();
+            $table->foreignId('lanzamiento_id')->unique()->nullable()->constrained('lanzamientos')->cascadeOnDelete();
             $table->foreignId('galeria_id')->nullable()->constrained('galerias')->cascadeOnDelete();
             $table->boolean('es_principal')->default(false);
             $table->timestamps();

@@ -17,10 +17,14 @@ class ConciertoResource extends JsonResource
         return [
             'id' => $this->id,
             'fecha' => (string) $this->fecha,
-            'fecha_formateada'  => $this->fecha 
-                ? Carbon::parse($this->fecha)->format('d/m')
+            'fecha_formateada' => $this->fecha
+                ? Carbon::parse($this->fecha)
+                    ->locale('es')
+                    ->translatedFormat('d \d\e F, Y')
                 : null,
-            'ubicacion' => $this->ubicacion,
+            'provincia' => $this->provincia,
+            'ciudad' => $this->ciudad,
+            'lugar' => $this->lugar,
             'descripcion' => $this->descripcion,
             'precioEntrada' => $this->precio_entrada,
             'entradaAnticipada' => (bool) $this->entrada_anticipada,

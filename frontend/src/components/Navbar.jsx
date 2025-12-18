@@ -1,16 +1,14 @@
-// src/components/Navbar.jsx
 import "./Navbar.css";
 
-export function Navbar() {
+function Navbar() {
   return (
-    <header>
+    <header className="d-flex justify-content-between align-items-center gap-5">
       <div className="navbarLogo">
-        {/* <span>Sons of Aral</span> */}
         <img src="images/logo.png" alt="logo" />
 
       </div>
 
-      <nav className="navbarLinks">
+      <nav className="navbarLinks d-flex gap-4">
         <a href="/">Inicio</a>
         <a href="/conciertos">Conciertos</a>
         <a href="/musica">Música</a>
@@ -23,3 +21,5 @@ export function Navbar() {
     </header>
   );
 }
+
+export default Navbar;

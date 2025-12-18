@@ -25,7 +25,7 @@ class CancionController extends Controller
      *                 @OA\Items(
      *                     type="object",
      *                     @OA\Property(property="id", type="integer"),
-     *                     @OA\Property(property="albumId", type="integer"),
+     *                     @OA\Property(property="lanzamientoId", type="integer"),
      *                     @OA\Property(property="titulo", type="string"),
      *                     @OA\Property(property="duracion", type="integer", description="Duración en segundos"),
      *                     @OA\Property(property="trackNumber", type="integer")
@@ -37,11 +37,7 @@ class CancionController extends Controller
      */
     public function index()
     {
-        $canciones = Cancion::select('id', 'album_id', 'titulo', 'duracion', 'track_number')
-            ->orderBy('album_id')
-            ->orderBy('id')
-            ->get();
-
+        $canciones = Cancion::orderBy('lanzamiento_id')->orderBy('track_number')->get();
         return CancionResource::collection($canciones);
     }
 
@@ -63,7 +59,7 @@ class CancionController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="id", type="integer"),
-     *             @OA\Property(property="albumId", type="integer"),
+     *             @OA\Property(property="lanzamientoId", type="integer"),
      *             @OA\Property(property="titulo", type="string"),
      *             @OA\Property(property="duracion", type="integer"),
      *             @OA\Property(property="trackNumber", type="integer")
@@ -77,7 +73,7 @@ class CancionController extends Controller
      */
     public function show(string $id)
     {
-        $cancion = Cancion::with('album')
+        $cancion = Cancion::with('lanzamiento')
             ->findOrFail($id);
 
         return new CancionResource($cancion);

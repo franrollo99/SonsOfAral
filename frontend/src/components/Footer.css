@@ -1,14 +1,31 @@
-/* src/components/Footer.css */
-
-.footer {
-  padding: 1.5rem 2rem;
-  text-align: center;
-  background: #1e1e1e;
+footer {
+  background: var(--bg-alt);
   border-top: 1px solid #2a2a2a;
   font-size: 0.85rem;
 }
 
-.footer__small {
+.nav-item a {
+  padding: 0;
+  color: var(--text);
+  border-bottom: 2px solid transparent;
+}
+
+.nav-item a:hover {
+  color: var(--muted);
+  border-bottom: 2px solid var(--muted);
+}
+
+.redesSociales img {
+  width: 30px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.redesSociales a:hover img {
+  opacity: 0.7;
+  transform: scale(1.1);
+}
+
+.copyrigth {
   color: var(--muted);
   margin-top: 0.25rem;
 }
