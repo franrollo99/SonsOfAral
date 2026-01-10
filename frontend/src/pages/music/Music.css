@@ -1,0 +1,312 @@
+.filtroMusica {
+  border: 1px solid #2a2a2a;
+  background: var(--bg-alt);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.filtroMusica:hover {
+  transform: translateY(-1px);
+  border-color: var(--muted);
+}
+
+.filtroMusica.isActive {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.lanzamiento {
+  cursor: pointer;
+}
+
+.lanzamientoPortada {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #2a2a2a;
+  background: var(--bg-alt);
+}
+
+.lanzamientoPortada img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.lanzamiento:hover .lanzamientoPortada img {
+  transform: scale(1.03);
+  filter: brightness(1.05);
+}
+
+.lanzamientoDatos {
+  padding-top: 10px;
+}
+
+.lanzamientoFecha {
+  color: var(--muted);
+  font-size: .75rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.lanzamientoTitulo {
+  font-size: 130%;
+  margin-top: 4px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+/* deshabilito clicks mientras carga detalles */
+.lanzamiento.isDisabled {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* mini overlay de “cargando” sobre la card */
+.lanzamientoLoading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, .55);
+  border-radius: 14px;
+  font-size: .9rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.lanzamiento {
+  position: relative;
+}
+
+
+/* Modal */
+.releaseModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 24px;
+}
+
+
+.releaseModal {
+  width: min(980px, 100%);
+  max-height: min(82vh, 900px);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(20, 20, 20, .75);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .55);
+  position: relative;
+  overflow: hidden;
+}
+
+.modalClose {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(0, 0, 0, .35);
+  cursor: pointer;
+}
+
+.modalClose img {
+  width: 16px;
+}
+
+.modalClose:hover {
+  background-color: rgba(255, 255, 255, .18);
+}
+
+.modalGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+  padding: 18px;
+  min-height: 0;
+}
+
+.modalLeft {
+  min-height: 0;
+}
+
+.cover {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .10);
+  background: rgba(0, 0, 0, .25);
+}
+
+.cover img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.leftMeta {
+  padding: 0 2px;
+}
+
+.smallMeta {
+  color: rgba(255, 255, 255, .75);
+  font-size: .78rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.smallMeta span {
+  padding: 0 5px;
+}
+
+.buyListen {
+  border-color: white !important;
+}
+
+.btnWide {
+  width: 100%;
+  border-radius: 999px;
+  padding: 10px 14px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: .85rem;
+}
+
+.modalRight {
+  min-width: 0;
+  min-height: 0;
+}
+
+.headerModal {
+  padding: 6px;
+  width: max-content;
+  max-width: 500px;
+  height: max-content;
+  background: none;
+  backdrop-filter: none;
+  border-bottom: none;
+}
+
+.title {
+  font-size: clamp(1.4rem, 3vw, 2.3rem);
+  font-weight: 900;
+  letter-spacing: .02em;
+  margin: 0;
+  line-height: 1.05;
+}
+
+.sub {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, .72);
+  font-size: .85rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.rightContent {
+  min-height: 0;
+}
+
+.divider {
+  margin: 0;
+}
+
+.tracklist {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 6px;
+  flex: 1;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .22) transparent;
+}
+
+.tracklist::-webkit-scrollbar {
+  width: 10px;
+}
+
+.tracklist::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tracklist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.tracklist::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .28);
+  background-clip: content-box;
+}
+
+.tracklist ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: track;
+}
+
+.trackRow {
+  counter-increment: track;
+  display: grid;
+  grid-template-columns: 42px 1fr 72px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.trackRow::before {
+  content: counter(track);
+  color: rgba(255, 255, 255, .65);
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+.trackName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackTime {
+  text-align: right;
+  color: rgba(255, 255, 255, .70);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .modalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .releaseModal {
+    max-height: 88vh;
+  }
+}

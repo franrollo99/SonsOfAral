@@ -24,8 +24,10 @@ class LanzamientoResource extends JsonResource
                 ->locale('es')
                 ->translatedFormat('d F Y')
                 : null,
-
             'descripcion' => $this->descripcion,
+            'duracionTotalMinutos' => $this->relationLoaded('canciones')
+                ? intdiv($this->canciones->sum('duracion'), 60)
+                : null,
             'canciones' => CancionResource::collection($this->whenLoaded('canciones')),
             'imagen' => new ImagenResource($this->whenLoaded('imagen')),
         ];

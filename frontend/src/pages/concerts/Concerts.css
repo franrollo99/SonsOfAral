@@ -15,14 +15,11 @@
 
 .entrada a {
   font-weight: bold;
-}
-
-.entrada a {
-  border: 1px solid #3a3a3a;
-  background: var(--bg-alt);
+  border: 1px solid #6D363E;
+  background: #442226;
 }
 
 .entrada a:hover {
-  border-color: var(--muted);
-  background: #242424;
+  border: 1px solid #6D363E;
+  background: #6D363E;
 }

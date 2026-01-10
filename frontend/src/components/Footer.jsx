@@ -16,11 +16,11 @@ function Footer() {
           </li>
         </ul>
         <div className="redesSociales d-flex align-items-center gap-4">
-          <a href="#"><img src="images/redesSociales/instagram.png" alt="Icono instagram" /></a>
-          <a href="#"><img src="images/redesSociales/youtube.png" alt="Icono youtube" /></a>
-          <a href="#"><img src="images/redesSociales/facebook.png" alt="Icono facebook" /></a>
-          <a href="#"><img src="images/redesSociales/tiktok.png" alt="Icono tik tok" /></a>
-          <a href="#"><img src="images/redesSociales/spotify.png" alt="Icono spotify" /></a>
+          <a href="#"><img src="/images/redesSociales/instagram.png" alt="Icono instagram" /></a>
+          <a href="#"><img src="/images/redesSociales/youtube.png" alt="Icono youtube" /></a>
+          <a href="#"><img src="/images/redesSociales/facebook.png" alt="Icono facebook" /></a>
+          <a href="#"><img src="/images/redesSociales/tiktok.png" alt="Icono tik tok" /></a>
+          <a href="#"><img src="/images/redesSociales/spotify.png" alt="Icono spotify" /></a>
         </div>
       </div>
       <p className="copyrigth">© {new Date().getFullYear()} Sons of Aral. Todos los derechos reservados.</p>

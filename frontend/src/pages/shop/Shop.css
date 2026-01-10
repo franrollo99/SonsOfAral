@@ -1,0 +1,157 @@
+.tiendaCats button {
+  color: white;
+}
+
+/* Contenedor */
+.tiendaContainer {
+  padding-top: 24px;
+  padding-bottom: 48px;
+}
+
+/* Layout principal */
+.tiendaLayout {
+  align-items: flex-start;
+}
+
+/* Sidebar */
+.tiendaSidebar {
+  max-width: 240px;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  padding-right: 18px;
+}
+
+.tiendaSidebarTitle {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 18px;
+  margin: 0 0 18px 0;
+}
+
+/* Categorías */
+.tiendaCatBtn {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 10px 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tiendaCatBtn:hover {
+  opacity: 0.85;
+}
+
+.tiendaCatBtn.isActive {
+  text-decoration: underline;
+}
+
+.tiendaCatBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tiendaCatCount {
+  font-weight: 700;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+/* Topbar */
+.tiendaTopbar {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 18px;
+}
+
+.tiendaItemsCount {
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.tiendaSortLabel {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  margin: 0;
+}
+
+.tiendaSortSelect {
+  min-width: 230px;
+  border-radius: 3px;
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+/* Cards */
+.tiendaCard {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var();
+  height: 100%;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.tiendaCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.tiendaCardLink{
+  text-decoration: none;
+}
+
+.tiendaImg {
+  width: 100%;
+  object-fit: contain;
+}
+
+.tiendaCardInfo {
+  padding: 14px 14px 18px 14px;
+  color: var(--text);
+}
+
+.tiendaName {
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 13px;
+  line-height: 1.2;
+  min-height: 34px;
+}
+
+.tiendaPrice {
+  margin-top: 8px;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.tiendaLoading,
+.tiendaEmpty {
+  padding: 26px 0;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .tiendaSidebar {
+    width: 200px;
+  }
+}
+
+@media (max-width: 767px) {
+  .tiendaLayout {
+    flex-direction: column;
+  }
+
+  .tiendaSidebar {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-right: 0;
+    padding-bottom: 14px;
+  }
+}

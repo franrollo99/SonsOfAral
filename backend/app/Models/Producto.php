@@ -9,9 +9,9 @@ class Producto extends Model
     protected $table = 'productos';
 
     protected $fillable = [
+        'tipo_producto_id',
         'nombre',
         'descripcion',
-        'es_ropa',
         'tallas_disponibles',
         'precio',
         'slug',
@@ -19,10 +19,17 @@ class Producto extends Model
     ];
 
     protected $casts = [
-        'es_ropa' => 'boolean',
+        'tallas_disponibles' => 'array',
+        'tipo_producto_id' => 'integer',
         'activo' => 'boolean',
         'precio' => 'float',
     ];
+
+
+    public function tipo()
+    {
+        return $this->belongsTo(TipoProducto::class, 'tipo_producto_id');
+    }
 
     public function pedidoProductos()
     {
@@ -54,10 +61,5 @@ class Producto extends Model
     public function getPrecioFormateadoAttribute()
     {
         return number_format($this->precio, 2, ',', '.') . ' €';
-    }
-
-    public function esRopa()
-    {
-        return $this->es_ropa;
     }
 }

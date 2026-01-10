@@ -18,6 +18,11 @@ class CancionResource extends JsonResource
             'lanzamientoId' => $this->lanzamiento_id,
             'titulo' => $this->titulo,
             'duracion' => $this->duracion,
+            'duracionFormateada' => sprintf(
+                '%02d:%02d',
+                intdiv($this->duracion, 60),
+                $this->duracion % 60
+            ),
             'trackNumber' => $this->track_number,
         ];
     }

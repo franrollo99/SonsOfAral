@@ -1,6 +1,5 @@
-// src/pages/Conciertos.jsx
 import { useEffect, useState } from "react";
-import "./Conciertos.css";
+import "./Concerts.css";
 
 function Conciertos() {
   const [conciertos, setConciertos] = useState([]);
@@ -36,7 +35,7 @@ function Conciertos() {
   }, []);
 
   return (
-    <section className="section">
+    <section>
       {cargando && <p>Cargando conciertos...</p>}
       {error && !cargando && <p className="errorMessage">{error}</p>}
       {!cargando && !error && conciertos.length === 0 && (<p>No hay conciertos disponibles por ahora.</p>)}
@@ -56,10 +55,9 @@ function Conciertos() {
                 {concierto.descripcion && (
                   <p className="descripcion w-50">{concierto.descripcion}</p>
                 )}
-                {/* <div className="entrada d-flex flex-column justify-content-end align-items-center gap-3"> */}
                 <div className="entrada d-flex align-items-center gap-3">
                   {concierto.precioEntrada && (
-                    <h4 className="m-0">Entrada {concierto.precioEntrada == 0 ? 'gratis' : `: ${concierto.precioEntrada} €`}</h4>
+                    <h4 className="m-0">Entrada{concierto.precioEntrada == 0 ? ' gratis' : `: ${concierto.precioEntrada} €`}</h4>
                   )}
                   {concierto.entradaAnticipada &&
                     concierto.enlaceEntradaAnticipada && (

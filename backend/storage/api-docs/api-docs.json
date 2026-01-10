@@ -361,6 +361,67 @@
                     }
                 }
             }
+        },
+        "/api/productos": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Lista productos",
+                "operationId": "productosIndex",
+                "responses": {
+                    "200": {
+                        "description": "Listado de productos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/productos/{id}": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Detalle de un producto",
+                "description": "Devuelve el detalle de un producto por ID (incluye tipo e imagen principal).",
+                "operationId": "productosShow",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Producto encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                }
+            }
         }
     },
     "tags": [
@@ -375,6 +436,10 @@
         {
             "name": "Lanzamientos",
             "description": "Lanzamientos"
+        },
+        {
+            "name": "Productos",
+            "description": "Productos"
         }
     ]
 }

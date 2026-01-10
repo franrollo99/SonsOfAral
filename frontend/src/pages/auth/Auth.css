@@ -1,0 +1,94 @@
+.userSessionContainer{
+  max-width: 620px;
+  width: 100%;
+}
+
+.userSessionTitle{
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: .14em;
+  font-size: 54px;
+  margin: 10px 0 46px;
+}
+
+.userSessionForm{
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.flField{
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.flInput{
+  width: 100%;
+  height: 58px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.65);
+  color: #fff;
+  font-size: 18px;
+  padding: 18px 14px 10px;
+  outline: none;
+}
+
+.flInput:focus{
+  border-color: rgba(255,255,255,.95);
+}
+
+.flLabel{
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,.8);
+  font-weight: 700;
+  pointer-events: none;
+  transition: all 140ms ease;
+  background: black;
+  padding: 0 6px;
+}
+
+.flInput:focus + .flLabel,
+.flField.hasValue .flLabel{
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.9);
+}
+
+.userSessionLink{
+  display: inline-block;
+  color: rgba(255,255,255,.85);
+  margin-top: 2px;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.userSessionLink:hover{
+  opacity: .85;
+}
+
+.userSessionLinkCenter{
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.userSessionBtn{
+  display: block;
+  margin: 34px auto 0;
+  width: 160px;
+  height: 52px;
+  background: #6D363E;
+  color: #fff;
+  border: 0;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.userSessionBtn:hover{
+  border:2px solid white;
+}

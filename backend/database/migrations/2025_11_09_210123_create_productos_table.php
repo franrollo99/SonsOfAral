@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
-            $table->boolean('es_ropa')->default(0);
-            $table->string('tallas_disponibles', 100)->nullable();
+            $table->foreignId('tipo_producto_id')->constrained('tipos_producto')->cascadeOnUpdate()->restrictOnDelete();
+            $table->json('tallas_disponibles')->nullable();
             $table->decimal('precio', 10, 2);
             $table->string('slug', 180)->unique();
             $table->boolean('activo')->default(true);

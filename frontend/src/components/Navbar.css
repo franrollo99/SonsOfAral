@@ -28,5 +28,9 @@ header {
 }
 
 .loginIcon img {
-  width: 60px;
+  width: 70px;
+}
+
+.cartIcon img {
+  height: 60px;
 }

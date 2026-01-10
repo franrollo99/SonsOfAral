@@ -4,7 +4,7 @@ function Navbar() {
   return (
     <header className="d-flex justify-content-between align-items-center gap-5">
       <div className="navbarLogo">
-        <img src="images/logo.png" alt="logo" />
+        <img src="/images/logo.png" alt="logo" />
 
       </div>
 
@@ -12,12 +12,16 @@ function Navbar() {
         <a href="/">Inicio</a>
         <a href="/conciertos">Conciertos</a>
         <a href="/musica">Música</a>
-        <a href="/galeria">Galería</a>
         <a href="/tienda">Tienda</a>
       </nav>
-      <a href="/login" className="loginIcon">
-        <img src="images/login.png" alt="" />
-      </a>
+      <div className="d-flex gap-3 align-items-center">
+        <a href="/login" className="cartIcon">
+          <img src="/images/carrito.png" alt="Carrito" />
+        </a>
+        <a href="/login" className="loginIcon">
+          <img src="/images/login.png" alt="Login" />
+        </a>
+      </div>
     </header>
   );
 }
