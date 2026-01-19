@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('fecha');
             $table->string('provincia', 150);
-            $table->string('ciudad', 150);
+            $table->string('municipio', 150);
             $table->string('lugar', 150);
             $table->text('descripcion')->nullable();
             $table->decimal('precio_entrada', 10, 2)->nullable();

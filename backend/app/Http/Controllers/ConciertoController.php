@@ -27,7 +27,7 @@ class ConciertoController extends Controller
      *                     @OA\Property(property="id", type="integer"),
      *                     @OA\Property(property="fecha", type="string"),
      *                     @OA\Property(property="provincia", type="string"),
-     *                     @OA\Property(property="ciudad", type="string"),
+     *                     @OA\Property(property="municipio", type="string"),
      *                     @OA\Property(property="lugar", type="string"),
      *                     @OA\Property(property="descripcion", type="string"),
      *                     @OA\Property(property="precioEntrada", type="number"),
@@ -41,7 +41,7 @@ class ConciertoController extends Controller
      */
     public function index()
     {
-        $conciertos = Concierto::orderBy('fecha', 'desc')->get();
+        $conciertos = Concierto::orderBy('fecha', 'asc')->get();
         return ConciertoResource::collection($conciertos);
     }
 
@@ -84,7 +84,7 @@ class ConciertoController extends Controller
      *             @OA\Property(property="id", type="integer"),
      *             @OA\Property(property="fecha", type="string"),
      *             @OA\Property(property="provincia", type="string"),
-     *             @OA\Property(property="ciudad", type="string"),
+     *             @OA\Property(property="municipio", type="string"),
      *             @OA\Property(property="lugar", type="string"),
      *             @OA\Property(property="descripcion", type="string"),
      *             @OA\Property(property="precioEntrada", type="number"),

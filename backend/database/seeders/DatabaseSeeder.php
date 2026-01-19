@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Lanzamiento;
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Producto;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ConciertoSeeder::class);
         $this->call(TiposProductoSeeder::class);
         $this->call(ProductosSeeder::class);
-
+        $this->call(PedidosSeeder::class);
     }
 }

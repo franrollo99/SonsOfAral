@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('rol', ['cliente', 'admin'])->default('cliente');
             $table->string('direccion')->nullable();
-            $table->string('ciudad')->nullable();
+            $table->string('municipio')->nullable();
             $table->string('provincia')->nullable();
             $table->string('cp', 10)->nullable();
             $table->rememberToken();

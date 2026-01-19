@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
+            $table->string('codigo_pedido', 8)->unique();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('estado', ['pendiente', 'enviado', 'entregado', 'cancelado'])->default('pendiente');
             $table->decimal('precio_total', 8, 2);
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

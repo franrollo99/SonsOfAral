@@ -1,0 +1,106 @@
+.adminCard {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  padding: 22px;
+  background: rgba(0,0,0,.35);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset;
+}
+
+.adminTitle {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.adminMuted {
+  margin: 6px 0 0;
+  opacity: .75;
+}
+
+.adminError {
+  margin: 12px 0 0;
+  color: #ffb4b4;
+}
+
+.adminDivider {
+  height: 1px;
+  background: var(--bg-alt);,255,.08);
+  margin: 18px 0;
+}
+
+.adminLinkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: rgba(255,255,255,.85);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.adminBtn {
+  margin-top: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  padding: 10px 14px;
+  background: var(--bg-alt);,255,.06);
+  color: #fff;
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminTile {
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  padding: 14px;
+  text-decoration: none;
+  color: #fff;
+  background: var(--bg-alt);,255,.03);
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.adminTile:hover {
+  transform: translateY(-2px);
+  background: var(--bg-alt);,255,.05);
+  border-color: rgba(255,255,255,.18);
+}
+
+.adminTileTitle {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.adminTileDesc {
+  margin-top: 6px;
+  opacity: .75;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.adminTileGo {
+  margin-top: 10px;
+  opacity: .9;
+  font-size: 13px;
+}
+
+.adminHint {
+  margin: 14px 0 0;
+  opacity: .75;
+  font-size: 13px;
+}
+
+@media (max-width: 992px) {
+  .adminGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .adminGrid {
+    grid-template-columns: 1fr;
+  }
+}

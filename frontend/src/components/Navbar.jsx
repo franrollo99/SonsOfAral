@@ -1,27 +1,45 @@
 import "./Navbar.css";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
+
+  const handleLoginClick = (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+    const rol = localStorage.getItem("rol");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (rol === "admin") {
+      navigate("/area-admin");
+    } else {
+      navigate("/area-cliente");
+    }
+  };
+
   return (
     <header className="d-flex justify-content-between align-items-center gap-5">
-      <div className="navbarLogo">
-        <img src="/images/logo.png" alt="logo" />
-
-      </div>
+      <Link to="/">
+        <div className="navbarLogo">
+          <img src="/images/logo.png" alt="logo" />
+        </div>
+      </Link>
 
       <nav className="navbarLinks d-flex gap-4">
-        <a href="/">Inicio</a>
-        <a href="/conciertos">Conciertos</a>
-        <a href="/musica">Música</a>
-        <a href="/tienda">Tienda</a>
+        <Link to="/">Inicio</Link>
+        <Link to="/conciertos">Conciertos</Link>
+        <Link to="/musica">Música</Link>
+        <Link to="/tienda">Tienda</Link>
       </nav>
-      <div className="d-flex gap-3 align-items-center">
-        <a href="/login" className="cartIcon">
-          <img src="/images/carrito.png" alt="Carrito" />
-        </a>
-        <a href="/login" className="loginIcon">
-          <img src="/images/login.png" alt="Login" />
-        </a>
-      </div>
+
+      <button className="loginIcon" onClick={handleLoginClick}>
+        <img src="/images/login.png" alt="Login" />
+      </button>
     </header>
   );
 }

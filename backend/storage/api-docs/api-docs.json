@@ -135,7 +135,7 @@
                                                     "provincia": {
                                                         "type": "string"
                                                     },
-                                                    "ciudad": {
+                                                    "municipio": {
                                                         "type": "string"
                                                     },
                                                     "lugar": {
@@ -201,7 +201,7 @@
                                         "provincia": {
                                             "type": "string"
                                         },
-                                        "ciudad": {
+                                        "municipio": {
                                             "type": "string"
                                         },
                                         "lugar": {
@@ -440,6 +440,21 @@
         {
             "name": "Productos",
             "description": "Productos"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Introduce: Bearer {token}"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
         }
     ]
 }

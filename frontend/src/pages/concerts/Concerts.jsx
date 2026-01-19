@@ -35,7 +35,7 @@ function Conciertos() {
   }, []);
 
   return (
-    <section>
+    <section className="container">
       {cargando && <p>Cargando conciertos...</p>}
       {error && !cargando && <p className="errorMessage">{error}</p>}
       {!cargando && !error && conciertos.length === 0 && (<p>No hay conciertos disponibles por ahora.</p>)}
@@ -46,7 +46,7 @@ function Conciertos() {
             <article key={concierto.id} className="concierto card gap-3">
               <div className="d-flex align-items-baseline justify-content-between gap-5">
                 <div>
-                  <h1>{concierto.lugar} <span>{concierto.ciudad}, {concierto.provincia}</span></h1>
+                  <h1>{concierto.lugar} <span>{concierto.municipio}, {concierto.provincia}</span></h1>
                 </div>
                 <h2>{concierto.fecha_formateada}</h2>
               </div>

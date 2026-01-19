@@ -16,7 +16,7 @@ class ConciertoSeeder extends Seeder
             [
                 'fecha' => '2024-04-15',
                 'provincia' => 'Cantabria',
-                'ciudad' => 'Santander',
+                'municipio' => 'Santander',
                 'lugar' => 'Sala Rockville',
                 'descripcion' => 'Presentación del nuevo álbum con bandas invitadas.',
                 'precio_entrada' => 15.00,
@@ -28,7 +28,7 @@ class ConciertoSeeder extends Seeder
             [
                 'fecha' => '2024-06-08',
                 'provincia' => 'Cantabria',
-                'ciudad' => 'Santander',
+                'municipio' => 'Santander',
                 'lugar' => 'Kafe Antzokia',
                 'descripcion' => 'Evento solidario junto a bandas locales de metal.',
                 'precio_entrada' => 12.00,
@@ -40,7 +40,7 @@ class ConciertoSeeder extends Seeder
             [
                 'fecha' => '2024-09-21',
                 'provincia' => 'Galicia',
-                'ciudad' => 'Vigo',
+                'municipio' => 'Vigo',
                 'lugar' => 'Sala Master',
                 'descripcion' => 'Gira norte: cierre de verano con espectáculo audiovisual.',
                 'precio_entrada' => 10.00,
@@ -52,7 +52,7 @@ class ConciertoSeeder extends Seeder
             [
                 'fecha' => '2024-11-02',
                 'provincia' => 'Asturias',
-                'ciudad' => 'Oviedo',
+                'municipio' => 'Oviedo',
                 'lugar' => 'Sala Monasterio',
                 'descripcion' => 'Halloween Metal Fest — con bandas internacionales.',
                 'precio_entrada' => 18.00,
@@ -64,7 +64,7 @@ class ConciertoSeeder extends Seeder
             [
                 'fecha' => '2025-02-14',
                 'provincia' => 'Cantabria',
-                'ciudad' => 'Torrelavega',
+                'municipio' => 'Torrelavega',
                 'lugar' => 'Sala Búnker',
                 'descripcion' => 'Concierto especial por San Valentín — setlist acústico.',
                 'precio_entrada' => 0,

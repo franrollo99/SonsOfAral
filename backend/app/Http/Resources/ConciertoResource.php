@@ -23,7 +23,7 @@ class ConciertoResource extends JsonResource
                     ->translatedFormat('d \d\e F, Y')
                 : null,
             'provincia' => $this->provincia,
-            'ciudad' => $this->ciudad,
+            'municipio' => $this->municipio,
             'lugar' => $this->lugar,
             'descripcion' => $this->descripcion,
             'precioEntrada' => $this->precio_entrada,

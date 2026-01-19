@@ -18,7 +18,7 @@ class UserFactory extends Factory
             'password' => Hash::make('password'), // contraseña por defecto
             'rol' => 'cliente',
             'direccion' => fake()->streetAddress(),
-            'ciudad' => fake()->city(),
+            'municipio' => fake()->city(),
             'provincia' => fake()->state(),
             'cp' => fake()->postcode(),
             'remember_token' => Str::random(10),

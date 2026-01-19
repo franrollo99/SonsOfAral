@@ -81,7 +81,7 @@ export function Musica() {
   }, [lanzamientos, filtro]);
 
   return (
-    <section>
+    <section className="container">
       <div className="d-flex align-items-end justify-content-between gap-3">
         <h1>Explorar lanzamientos</h1>
 

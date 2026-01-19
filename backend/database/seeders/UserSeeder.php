@@ -27,5 +27,13 @@ class UserSeeder extends Seeder
             'rol' => 'cliente',
             'password' => bcrypt('cliente123'),
         ]);
+
+        User::factory()->create([
+            'nombre' => 'Maria',
+            'apellidos' => 'Martínez',
+            'email' => 'cliente2@sonsofaral.com',
+            'rol' => 'cliente',
+            'password' => bcrypt('cliente123'),
+        ]);
     }
 }

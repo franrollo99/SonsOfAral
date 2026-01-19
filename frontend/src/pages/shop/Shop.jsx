@@ -107,7 +107,7 @@ function Tienda() {
     const totalItems = productos.length;
 
     return (
-        <section>
+        <section className="container">
             <div className="container tiendaContainer">
                 <div className="d-flex tiendaLayout gap-4">
                     <aside className="tiendaSidebar">

@@ -10,6 +10,7 @@ class Pedido extends Model
 
     protected $fillable = [
         'user_id',
+        'codigo_pedido',
         'estado',
         'precio_total',
     ];
@@ -18,6 +19,28 @@ class Pedido extends Model
         'precio_total' => 'float',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (Pedido $pedido) {
+            if (empty($pedido->codigo_pedido)) {
+                $pedido->codigo_pedido = self::generateCodigoPedido();
+            }
+
+            if ($pedido->precio_total === null) {
+                $pedido->precio_total = 0;
+            }
+        });
+    }
+
+    private static function generateCodigoPedido(): string
+    {
+        do {
+            $codigo = (string) random_int(10000000, 99999999);
+        } while (self::where('codigo_pedido', $codigo)->exists());
+
+        return $codigo;
+    }
+
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -25,17 +48,17 @@ class Pedido extends Model
 
     public function productos()
     {
-        return $this->hasMany(PedidoProducto::class);
+        return $this->hasMany(PedidoProducto::class, 'pedido_id');
     }
 
-    public function calcularTotal()
+    public function calcularTotal(): void
     {
         $this->loadMissing('productos');
-        $this->precio_total = $this->productos->sum('subtotal');
+        $this->precio_total = (float) $this->productos->sum('subtotal');
         $this->save();
     }
 
-    public function cancelar()
+    public function cancelar(): void
     {
         if ($this->estado === 'pendiente') {
             $this->estado = 'cancelado';
@@ -43,7 +66,7 @@ class Pedido extends Model
         }
     }
 
-    public function estaEntregado()
+    public function estaEntregado(): bool
     {
         return $this->estado === 'entregado';
     }

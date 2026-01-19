@@ -21,7 +21,7 @@ class ProductosSeeder extends Seeder
             ['nombre' => 'Pulsera de silicona', 'descripcion' => 'Pulsera negra con el texto "Sons of Aral".', 'tipo_producto_id' => 3, 'tallas_disponibles' => null, 'precio' => 3.00],
             ['nombre' => 'CD - Echoes of the Void', 'descripcion' => 'Álbum completo en formato físico con libreto.', 'tipo_producto_id' => 2, 'tallas_disponibles' => null, 'precio' => 10.00],
             ['nombre' => 'CD - Ashes and Rebirth', 'descripcion' => 'Nuevo álbum con temas inéditos y arte exclusivo.', 'tipo_producto_id' => 2, 'tallas_disponibles' => null, 'precio' => 12.00],
-            ['nombre' => 'Parches', 'descripcion' => 'Parches para poner en tus pantalones o chaquetas vaqueras.', 'tipo_producto_id' => 4, 'tallas_disponibles' => ['M', 'L', 'XL'], 'precio' => 25.00],
+            ['nombre' => 'Parches', 'descripcion' => 'Parches para poner en tus pantalones o chaquetas vaqueras.', 'tipo_producto_id' => 4, 'tallas_disponibles' => null, 'precio' => 25.00],
         ];
 
         foreach ($productos as $producto) {
