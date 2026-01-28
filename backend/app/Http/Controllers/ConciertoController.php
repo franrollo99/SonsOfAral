@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Concierto;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConciertoRequest;
 use App\Http\Resources\ConciertoResource;
 
 class ConciertoController extends Controller
@@ -45,24 +46,16 @@ class ConciertoController extends Controller
         return ConciertoResource::collection($conciertos);
     }
 
-
-    /**
-     * No se usa en APIs.
-     */
-    public function create()
+    public function store(ConciertoRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        $concierto = Concierto::create($data);
+
+        return (new ConciertoResource($concierto))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
-
-
-    /**
-     * No se usa en APIs.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
 
     /**
      * @OA\Get(
@@ -104,21 +97,16 @@ class ConciertoController extends Controller
         return new ConciertoResource($concierto);
     }
 
-
-    public function edit(string $id)
+    public function update(ConciertoRequest $request, string $id)
     {
-        //
+        $concierto = Concierto::findOrFail($id);
+        $concierto->update($request->validated());
+        return new ConciertoResource($concierto);
     }
-
-
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
 
     public function destroy(string $id)
     {
-        //
+        Concierto::findOrFail($id)->delete();
+        return response()->json(['message' => 'OK']);
     }
 }

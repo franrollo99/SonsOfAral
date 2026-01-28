@@ -36,7 +36,7 @@ export function AppRouter() {
         <Route path="/area-admin/lanzamientos" element={<ReleasesManagement />} />
         <Route path="/area-admin/canciones" element={<SongsManagement />} />
         <Route path="/area-admin/productos" element={<ProductsManagement />} />
-        <Route path="/area-admin/tipos-producto" element={<ProductTypesManagement />} />
+        <Route path="/area-admin/categorias" element={<ProductTypesManagement />} />
         <Route path="/area-admin/usuarios" element={<UsersManagement />} />
         <Route path="/area-admin/pedidos" element={<OrdersManagement />} />
       </Route>

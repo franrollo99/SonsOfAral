@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Cancion;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CancionRequest;
 use App\Http\Resources\CancionResource;
 
 class CancionController extends Controller
@@ -37,8 +39,19 @@ class CancionController extends Controller
      */
     public function index()
     {
-        $canciones = Cancion::orderBy('lanzamiento_id')->orderBy('track_number')->get();
+        $canciones = Cancion::with('lanzamiento')->get();
         return CancionResource::collection($canciones);
+    }
+
+
+    public function store(CancionRequest $request)
+    {
+        $cancion = Cancion::create($request->validated());
+        $cancion->load('lanzamiento');
+
+        return (new CancionResource($cancion))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
@@ -77,5 +90,21 @@ class CancionController extends Controller
             ->findOrFail($id);
 
         return new CancionResource($cancion);
+    }
+
+    public function update(CancionRequest $request, string $id)
+    {
+        $cancion = Cancion::findOrFail($id);
+        $cancion->update($request->validated());
+        $cancion->load('lanzamiento');
+
+        return new CancionResource($cancion);
+    }
+
+    public function destroy(string $id)
+    {
+        Cancion::findOrFail($id)->delete();
+
+        return response()->json(['message' => 'OK']);
     }
 }

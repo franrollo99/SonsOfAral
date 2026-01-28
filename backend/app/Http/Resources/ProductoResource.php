@@ -22,8 +22,8 @@ class ProductoResource extends JsonResource
             'precio' => $this->precio,
             'precio_formateado' => $this->precio_formateado,
             'slug' => $this->slug,
-            'activo' => $this->activo,
-
+            'activo' => $this->activo ? 1 : 0,
+            'tipo_producto_id' => $this->tipo_producto_id,
             'tipo' => new TipoProductoResource(
                 $this->whenLoaded('tipo')
             ),

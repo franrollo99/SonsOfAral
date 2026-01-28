@@ -14,17 +14,16 @@ function AdminCrudPage({
   entityName = "registro",
   // endpoints
   listPath,   // "/api/conciertos"
-  createPath, // "/api/conciertos"
+  createPath, // "/api/conciertos"  (puede ser null para desactivar crear)
   updatePath, // (id) => `/api/conciertos/${id}`
-  deletePath, // (id) => `/api/conciertos/${id}`
+  deletePath, // (id) => `/api/conciertos/${id}` (puede ser null para desactivar borrar)
 
   // table
   columns = [], // [{ key, header, render?, className?, title? }]
-  columnsGridCss, // string CSS grid-template-columns + min-width
+  columnsGridCss,
 
-  // search
-  searchKeys = [], // ["id","nombre",...]
-  // editor
+  searchKeys = [],
+  editLabel = "Editar",
   emptyForm = {},
   formFields = [],
   buildPayload = (form) => form,
@@ -43,6 +42,9 @@ function AdminCrudPage({
       Authorization: `Bearer ${token}`,
     };
   }, [token]);
+
+  const canCreate = !!createPath;
+  const canDelete = typeof deletePath === "function";
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -143,6 +145,7 @@ function AdminCrudPage({
 
   // ========= Delete flow =========
   const onDeleteClick = (row) => {
+    if (!canDelete) return;
     setToDelete(row);
     setConfirmOpen(true);
   };
@@ -154,7 +157,9 @@ function AdminCrudPage({
   };
 
   const doDelete = async () => {
+    if (!canDelete) return;
     if (!toDelete?.id) return;
+
     setConfirmLoading(true);
 
     try {
@@ -175,6 +180,7 @@ function AdminCrudPage({
 
   // ========= Editor flow =========
   const openCreate = () => {
+    if (!canCreate) return;
     setEditorError("");
     setEditorOk("");
     setForm({ ...emptyForm });
@@ -202,6 +208,10 @@ function AdminCrudPage({
 
     try {
       const isEdit = !!form.id;
+
+      if (!isEdit && !canCreate) {
+        throw new Error("Crear está deshabilitado para esta entidad.");
+      }
 
       const url = isEdit
         ? `${API_URL}${updatePath(form.id)}`
@@ -340,11 +350,19 @@ function AdminCrudPage({
 
                     <div className="adminActions">
                       <button className="adminActionBtn" type="button" onClick={() => openEdit(r)}>
-                        Editar
+                        {editLabel}
                       </button>
-                      <button className="adminActionBtn adminActionBtn--danger" type="button" onClick={() => onDeleteClick(r)}>
-                        Borrar
-                      </button>
+
+
+                      {canDelete ? (
+                        <button
+                          className="adminActionBtn adminActionBtn--danger"
+                          type="button"
+                          onClick={() => onDeleteClick(r)}
+                        >
+                          Borrar
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 ))
@@ -365,23 +383,27 @@ function AdminCrudPage({
           <button className="adminPagerBtn" type="button" onClick={() => goTo(totalPages)} disabled={page === totalPages}>»</button>
         </div>
 
-        <div className="adminCreateBand">
-          <div className="adminCreateBandInner">
-            <button className="adminCreateBtn" type="button" onClick={openCreate}>
-              + Crear {entityName}
-            </button>
+        {canCreate ? (
+          <div className="adminCreateBand">
+            <div className="adminCreateBandInner">
+              <button className="adminCreateBtn" type="button" onClick={openCreate}>
+                + Crear {entityName}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
-      <ConfirmModal
-        open={confirmOpen}
-        title="Confirmar borrado"
-        text={`¿Seguro que quieres borrar el ${entityName} #${toDelete?.id}?`}
-        loading={confirmLoading}
-        onCancel={closeConfirm}
-        onConfirm={doDelete}
-      />
+      {canDelete ? (
+        <ConfirmModal
+          open={confirmOpen}
+          title="Confirmar borrado"
+          text={`¿Seguro que quieres borrar el ${entityName} #${toDelete?.id}?`}
+          loading={confirmLoading}
+          onCancel={closeConfirm}
+          onConfirm={doDelete}
+        />
+      ) : null}
 
       <AdminEntityModal
         open={editorOpen}

@@ -10,9 +10,9 @@ const date = (iso) => {
 
 const emptyLanzamiento = {
   id: null,
-  tipo: "album",          // ajusta a tu enum real si es distinto
+  tipo: "album",
   titulo: "",
-  fechaLanzamiento: "",   // tu Resource lo devuelve como fechaLanzamiento
+  fechaLanzamiento: "",
   descripcion: "",
 };
 
@@ -48,8 +48,7 @@ function ReleasesManagement() {
       ]}
       columnsGridCss={`
         grid-template-columns:
-          70px
-          120px
+          80px
           1.4fr
           130px
           120px
@@ -66,7 +65,6 @@ function ReleasesManagement() {
           options: [
             { value: "album", label: "album" },
             { value: "single", label: "single" },
-            { value: "ep", label: "ep" },
           ],
         },
         { name: "titulo", label: "Título", type: "text", full: true },
@@ -76,7 +74,7 @@ function ReleasesManagement() {
       buildPayload={(f) => ({
         tipo: f.tipo,
         titulo: f.titulo,
-        fecha_lanzamiento: f.fechaLanzamiento, // ojo: en DB seguramente se llama fecha_lanzamiento
+        fecha_lanzamiento: f.fechaLanzamiento,
         descripcion: f.descripcion,
       })}
     />

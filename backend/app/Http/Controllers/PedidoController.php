@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PedidoResource;
 use App\Models\Pedido;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PedidoController extends Controller
 {
@@ -49,4 +50,30 @@ class PedidoController extends Controller
 
         return new PedidoResource($pedido);
     }
+
+    public function update(Request $request, Pedido $pedido)
+{
+    $user = $request->user();
+    $isAdmin = ($user->role ?? $user->rol ?? null) === 'admin';
+
+    if (!$isAdmin) {
+        abort(403, 'No tienes permisos para actualizar pedidos.');
+    }
+
+    $data = $request->validate([
+        'estado' => [
+            'required',
+            'string',
+            Rule::in(['pendiente', 'enviado', 'entregado', 'cancelado']),
+        ],
+    ]);
+
+    $pedido->estado = $data['estado'];
+    $pedido->save();
+
+    // devolvemos el pedido con líneas por si el front refresca el modal
+    $pedido->load('productos');
+
+    return new PedidoResource($pedido);
+}
 }

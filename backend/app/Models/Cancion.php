@@ -12,6 +12,7 @@ class Cancion extends Model
         'lanzamiento_id',
         'titulo',
         'duracion',
+        'track_number',
     ];
 
     public function lanzamiento()

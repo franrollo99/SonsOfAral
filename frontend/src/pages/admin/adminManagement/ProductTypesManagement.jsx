@@ -9,10 +9,10 @@ function ProductTypesManagement() {
       title="Tipos de producto"
       subtitle="Gestión de categorías/tipos."
       entityName="tipo"
-      listPath="/api/tipos-producto"
-      createPath="/api/tipos-producto"
-      updatePath={(id) => `/api/tipos-producto/${id}`}
-      deletePath={(id) => `/api/tipos-producto/${id}`}
+      listPath="/api/tipos-productos"
+      createPath="/api/tipos-productos"
+      updatePath={(id) => `/api/tipos-productos/${id}`}
+      deletePath={(id) => `/api/tipos-productos/${id}`}
       requireAdmin
       emptyForm={emptyTipo}
       searchKeys={["id", "nombre"]}

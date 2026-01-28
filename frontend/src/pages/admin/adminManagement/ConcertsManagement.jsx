@@ -23,9 +23,9 @@ const emptyConcert = {
   municipio: "",
   lugar: "",
   descripcion: "",
-  precio_entrada: "",
-  entrada_anticipada: 0,
-  enlace_entrada_anticipada: "",
+  precioEntrada: "",
+  entradaAnticipada: "0",
+  enlaceEntradaAnticipada: "",
 };
 
 function ConcertsManagement() {
@@ -58,24 +58,23 @@ function ConcertsManagement() {
         { key: "municipio", header: "Municipio" },
         { key: "lugar", header: "Lugar", className: "adminTruncate", title: (v) => v || "" },
         { key: "descripcion", header: "Descripción", className: "adminTruncate", title: (v) => v || "" },
-        { key: "precioEntrada", header: "Precio", className: "text-end", render: (v) => money(v) },
+        { key: "precioEntrada", header: "Precio", render: (v) => money(v) },
         { key: "entradaAnticipada", header: "Anticipada", render: (v) => yesNo(v) },
         {
-          key: "enlaceEntradaAnticipada", header: "Enlace", className: "adminTruncate", title: (v) => v 
+          key: "enlaceEntradaAnticipada", header: "Enlace", className: "adminTruncate", title: (v) => v
         },
       ]}
       columnsGridCss={`
         grid-template-columns:
-          70px
+          100px
           110px
-          120px
-          140px
+          110px
           1.1fr
           1.6fr
-          110px
-          110px
+          80px
+          80px
           1fr
-          170px;
+          150px;
         min-width: 1050px;
       `}
       formFields={[
@@ -91,33 +90,37 @@ function ConcertsManagement() {
           type: "select",
           full: true,
           options: [
-            { value: 0, label: "No" },
-            { value: 1, label: "Sí" },
+            { value: false, label: "No" },
+            { value: true, label: "Sí" },
           ],
         },
+
         {
           name: "enlaceEntradaAnticipada",
           label: "Enlace entrada anticipada",
           type: "text",
           full: true,
-          placeholder: "https://...",
-          disabled: (form) => !(String(form?.entradaAnticipada) === "1" || form?.entradaAnticipada === 1),
+          disabled: (form) => String(form?.entradaAnticipada) !== "true",
           help: (form) =>
-            String(form?.entradaAnticipada) === "1" || form?.entradaAnticipada === 1
+            String(form?.entradaAnticipada) === "true"
               ? ""
               : "Activa “Entrada anticipada” para habilitar el enlace.",
-        },
+        }
       ]}
-      buildPayload={(form) => ({
-        fecha: form.fecha,
-        provincia: form.provincia,
-        municipio: form.municipio,
-        lugar: form.lugar,
-        descripcion: form.descripcion,
-        precio_entrada: form.precio_entrada === "" ? 0 : Number(form.precio_entrada),
-        entrada_anticipada: String(form.entrada_anticipada) === "1" || form.entrada_anticipada === 1 ? 1 : 0,
-        enlace_entrada_anticipada: form.enlace_entrada_anticipada || null,
-      })}
+      buildPayload={(form) => {
+        const anticipada = String(form.entradaAnticipada) === "true";
+        return {
+          fecha: form.fecha,
+          provincia: form.provincia,
+          municipio: form.municipio,
+          lugar: form.lugar,
+          descripcion: form.descripcion,
+          precio_entrada: form.precioEntrada === "" ? 0 : Number(form.precioEntrada),
+          entrada_anticipada: anticipada ? 1 : 0,
+          enlace_entrada_anticipada: anticipada ? (form.enlaceEntradaAnticipada || null) : null,
+        };
+      }}
+
     />
   );
 }

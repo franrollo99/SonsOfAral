@@ -16,6 +16,9 @@ class CancionResource extends JsonResource
         return [
             'id' => $this->id,
             'lanzamientoId' => $this->lanzamiento_id,
+            'lanzamiento' => $this->relationLoaded('lanzamiento')
+                ? $this->lanzamiento?->titulo
+                : null,
             'titulo' => $this->titulo,
             'duracion' => $this->duracion,
             'duracionFormateada' => sprintf(

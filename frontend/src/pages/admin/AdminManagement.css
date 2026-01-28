@@ -5,11 +5,11 @@
 }
 
 .adminPageCard {
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid rgba(255, 255, 255, .10);
   border-radius: 14px;
   padding: 22px;
-  background: rgba(0,0,0,.35);
-  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset;
+  background: rgba(0, 0, 0, .35);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .04) inset;
 }
 
 .adminPageTitle {
@@ -18,13 +18,24 @@
   font-weight: 750;
 }
 
-.adminMuted { opacity: .75; margin: 6px 0 0; }
-.adminError { margin: 12px 0 0; color: #ffb4b4; }
-.adminOk { margin: 12px 0 0; color: rgba(170, 255, 200, .9); }
+.adminMuted {
+  opacity: .75;
+  margin: 6px 0 0;
+}
+
+.adminError {
+  margin: 12px 0 0;
+  color: #ffb4b4;
+}
+
+.adminOk {
+  margin: 12px 0 0;
+  color: rgba(170, 255, 200, .9);
+}
 
 .adminDivider {
   height: 1px;
-  background: rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, .08);
   margin: 18px 0;
 }
 
@@ -32,16 +43,16 @@
   background: none;
   border: none;
   padding: 0;
-  color: rgba(255,255,255,.85);
+  color: rgba(255, 255, 255, .85);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .adminBtn {
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255, 255, 255, .12);
   padding: 10px 14px;
-  background: rgba(255,255,255,.06);
+  background: rgba(255, 255, 255, .06);
   color: #fff;
 }
 
@@ -65,8 +76,13 @@
   gap: 6px;
 }
 
-.adminControlGrow { flex: 1 1 320px; }
-.adminControlRight { margin-left: auto; }
+.adminControlGrow {
+  flex: 1 1 320px;
+}
+
+.adminControlRight {
+  margin-left: auto;
+}
 
 .adminControlLabel {
   font-size: 12px;
@@ -77,23 +93,33 @@
 .adminSelect,
 .adminTextarea {
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
   color: #fff;
   padding: 10px 12px;
   outline: none;
 }
 
-.adminTextarea { min-height: 90px; resize: vertical; }
+.adminTextarea {
+  min-height: 90px;
+  resize: vertical;
+}
 
 .adminInput:focus,
 .adminSelect:focus,
 .adminTextarea:focus {
-  border-color: rgba(255,255,255,.22);
+  border-color: rgba(255, 255, 255, .22);
 }
 
-.adminPad { padding: 14px; }
-.adminMono { font-variant-numeric: tabular-nums; }
+.adminPad {
+  padding: 14px;
+}
+
+ .adminTableHead > div:first-child,
+.adminTableRow  > div:first-child {
+  font-variant-numeric: tabular-nums;
+  display: none;
+}
 
 .adminTruncate {
   min-width: 0;
@@ -104,10 +130,10 @@
 
 /* ============ Table ============ */
 .adminTableWrap {
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid rgba(255, 255, 255, .10);
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(255,255,255,.02);
+  background: rgba(255, 255, 255, .02);
 }
 
 .adminTableHead,
@@ -123,19 +149,26 @@
   text-transform: uppercase;
   letter-spacing: .06em;
   opacity: .8;
-  background: rgba(255,255,255,.03);
+  background: rgba(255, 255, 255, .03);
 }
 
 .adminTableBody .adminTableRow {
-  border-top: 1px solid rgba(255,255,255,.06);
+  border-top: 1px solid rgba(255, 255, 255, .06);
 }
 
 .adminTableBody .adminTableRow:hover {
-  background: rgba(255,255,255,.03);
+  background: rgba(255, 255, 255, .03);
 }
 
+/* .adminTableBody .adminTableRow:hover>div {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+} */
+
 .adminLink {
-  color: rgba(255,255,255,.85);
+  color: rgba(255, 255, 255, .85);
   text-decoration: underline;
 }
 
@@ -148,8 +181,8 @@
 
 .adminActionBtn {
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
   color: #fff;
   padding: 7px 10px;
   font-size: 13px;
@@ -171,8 +204,8 @@
 
 .adminPagerBtn {
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
   color: #fff;
   padding: 8px 10px;
 }
@@ -201,34 +234,34 @@
   width: min(680px, 100%);
   padding: 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255, 255, 255, .12);
   background:
-    radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,.10), transparent 65%),
-    rgba(0,0,0,.45);
+    radial-gradient(120% 140% at 50% 0%, rgba(255, 255, 255, .10), transparent 65%),
+    rgba(0, 0, 0, .45);
   backdrop-filter: blur(8px);
-  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
   display: flex;
   justify-content: center;
 }
 
 .adminCreateBtn {
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(255, 255, 255, .08);
   color: #fff;
   padding: 10px 18px;
   font-weight: 750;
 }
 
 .adminCreateBtn:hover {
-  background: rgba(255,255,255,.12);
+  background: rgba(255, 255, 255, .12);
 }
 
 /* ============ Modals ============ */
 .adminModalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0, 0, 0, .55);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
@@ -240,9 +273,9 @@
 .adminModal {
   width: min(880px, 100%);
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.70);
-  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(0, 0, 0, .70);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
   padding: 16px;
 }
 
@@ -261,8 +294,8 @@
 }
 
 .adminModalClose {
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
   color: #fff;
   border-radius: 10px;
   padding: 6px 10px;
@@ -295,9 +328,29 @@
   grid-column: 1 / -1;
 }
 
-.adminSelect {
+.adminSelect option {
   background: var(--bg-alt);
   color: #fff;
+}
+
+.adminSizesGrid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.adminSizeBtn{
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: inherit;
+  cursor:pointer;
+}
+
+.adminSizeBtn.isOn{
+  border-color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.16);
 }
 
 
@@ -309,5 +362,7 @@
 
 /* Responsive: scroll horizontal en tablas grandes */
 @media (max-width: 992px) {
-  .adminTableWrap { overflow-x: auto; }
+  .adminTableWrap {
+    overflow-x: auto;
+  }
 }

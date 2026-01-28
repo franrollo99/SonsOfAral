@@ -11,7 +11,7 @@ const TIPOS_FIJOS = [
 
 const ORDER_OPTIONS = [
     { value: "newest", label: "Más nuevo" },
-    { value: "oldest", label: "Más viejo" },
+    { value: "oldest", label: "Más antiguo" },
     { value: "price_asc", label: "Precio: menor a mayor" },
     { value: "price_desc", label: "Precio: mayor a menor" },
 ];
@@ -48,7 +48,7 @@ function Tienda() {
         const loadAll = async () => {
             try {
                 const params = new URLSearchParams();
-                params.set("order", "newest"); // da igual para contadores
+                params.set("order", "newest");
 
                 const res = await fetch(`${baseUrl}/productos?${params.toString()}`, {
                     headers: { Accept: "application/json" },

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lanzamiento;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LanzamientoRequest;
 use App\Http\Resources\LanzamientoResource;
 
 class LanzamientoController extends Controller
@@ -35,9 +38,21 @@ class LanzamientoController extends Controller
      */
     public function index()
     {
-        $lanzamientos = Lanzamiento::orderBy('fecha_lanzamiento', 'desc')->get();
+        $lanzamientos = Lanzamiento::with(['canciones', 'imagen'])->get();
         return LanzamientoResource::collection($lanzamientos);
     }
+
+    public function store(LanzamientoRequest $request)
+    {
+        $lanzamiento = Lanzamiento::create($request->validated());
+
+        $lanzamiento->load(['canciones', 'imagen']);
+
+        return (new LanzamientoResource($lanzamiento))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+
 
     /**
      * @OA\Get(
@@ -95,5 +110,22 @@ class LanzamientoController extends Controller
             ->findOrFail($id);
 
         return new LanzamientoResource($lanzamiento);
+    }
+
+    public function update(LanzamientoRequest $request, string $id)
+    {
+        $lanzamiento = Lanzamiento::findOrFail($id);
+        $lanzamiento->update($request->validated());
+
+        $lanzamiento->load(['canciones', 'imagen']);
+
+        return new LanzamientoResource($lanzamiento);
+    }
+
+    public function destroy(string $id)
+    {
+        Lanzamiento::findOrFail($id)->delete();
+
+        return response()->json(['message' => 'OK']);
     }
 }

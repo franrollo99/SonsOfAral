@@ -20,7 +20,7 @@ class TiposProductoSeeder extends Seeder
         ];
 
         foreach ($tipos as $tipo) {
-            DB::table('tipos_producto')->insert([
+            DB::table('tipos_productos')->insert([
                 'id' => $tipo['id'],
                 'nombre' => $tipo['nombre'],
                 'created_at' => now(),
