@@ -24,6 +24,8 @@ class UserResource extends JsonResource
             'municipio'     => $this->municipio,
             'provincia'  => $this->provincia,
             'cp'         => $this->cp,
+            'created_at' => $this->created_at?->format('d/m/Y'),
+            'pedidos_count' => (int) ($this->pedidos_count ?? 0),
         ];
     }
 }

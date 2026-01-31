@@ -7,6 +7,7 @@ use App\Http\Controllers\LanzamientoController;
 use App\Http\Controllers\TipoProductoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -52,4 +53,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy']);
 
     Route::put('/pedidos/{pedido}', [PedidoController::class, 'update']);
+
+    Route::get('/usuarios', [UserController::class, 'index']);
+    Route::get('/usuarios/{user}', [UserController::class, 'show']);
 });

@@ -18,10 +18,9 @@ const emptyProducto = {
   id: null,
   nombre: "",
   descripcion: "",
-  // ✅ ahora array, para que se guarde como JSON
   tallas_disponibles: [],
   precio: "",
-  slug: "", // si lo autogeneras en backend, luego lo quitamos del payload
+  slug: "",
   activo: "1",
   tipo_producto_id: "",
 };
@@ -113,8 +112,6 @@ function ProductsManagement() {
         { key: "precio", header: "Precio", render: (v, row) => row?.precio_formateado ?? money(v) },
         { key: "activo", header: "Activo", render: (v) => yesNo(v) },
         { key: "slug", header: "Slug", className: "adminTruncate", title: (v) => v || "" },
-
-        // ✅ tabla: tallas como texto legible
         {
           key: "tallas_disponibles",
           header: "Tallas",
@@ -156,7 +153,6 @@ function ProductsManagement() {
             { value: "0", label: "No" },
           ],
         },
-
         {
           name: "tallas_disponibles",
           label: "Tallas disponibles",
@@ -166,8 +162,6 @@ function ProductsManagement() {
           help: "Selecciona las tallas disponibles.",
           showWhen: (form) => isRopaSelected(form),
         },
-
-
         { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 5 },
       ]}
       buildPayload={(f) => ({

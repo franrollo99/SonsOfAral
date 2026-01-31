@@ -28,12 +28,8 @@ function OrdersManagement() {
       subtitle="Gestión de pedidos."
       entityName="pedido"
       listPath="/api/pedidos"
-
-      // ✅ quitamos crear y borrar (si tu AdminCrudPage oculta botones cuando es null)
       createPath={null}
       deletePath={null}
-
-      // ✅ solo permitimos update para cambiar estado / ver detalle
       updatePath={(id) => `/api/pedidos/${id}`}
       editLabel="Editar / Detalles"
       requireAdmin
@@ -45,7 +41,6 @@ function OrdersManagement() {
         { key: "estado", header: "Estado" },
         { key: "precio_total", header: "Total", className: "text-end", render: (v) => money(v) },
         { key: "created_at", header: "Creado", render: (v) => dateTime(v) },
-        // ✅ fuera la columna líneas como pediste
       ]}
       columnsGridCss={`
         grid-template-columns:
@@ -57,25 +52,17 @@ function OrdersManagement() {
         min-width: 860px;
       `}
       formFields={[
-        // ✅ solo lectura
         { name: "codigo_pedido", label: "Código pedido", type: "text", full: true, disabled: true },
-
-        // ✅ editable
         {
           name: "estado",
           label: "Estado",
           type: "select",
           options: ["pendiente", "enviado", "entregado", "cancelado"].map((s) => ({ value: s, label: s })),
         },
-
-        // ✅ solo lectura
         { name: "precio_total", label: "Precio total (€)", type: "number", step: "0.01", disabled: true },
-
-        // ✅ detalle de líneas (solo lectura)
         { name: "productos", label: "Productos del pedido", type: "orderLines", full: true },
       ]}
       buildPayload={(f) => ({
-        // ✅ solo cambiamos estado (lo demás no se toca)
         estado: f.estado,
       })}
     />

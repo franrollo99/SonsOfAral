@@ -12,7 +12,7 @@ function AdminCrudPage({
   title = "Entidad",
   subtitle = "Gestión por modal (crear/editar).",
   entityName = "registro",
-  // endpoints
+  hideSave = false,
   listPath,   // "/api/conciertos"
   createPath, // "/api/conciertos"  (puede ser null para desactivar crear)
   updatePath, // (id) => `/api/conciertos/${id}`
@@ -417,6 +417,7 @@ function AdminCrudPage({
         onClose={closeEditor}
         onSave={onSave}
         saveText="Guardar"
+        showSave={!hideSave}
       />
 
       {/* columnas de la tabla */}

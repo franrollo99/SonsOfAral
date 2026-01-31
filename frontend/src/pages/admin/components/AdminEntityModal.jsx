@@ -238,6 +238,7 @@ function AdminEntityModal({
   loading,
   onClose,
   onSave,
+  showSave = true,
   saveText = "Guardar",
 }) {
   if (!open) return null;
@@ -267,9 +268,11 @@ function AdminEntityModal({
           <button className="adminBtn" type="button" onClick={onClose} disabled={loading}>
             Volver
           </button>
-          <button className="adminBtn" type="button" onClick={onSave} disabled={loading}>
-            {loading ? "Guardando..." : saveText}
-          </button>
+          {showSave && (
+            <button className="adminBtn" type="button" onClick={onSave} disabled={loading}>
+              {loading ? "Guardando..." : saveText}
+            </button>
+          )}
         </div>
       </div>
     </div>
