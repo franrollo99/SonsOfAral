@@ -20,7 +20,7 @@ function UsersManagement() {
       title="Usuarios"
       subtitle="Listado y detalles de usuarios registrados."
       entityName="usuario"
-      listPath="/api/usuarios"
+      listPath="/usuarios"
       requireAdmin
       emptyForm={emptyUser}
       searchKeys={["id", "nombre", "apellidos", "email"]}

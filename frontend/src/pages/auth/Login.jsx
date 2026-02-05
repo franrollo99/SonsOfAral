@@ -1,26 +1,25 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Auth.css";
-
-const API_URL = "http://localhost:8000";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState(null);
-  
+
   const navigate = useNavigate();
-  
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const loginRes = await fetch(`${API_URL}/api/auth/login`, {
+      const loginRes = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -32,12 +31,18 @@ function Login() {
       const loginData = await loginRes.json();
 
       if (!loginRes.ok) {
-        throw new Error(loginData.message || "Credenciales incorrectas");
+        const msg =
+          loginData?.errors
+            ? Object.values(loginData.errors).flat()[0]
+            : loginData?.message || "Credenciales incorrectas";
+
+        throw new Error(msg);
       }
+
 
       setUser(loginData.user);
 
-      const meRes = await fetch(`${API_URL}/api/auth/me`, {
+      const meRes = await fetch(`${API_URL}/auth/me`, {
         method: "GET",
         headers: {
           "Accept": "application/json",
@@ -105,6 +110,10 @@ function Login() {
             <label className="flLabel" htmlFor="password">Contraseña</label>
           </div>
 
+          <Link className="userSessionLink" to="/reset-password">
+            ¿Has olvidado la contraseña?
+          </Link>
+
           {error && <p className="userSessionError">{error}</p>}
 
           {user && (
@@ -116,6 +125,9 @@ function Login() {
           <button className="userSessionBtn" type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Iniciar Sesión"}
           </button>
+          <Link className="userSessionLink userSessionLinkCenter" to="/register">
+            Crear cuenta
+          </Link>
         </form>
       </div>
     </section>

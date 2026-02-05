@@ -1,9 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../auth/Auth.css";            // reutiliza el estilo del login (flField, flInput, flLabel) :contentReference[oaicite:1]{index=1}
+import "../auth/Auth.css";
 import "./ClientArea.css";
-
-const API_URL = "http://localhost:8000";
 
 function ClientArea() {
   const navigate = useNavigate();
@@ -80,7 +79,7 @@ function ClientArea() {
       }
 
       try {
-        const meRes = await fetch(`${API_URL}/api/auth/me`, {
+        const meRes = await fetch(`${API_URL}/auth/me`, {
           method: "GET",
           headers: {
             "Accept": "application/json",
@@ -133,7 +132,7 @@ function ClientArea() {
       setOrdersLoading(true);
 
       try {
-        const res = await fetch(`${API_URL}/api/pedidos`, {
+        const res = await fetch(`${API_URL}/pedidos`, {
           method: "GET",
           headers: authHeaders,
         });
@@ -187,7 +186,7 @@ function ClientArea() {
 
     try {
       // Puedes usar /{id} o /{codigo_pedido}. Ajusta a tu API.
-      const res = await fetch(`${API_URL}/api/pedidos/${order.id}`, {
+      const res = await fetch(`${API_URL}/pedidos/${order.id}`, {
         method: "GET",
         headers: authHeaders,
       });
@@ -216,7 +215,7 @@ function ClientArea() {
 
   const onLogout = async () => {
     try {
-      await fetch(`${API_URL}/api/auth/logout`, {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         headers: {
           "Accept": "application/json",
@@ -244,9 +243,13 @@ function ClientArea() {
     setPwdLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/auth/change-password`, {
-        method: "POST",
-        headers: authHeaders,
+      const res = await fetch(`${API_URL}/auth/change-password`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           current_password: currentPassword,
           password: newPassword,
@@ -257,13 +260,14 @@ function ClientArea() {
       const data = await res.json();
 
       if (!res.ok) {
-        // backend suele devolver message o errors
-        const msg =
-          data?.message ||
-          (data?.errors
-            ? Object.values(data.errors).flat().join(" ")
-            : "No se pudo cambiar la contraseña.");
-        throw new Error(msg);
+        if (res.status === 422 && data?.errors) {
+          const firstPwdError = data.errors?.password?.[0];
+          const firstAnyError = Object.values(data.errors).flat()[0];
+
+          throw new Error(firstPwdError || firstAnyError || "Datos inválidos.");
+        }
+
+        throw new Error(data?.message || "No se pudo cambiar la contraseña.");
       }
 
       setPwdOk("Contraseña actualizada.");
@@ -375,7 +379,7 @@ function ClientArea() {
 
                   try {
                     // OJO: este endpoint aún no existe. Lo crearemos luego.
-                    const res = await fetch(`${API_URL}/api/auth/profile`, {
+                    const res = await fetch(`${API_URL}/auth/profile`, {
                       method: "PUT",
                       headers: authHeaders,
                       body: JSON.stringify(form),

@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import "./Music.css";
 
@@ -12,15 +13,13 @@ export function Musica() {
   const [detalleError, setDetalleError] = useState(null);
   const [lanzamientoSeleccionado, setLanzamientoSeleccionado] = useState(null);
 
-  const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-
   useEffect(() => {
     async function cargarLanzamientos() {
       try {
         setCargando(true);
         setError(null);
 
-        const res = await fetch(`${baseUrl}/lanzamientos`);
+        const res = await fetch(`${API_URL}/lanzamientos`);
         if (!res.ok) throw new Error("Error al cargar lanzamientos");
 
         const data = await res.json();
@@ -51,7 +50,7 @@ export function Musica() {
       setDetalleCargando(true);
       setDetalleError(null);
 
-      const res = await fetch(`${baseUrl}/lanzamientos/${lanzamiento.id}`);
+      const res = await fetch(`${API_URL}/lanzamientos/${lanzamiento.id}`);
       if (!res.ok) throw new Error("Error al cargar detalle");
 
       const data = await res.json();
@@ -112,7 +111,8 @@ export function Musica() {
                 tabIndex={0}
               >
                 <div className="lanzamientoPortada">
-                  <img src={lanzamiento.imagen_url ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamiento.titulo}`} loading="lazy"/>
+                  {/* Quitar imagen por defecto */}
+                  <img src={lanzamiento.imagen ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamiento.titulo}`} loading="lazy" />
                 </div>
 
                 <div className="lanzamientoDatos">
@@ -144,7 +144,7 @@ export function Musica() {
             <div className="modalGrid">
               <aside className="modalLeft d-flex flex-column gap-3">
                 <div className="cover">
-                  <img src={lanzamientoSeleccionado.imagen_url ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamientoSeleccionado.titulo}`}/>
+                  <img src={lanzamientoSeleccionado.imagen ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamientoSeleccionado.titulo}`} />
                 </div>
 
                 <div className="leftMeta d-flex flex-column gap-3">
@@ -152,8 +152,8 @@ export function Musica() {
 
                   <div className="buttons d-flex flex-column gap-3">
                     <div className="d-flex gap-3">
-                    <button type="button" className="btn btn-outline-light btnWide buyListen">COMPRAR</button>
-                    <button type="button" className="btn btn-outline-light btnWide buyListen">ESCUCHAR</button>
+                      <button type="button" className="btn btn-outline-light btnWide buyListen">COMPRAR</button>
+                      <button type="button" className="btn btn-outline-light btnWide buyListen">ESCUCHAR</button>
 
                     </div>
                     <button type="button" className="btn btn-danger btnWide">VER</button>

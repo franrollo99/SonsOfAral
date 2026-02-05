@@ -6,6 +6,7 @@ use App\Models\Concierto;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConciertoRequest;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\ConciertoResource;
 
 class ConciertoController extends Controller
@@ -42,15 +43,24 @@ class ConciertoController extends Controller
      */
     public function index()
     {
-        $conciertos = Concierto::orderBy('fecha', 'asc')->get();
-        return ConciertoResource::collection($conciertos);
+        return ConciertoResource::collection(
+            Concierto::orderBy('fecha', 'asc')->get()
+        );
     }
 
     public function store(ConciertoRequest $request)
     {
         $data = $request->validated();
 
+        unset($data['imagen']);
+
         $concierto = Concierto::create($data);
+
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('conciertos', 'public');
+            $concierto->imagen = basename($path);
+            $concierto->save();
+        }
 
         return (new ConciertoResource($concierto))
             ->response()
@@ -93,20 +103,43 @@ class ConciertoController extends Controller
      */
     public function show(string $id)
     {
-        $concierto = Concierto::findOrFail($id);
-        return new ConciertoResource($concierto);
+        return new ConciertoResource(
+            Concierto::findOrFail($id)
+        );
     }
 
     public function update(ConciertoRequest $request, string $id)
     {
         $concierto = Concierto::findOrFail($id);
-        $concierto->update($request->validated());
+        $data = $request->validated();
+
+        unset($data['imagen']);
+
+        $concierto->update($data);
+
+        if ($request->hasFile('imagen')) {
+            if (!empty($concierto->imagen)) {
+                Storage::disk('public')->delete('conciertos/' . $concierto->imagen);
+            }
+
+            $path = $request->file('imagen')->store('conciertos', 'public');
+            $concierto->imagen = basename($path);
+            $concierto->save();
+        }
+
         return new ConciertoResource($concierto);
     }
 
     public function destroy(string $id)
     {
-        Concierto::findOrFail($id)->delete();
+        $concierto = Concierto::findOrFail($id);
+
+        if (!empty($concierto->imagen)) {
+            Storage::disk('public')->delete('conciertos/' . $concierto->imagen);
+        }
+
+        $concierto->delete();
+
         return response()->json(['message' => 'OK']);
     }
 }

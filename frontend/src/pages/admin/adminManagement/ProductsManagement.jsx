@@ -1,9 +1,9 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
 
-const API_URL = "http://localhost:8000";
-const TIPOS_PATH = "/api/tipos-productos";
+const TIPOS_PATH = "/tipos-productos";
 
 const ALL_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -23,6 +23,7 @@ const emptyProducto = {
   slug: "",
   activo: "1",
   tipo_producto_id: "",
+  imagen: null,
 };
 
 function ProductsManagement() {
@@ -94,10 +95,10 @@ function ProductsManagement() {
       title="Productos"
       subtitle="Gestión de catálogo."
       entityName="producto"
-      listPath="/api/productos"
-      createPath="/api/productos"
-      updatePath={(id) => `/api/productos/${id}`}
-      deletePath={(id) => `/api/productos/${id}`}
+      listPath="/productos"
+      createPath="/productos"
+      updatePath={(id) => `/productos/${id}`}
+      deletePath={(id) => `/productos/${id}`}
       requireAdmin
       emptyForm={emptyProducto}
       searchKeys={["id", "nombre", "descripcion", "tallas_disponibles", "precio", "slug", "activo"]}
@@ -154,6 +155,13 @@ function ProductsManagement() {
           ],
         },
         {
+          name: "imagen",
+          label: "Imagen (portada)",
+          type: "file",
+          full: true,
+          accept: "image/png,image/jpeg,image/webp",
+        },
+        {
           name: "tallas_disponibles",
           label: "Tallas disponibles",
           type: "sizes",
@@ -164,17 +172,28 @@ function ProductsManagement() {
         },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 5 },
       ]}
-      buildPayload={(f) => ({
-        nombre: f.nombre,
-        descripcion: f.descripcion,
-        tallas_disponibles: isRopaSelected(f)
+      buildPayload={(f) => {
+        const fd = new FormData();
+
+        fd.append("nombre", f.nombre || "");
+        fd.append("descripcion", f.descripcion || "");
+        fd.append("precio", f.precio === "" ? "0" : String(Number(f.precio)));
+        fd.append("slug", f.slug || "");
+        fd.append("activo", String(f.activo) === "1" || f.activo === true ? "1" : "0");
+        fd.append("tipo_producto_id", f.tipo_producto_id === "" ? "" : String(Number(f.tipo_producto_id)));
+
+        const tallas = (ropaTipoId && String(f?.tipo_producto_id) === String(ropaTipoId))
           ? (Array.isArray(f.tallas_disponibles) ? f.tallas_disponibles : [])
-          : [],
-        precio: f.precio === "" ? 0 : Number(f.precio),
-        slug: f.slug,
-        activo: String(f.activo) === "1" || f.activo === true ? 1 : 0,
-        tipo_producto_id: f.tipo_producto_id === "" ? null : Number(f.tipo_producto_id),
-      })}
+          : [];
+
+        tallas.forEach((t) => fd.append("tallas_disponibles[]", t));
+
+        if (f.imagen instanceof File) {
+          fd.append("imagen", f.imagen);
+        }
+
+        return fd;
+      }}
     />
   );
 }

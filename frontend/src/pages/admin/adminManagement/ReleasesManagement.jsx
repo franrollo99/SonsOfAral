@@ -14,6 +14,7 @@ const emptyLanzamiento = {
   titulo: "",
   fechaLanzamiento: "",
   descripcion: "",
+  imagen: null,
 };
 
 function ReleasesManagement() {
@@ -22,10 +23,10 @@ function ReleasesManagement() {
       title="Lanzamientos"
       subtitle="Gestión de álbumes/singles."
       entityName="lanzamiento"
-      listPath="/api/lanzamientos"
-      createPath="/api/lanzamientos"
-      updatePath={(id) => `/api/lanzamientos/${id}`}
-      deletePath={(id) => `/api/lanzamientos/${id}`}
+      listPath="/lanzamientos"
+      createPath="/lanzamientos"
+      updatePath={(id) => `/lanzamientos/${id}`}
+      deletePath={(id) => `/lanzamientos/${id}`}
       requireAdmin
       emptyForm={emptyLanzamiento}
       searchKeys={["id", "tipo", "titulo", "fechaLanzamiento", "descripcion"]}
@@ -69,14 +70,28 @@ function ReleasesManagement() {
         },
         { name: "titulo", label: "Título", type: "text", full: true },
         { name: "fechaLanzamiento", label: "Fecha lanzamiento", type: "date" },
+        {
+          name: "imagen",
+          label: "Imagen (portada)",
+          type: "file",
+          full: true,
+          accept: "image/png,image/jpeg,image/webp",
+        },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 6 },
       ]}
-      buildPayload={(f) => ({
-        tipo: f.tipo,
-        titulo: f.titulo,
-        fecha_lanzamiento: f.fechaLanzamiento,
-        descripcion: f.descripcion,
-      })}
+      buildPayload={(f) => {
+        const fd = new FormData();
+        fd.append("tipo", f.tipo);
+        fd.append("titulo", f.titulo);
+        fd.append("fecha_lanzamiento", f.fechaLanzamiento || "");
+        fd.append("descripcion", f.descripcion || "");
+
+        if (f.imagen instanceof File) {
+          fd.append("imagen", f.imagen);
+        }
+
+        return fd;
+      }}
     />
   );
 }

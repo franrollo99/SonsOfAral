@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react";
 import "./Concerts.css";
 
@@ -12,8 +13,7 @@ function Conciertos() {
         setCargando(true);
         setError(null);
 
-        const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-        const respuesta = await fetch(`${baseUrl}/conciertos`);
+        const respuesta = await fetch(`${API_URL}/conciertos`);
 
         if (!respuesta.ok) {
           throw new Error("Error al cargar conciertos");

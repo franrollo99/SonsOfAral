@@ -17,12 +17,16 @@ class LanzamientoSeeder extends Seeder
             'tipo' => 'Album',
             'fecha_lanzamiento' => '2022-05-20',
             'descripcion' => 'Un álbum que mezcla groove metal con matices progresivos.',
+            'imagen' => 'echoes_of_the_void.jpg',
+            'audio_url' => 'https://open.spotify.com/intl-es/artist/3rXaE7VIG232g8KyMp1Rul?si=ds8J8JE9T32wpJap-pkcHg',
+            'video_url' => 'https://www.youtube.com/@SonsOfAral',
+            'compra_url' => 'http://localhost:5173/tienda/cd-echoes-of-the-void',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         DB::table('canciones')->insert([
-            ['lanzamiento_id' => $album1Id, 'titulo' => 'Into the Abyss', 'duracion' => 242, 'track_number' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['lanzamiento_id' => $album1Id, 'titulo' => 'Into the Abyss', 'duracion' => 242, 'track_number' => 1,  'created_at' => now(), 'updated_at' => now()],
             ['lanzamiento_id' => $album1Id, 'titulo' => 'Burn the Silence', 'duracion' => 198, 'track_number' => 2, 'created_at' => now(), 'updated_at' => now()],
             ['lanzamiento_id' => $album1Id, 'titulo' => 'Crimson Horizon', 'duracion' => 256, 'track_number' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['lanzamiento_id' => $album1Id, 'titulo' => 'Chains of Tomorrow', 'duracion' => 233, 'track_number' => 4, 'created_at' => now(), 'updated_at' => now()],

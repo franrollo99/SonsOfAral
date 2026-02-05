@@ -1,8 +1,7 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "./ProductDetails.css";
-
-const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
 function isNew(createdAt) {
   if (!createdAt) return false;
@@ -58,7 +57,7 @@ function ProductoDetalle() {
         const params = new URLSearchParams();
         params.set("order", "newest");
 
-        const res = await fetch(`${baseUrl}/productos?${params.toString()}`, {
+        const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });

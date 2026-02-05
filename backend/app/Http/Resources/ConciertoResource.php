@@ -29,7 +29,7 @@ class ConciertoResource extends JsonResource
             'precioEntrada' => $this->precio_entrada,
             'entradaAnticipada' => (bool) $this->entrada_anticipada,
             'enlaceEntradaAnticipada' => $this->enlace_entrada_anticipada,
-            'imagen' => new ImagenResource($this->whenLoaded('imagen')),
+            'imagen' =>  $this->imagen ? asset('storage/conciertos' . $this->imagen) : null,
         ];
     }
 }

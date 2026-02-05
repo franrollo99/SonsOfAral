@@ -29,7 +29,7 @@ class LanzamientoResource extends JsonResource
                 ? intdiv($this->canciones->sum('duracion'), 60)
                 : null,
             'canciones' => CancionResource::collection($this->whenLoaded('canciones')),
-            'imagen' => new ImagenResource($this->whenLoaded('imagen')),
+            'imagen' =>  $this->imagen ? asset('storage/lanzamientos/' . $this->imagen) : null,
         ];
     }
 }

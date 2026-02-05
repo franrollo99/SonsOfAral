@@ -14,7 +14,7 @@ class ProductosSeeder extends Seeder
     public function run(): void
     {
         $productos = [
-            ['nombre' => 'Camiseta Sons of Aral - Logo Blanco', 'descripcion' => 'Camiseta negra con el logotipo oficial en blanco.', 'tipo_producto_id' => 1, 'tallas_disponibles' => ['S', 'M', 'L', 'XL'], 'precio' => 18.00],
+            ['nombre' => 'Camiseta Sons of Aral - Logo Blanco', 'descripcion' => 'Camiseta negra con el logotipo oficial en blanco.', 'tipo_producto_id' => 1, 'tallas_disponibles' => ['S', 'M', 'L', 'XL'], 'precio' => 18.00, 'imagen' => 'camisetaSonsOfAral.jpg'],
             ['nombre' => 'Camiseta Sons of Aral - Tour 2024', 'descripcion' => 'Edición limitada con fechas de la gira impresa en la espalda.', 'tipo_producto_id' => 1, 'tallas_disponibles' => ['M', 'L', 'XL', 'XXL'], 'precio' => 20.00],
             ['nombre' => 'Sudadera Sons of Aral', 'descripcion' => 'Sudadera con capucha de alta calidad con logo bordado.', 'tipo_producto_id' => 1, 'tallas_disponibles' => ['S', 'M', 'L', 'XL'], 'precio' => 35.00],
             ['nombre' => 'Gorra Sons of Aral', 'descripcion' => 'Gorra ajustable negra con logotipo metálico.', 'tipo_producto_id' => 3, 'tallas_disponibles' => null, 'precio' => 15.00],

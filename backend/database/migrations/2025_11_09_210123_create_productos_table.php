@@ -19,6 +19,7 @@ return new class extends Migration
             $table->json('tallas_disponibles')->nullable();
             $table->decimal('precio', 10, 2);
             $table->string('slug', 180)->unique();
+            $table->string('imagen', 255)->nullable();
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });

@@ -1,10 +1,9 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../AdminManagement.css";
 import ConfirmModal from "./ConfirmModal";
 import AdminEntityModal from "./AdminEntityModal";
-
-const API_URL = "http://localhost:8000";
 
 const normalize = (v) => String(v ?? "").toLowerCase();
 
@@ -79,7 +78,7 @@ function AdminCrudPage({
 
       try {
         if (requireAdmin) {
-          const meRes = await fetch(`${API_URL}/api/auth/me`, {
+          const meRes = await fetch(`${API_URL}/auth/me`, {
             method: "GET",
             headers: authHeaders,
           });
@@ -217,13 +216,25 @@ function AdminCrudPage({
         ? `${API_URL}${updatePath(form.id)}`
         : `${API_URL}${createPath}`;
 
-      const method = isEdit ? "PUT" : "POST";
       const payload = buildPayload(form);
+      const isFD = payload instanceof FormData;
+
+      let method = isEdit ? "PUT" : "POST";
+
+      if (isEdit && isFD) {
+        // Laravel/PHP no parsea bien multipart en PUT -> spoof
+        payload.append("_method", "PUT");
+        method = "POST";
+      }
 
       const res = await fetch(url, {
         method,
-        headers: authHeaders,
-        body: JSON.stringify(payload),
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(isFD ? {} : { "Content-Type": "application/json" }),
+        },
+        body: isFD ? payload : JSON.stringify(payload),
       });
 
       const data = await res.json().catch(() => ({}));

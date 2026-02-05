@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import "./Shop.css";
 import { Link } from "react-router-dom";
@@ -39,9 +40,6 @@ function Tienda() {
         return map;
     }, [productosAll, tipos]);
 
-
-    const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-
     useEffect(() => {
         const controller = new AbortController();
 
@@ -50,7 +48,7 @@ function Tienda() {
                 const params = new URLSearchParams();
                 params.set("order", "newest");
 
-                const res = await fetch(`${baseUrl}/productos?${params.toString()}`, {
+                const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
                     headers: { Accept: "application/json" },
                     signal: controller.signal,
                 });
@@ -80,7 +78,7 @@ function Tienda() {
                 params.set("order", order);
                 if (tipoSeleccionado) params.set("tipo", String(tipoSeleccionado));
 
-                const res = await fetch(`${baseUrl}/productos?${params.toString()}`, {
+                const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
                     headers: { Accept: "application/json" },
                     signal: controller.signal,
                 });
@@ -160,11 +158,20 @@ function Tienda() {
                         ) : (
                             <div className="row row-cols-1 row-cols-md-3 g-4">
                                 {productos.map((p) => (
-                                    <Link to={`/tienda/${p.slug}`} state={{ producto: p }} className="tiendaCardLink">
-                                        <div className="col" key={p.id}>
+                                    <div className="col" key={p.id}>
+                                        <Link
+                                            to={`/tienda/${p.slug}`}
+                                            state={{ producto: p }}
+                                            className="tiendaCardLink"
+                                        >
                                             <article className="tiendaCard card">
                                                 <div className="tiendaImgWrap">
-                                                    <img className="tiendaImg" src={p.imagen ?? "/images/productos/camiseta01.png"} alt={p.nombre} loading="lazy" />
+                                                    <img
+                                                        className="tiendaImg"
+                                                        src={p.imagen ?? "/images/productos/camiseta01.png"}
+                                                        alt={p.nombre}
+                                                        loading="lazy"
+                                                    />
                                                 </div>
 
                                                 <div className="tiendaCardInfo">
@@ -178,8 +185,8 @@ function Tienda() {
                                                     </div>
                                                 </div>
                                             </article>
-                                        </div>
-                                    </Link>
+                                        </Link>
+                                    </div>
                                 ))}
                             </div>
                         )}

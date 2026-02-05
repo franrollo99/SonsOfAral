@@ -26,6 +26,7 @@ const emptyConcert = {
   precioEntrada: "",
   entradaAnticipada: "0",
   enlaceEntradaAnticipada: "",
+  imagen: null,
 };
 
 function ConcertsManagement() {
@@ -34,10 +35,10 @@ function ConcertsManagement() {
       title="Conciertos"
       subtitle="Lectura + edición por modal (crear/editar)."
       entityName="concierto"
-      listPath="/api/conciertos"
-      createPath="/api/conciertos"
-      updatePath={(id) => `/api/conciertos/${id}`}
-      deletePath={(id) => `/api/conciertos/${id}`}
+      listPath="/conciertos"
+      createPath="/conciertos"
+      updatePath={(id) => `/conciertos/${id}`}
+      deletePath={(id) => `/conciertos/${id}`}
       requireAdmin={true}
       emptyForm={emptyConcert}
       searchKeys={[
@@ -60,9 +61,7 @@ function ConcertsManagement() {
         { key: "descripcion", header: "Descripción", className: "adminTruncate", title: (v) => v || "" },
         { key: "precioEntrada", header: "Precio", render: (v) => money(v) },
         { key: "entradaAnticipada", header: "Anticipada", render: (v) => yesNo(v) },
-        {
-          key: "enlaceEntradaAnticipada", header: "Enlace", className: "adminTruncate", title: (v) => v
-        },
+        { key: "enlaceEntradaAnticipada", header: "Enlace", className: "adminTruncate", title: (v) => v },
       ]}
       columnsGridCss={`
         grid-template-columns:
@@ -83,6 +82,13 @@ function ConcertsManagement() {
         { name: "provincia", label: "Provincia", type: "text" },
         { name: "municipio", label: "Municipio", type: "text" },
         { name: "lugar", label: "Lugar", type: "text", full: true },
+        {
+          name: "imagen",
+          label: "Cartel",
+          type: "file",
+          full: true,
+          accept: "image/png,image/jpeg,image/webp",
+        },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true },
         {
           name: "entradaAnticipada",
@@ -109,16 +115,22 @@ function ConcertsManagement() {
       ]}
       buildPayload={(form) => {
         const anticipada = String(form.entradaAnticipada) === "true";
-        return {
-          fecha: form.fecha,
-          provincia: form.provincia,
-          municipio: form.municipio,
-          lugar: form.lugar,
-          descripcion: form.descripcion,
-          precio_entrada: form.precioEntrada === "" ? 0 : Number(form.precioEntrada),
-          entrada_anticipada: anticipada ? 1 : 0,
-          enlace_entrada_anticipada: anticipada ? (form.enlaceEntradaAnticipada || null) : null,
-        };
+
+        const fd = new FormData();
+        fd.append("fecha", form.fecha || "");
+        fd.append("provincia", form.provincia || "");
+        fd.append("municipio", form.municipio || "");
+        fd.append("lugar", form.lugar || "");
+        fd.append("descripcion", form.descripcion || "");
+        fd.append("precio_entrada", form.precioEntrada === "" ? "0" : String(Number(form.precioEntrada)));
+        fd.append("entrada_anticipada", anticipada ? "1" : "0");
+        fd.append("enlace_entrada_anticipada", anticipada ? (form.enlaceEntradaAnticipada || "") : "");
+
+        if (form.imagen instanceof File) {
+          fd.append("imagen", form.imagen);
+        }
+
+        return fd;
       }}
 
     />

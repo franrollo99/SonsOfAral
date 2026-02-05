@@ -17,10 +17,6 @@ class Concierto extends Model
         'precio_entrada',
         'entrada_anticipada',
         'enlace_entrada_anticipada',
+        'imagen',
     ];
-
-    public function imagen()
-    {
-        return $this->hasOne(Imagen::class);
-    }
 }

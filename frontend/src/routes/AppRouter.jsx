@@ -24,7 +24,7 @@ export function AppRouter() {
       <Route element={<AppLayout />}>
         <Route index path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/recovery-password" element={<ResetPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/conciertos" element={<Concerts />} />
         <Route path="/musica" element={<Music />} />

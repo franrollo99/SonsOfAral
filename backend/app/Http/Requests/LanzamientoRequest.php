@@ -14,7 +14,7 @@ class LanzamientoRequest extends FormRequest
             'titulo' => ['required', 'string', 'max:255'],
             'fecha_lanzamiento' => ['nullable', 'date'],
             'descripcion' => ['nullable', 'string'],
-            'imagen_id' => ['nullable', 'exists:imagenes,id'],
+            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 
@@ -24,7 +24,9 @@ class LanzamientoRequest extends FormRequest
             'tipo.in' => 'El tipo de lanzamiento no es válido.',
             'titulo.required' => 'El título es obligatorio.',
             'fecha_lanzamiento.date' => 'La fecha de lanzamiento no es válida.',
-            'imagen_id.exists' => 'La imagen seleccionada no existe.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
+            'imagen.max'   => 'La imagen no puede superar los 2 MB.',
         ];
     }
 }

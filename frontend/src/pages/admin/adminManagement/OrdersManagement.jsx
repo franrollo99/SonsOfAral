@@ -27,10 +27,10 @@ function OrdersManagement() {
       title="Pedidos"
       subtitle="Gestión de pedidos."
       entityName="pedido"
-      listPath="/api/pedidos"
+      listPath="/pedidos"
       createPath={null}
       deletePath={null}
-      updatePath={(id) => `/api/pedidos/${id}`}
+      updatePath={(id) => `/pedidos/${id}`}
       editLabel="Editar / Detalles"
       requireAdmin
       emptyForm={emptyPedido}

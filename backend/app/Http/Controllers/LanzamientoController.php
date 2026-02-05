@@ -6,6 +6,7 @@ use App\Models\Lanzamiento;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\LanzamientoRequest;
 use App\Http\Resources\LanzamientoResource;
 
@@ -38,15 +39,24 @@ class LanzamientoController extends Controller
      */
     public function index()
     {
-        $lanzamientos = Lanzamiento::with(['canciones', 'imagen'])->get();
+        $lanzamientos = Lanzamiento::with(['canciones'])->get();
         return LanzamientoResource::collection($lanzamientos);
     }
 
     public function store(LanzamientoRequest $request)
     {
-        $lanzamiento = Lanzamiento::create($request->validated());
+        $data = $request->validated();
+        unset($data['imagen']);
 
-        $lanzamiento->load(['canciones', 'imagen']);
+        $lanzamiento = Lanzamiento::create($data);
+
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('lanzamientos', 'public');
+            $lanzamiento->imagen = basename($path);
+            $lanzamiento->save();
+        }
+
+        $lanzamiento->load(['canciones']);
 
         return (new LanzamientoResource($lanzamiento))
             ->response()
@@ -106,7 +116,7 @@ class LanzamientoController extends Controller
      */
     public function show(string $id)
     {
-        $lanzamiento = Lanzamiento::with('canciones', 'imagen')
+        $lanzamiento = Lanzamiento::with('canciones')
             ->findOrFail($id);
 
         return new LanzamientoResource($lanzamiento);
@@ -115,16 +125,36 @@ class LanzamientoController extends Controller
     public function update(LanzamientoRequest $request, string $id)
     {
         $lanzamiento = Lanzamiento::findOrFail($id);
-        $lanzamiento->update($request->validated());
 
-        $lanzamiento->load(['canciones', 'imagen']);
+        $data = $request->validated();
+        unset($data['imagen']);
+
+        $lanzamiento->update($data);
+
+        if ($request->hasFile('imagen')) {
+            if (!empty($lanzamiento->imagen)) {
+                Storage::disk('public')->delete('lanzamientos/' . $lanzamiento->imagen);
+            }
+
+            $path = $request->file('imagen')->store('lanzamientos', 'public');
+            $lanzamiento->imagen = basename($path);
+            $lanzamiento->save();
+        }
+
+        $lanzamiento->load(['canciones']);
 
         return new LanzamientoResource($lanzamiento);
     }
 
     public function destroy(string $id)
     {
-        Lanzamiento::findOrFail($id)->delete();
+        $lanzamiento = Lanzamiento::findOrFail($id);
+
+        if (!empty($lanzamiento->imagen)) {
+            Storage::disk('public')->delete('lanzamientos/' . $lanzamiento->imagen);
+        }
+
+        $lanzamiento->delete();
 
         return response()->json(['message' => 'OK']);
     }

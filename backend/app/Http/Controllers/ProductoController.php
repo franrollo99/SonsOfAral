@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductoRequest;
-use App\Http\Resources\ProductoResource;
 use App\Models\Producto;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductoRequest;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\ProductoResource;
 
 class ProductoController extends Controller
 {
@@ -31,7 +32,7 @@ class ProductoController extends Controller
     public function index(Request $request)
     {
         $query = Producto::query()
-            ->with(['tipo', 'imagenPrincipal']);
+            ->with(['tipo']);
 
         $user = auth('sanctum')->user();
 
@@ -77,8 +78,17 @@ class ProductoController extends Controller
         $data = $request->validated();
         $data['slug'] = Str::slug($data['nombre']);
 
+        unset($data['imagen']);
+
         $producto = Producto::create($data);
-        $producto->load(['tipo', 'imagenPrincipal']);
+
+        if ($request->hasFile('imagen')) {
+            $path = $request->file('imagen')->store('productos', 'public');
+            $producto->imagen = basename($path);
+            $producto->save();
+        }
+
+        $producto->load(['tipo']);
 
         return (new ProductoResource($producto))
             ->response()
@@ -112,7 +122,7 @@ class ProductoController extends Controller
      */
     public function show(int $id)
     {
-        $producto = Producto::with(['tipo', 'imagenPrincipal'])->findOrFail($id);
+        $producto = Producto::with(['tipo'])->findOrFail($id);
         return new ProductoResource($producto);
     }
 
@@ -147,8 +157,21 @@ class ProductoController extends Controller
             unset($data['slug']);
         }
 
+        unset($data['imagen']);
+
         $model->update($data);
-        $model->load(['tipo', 'imagenPrincipal']);
+
+        if ($request->hasFile('imagen')) {
+            if (!empty($model->imagen)) {
+                Storage::disk('public')->delete('productos/' . $model->imagen);
+            }
+
+            $path = $request->file('imagen')->store('productos', 'public');
+            $model->imagen = basename($path);
+            $model->save();
+        }
+
+        $model->load(['tipo']);
 
         return new ProductoResource($model);
     }
@@ -174,7 +197,14 @@ class ProductoController extends Controller
      */
     public function destroy(int $id)
     {
-        Producto::findOrFail($id)->delete();
+        $model = Producto::findOrFail($id);
+
+        if (!empty($model->imagen)) {
+            Storage::disk('public')->delete('productos/' . $model->imagen);
+        }
+
+        $model->delete();
+
         return response()->json(['message' => 'OK']);
     }
 }

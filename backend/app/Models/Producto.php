@@ -16,6 +16,7 @@ class Producto extends Model
         'precio',
         'slug',
         'activo',
+        'imagen',
     ];
 
     protected $casts = [
@@ -34,16 +35,6 @@ class Producto extends Model
     public function pedidoProductos()
     {
         return $this->hasMany(PedidoProducto::class);
-    }
-
-    public function imagenes()
-    {
-        return $this->hasMany(Imagen::class);
-    }
-
-    public function imagenPrincipal()
-    {
-        return $this->hasOne(Imagen::class)->where('es_principal', true);
     }
 
     public function activar()

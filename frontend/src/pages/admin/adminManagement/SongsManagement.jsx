@@ -1,8 +1,7 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
-
-const API_URL = "http://localhost:8000";
 
 const emptyCancion = {
   id: null,
@@ -32,7 +31,7 @@ function SongsManagement() {
       try {
         setLoadingLanzamientos(true);
 
-        const res = await fetch(`${API_URL}/api/lanzamientos`, {
+        const res = await fetch(`${API_URL}/lanzamientos`, {
           method: "GET",
           headers: authHeaders,
         });
@@ -79,10 +78,10 @@ function SongsManagement() {
       title="Canciones"
       subtitle="Gestión de tracks."
       entityName="canción"
-      listPath="/api/canciones"
-      createPath="/api/canciones"
-      updatePath={(id) => `/api/canciones/${id}`}
-      deletePath={(id) => `/api/canciones/${id}`}
+      listPath="/canciones"
+      createPath="/canciones"
+      updatePath={(id) => `/canciones/${id}`}
+      deletePath={(id) => `/canciones/${id}`}
       requireAdmin
       emptyForm={emptyCancion}
       searchKeys={["id", "lanzamiento", "titulo", "duracion", "duracionFormateada", "trackNumber"]}

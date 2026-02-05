@@ -185,9 +185,6 @@
   cursor: not-allowed;
 }
 
-
-
-/* Responsive */
 @media (max-width: 991px) {
   .productoDetalleLayout {
     flex-direction: column;

@@ -68,6 +68,30 @@ function Field({ field, form, setForm }) {
     disabled: isDisabled,
   };
 
+  if (type === "file") {
+    return (
+      <div className={`adminFormField ${full ? "adminFormFieldFull" : ""}`}>
+        <label className="adminControlLabel">{label}</label>
+
+        <input
+          className="adminInput"
+          type="file"
+          accept={field.accept || "image/png,image/jpeg,image/webp"}
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            onChange(file);
+          }}
+        />
+
+        {help ? (
+          <small className="adminMuted">
+            {typeof help === "function" ? help(form) : help}
+          </small>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className={`adminFormField ${full ? "adminFormFieldFull" : ""}`}>
       <label className="adminControlLabel">{label}</label>
@@ -207,6 +231,17 @@ function Field({ field, form, setForm }) {
             </table>
           </div>
         </div>
+      ) : type === "file" ? (
+        <input
+          className="adminInput"
+          type="file"
+          accept={field.accept || "image/png,image/jpeg,image/webp"}
+          disabled={isDisabled}
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            onChange(file);
+          }}
+        />
       ) : (
         <input
           {...commonProps}

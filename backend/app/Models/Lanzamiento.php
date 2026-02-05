@@ -13,15 +13,14 @@ class Lanzamiento extends Model
         'tipo',
         'fecha_lanzamiento',
         'descripcion',
+        'imagen',
+        'compra_url',
+        'audio_url',
+        'video_url',
     ];
 
     public function canciones()
     {
         return $this->hasMany(Cancion::class);
-    }
-
-    public function imagen()
-    {
-        return $this->hasOne(Imagen::class);
     }
 }

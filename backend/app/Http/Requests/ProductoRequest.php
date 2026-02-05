@@ -15,6 +15,7 @@ class ProductoRequest extends FormRequest
             'precio' => ['required', 'numeric', 'min:0'],
             'slug' => ['nullable', 'string', 'max:255'],
             'activo' => ['required', 'boolean'],
+            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'tipo_producto_id' => ['required', 'integer', 'exists:tipos_productos,id'],
         ];
     }
@@ -41,6 +42,10 @@ class ProductoRequest extends FormRequest
             'tipo_producto_id.required' => 'Debes seleccionar un tipo de producto.',
             'tipo_producto_id.integer' => 'El tipo de producto no es válido.',
             'tipo_producto_id.exists' => 'El tipo de producto seleccionado no existe.',
+
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
+            'imagen.max'   => 'La imagen no puede superar los 2 MB.',
         ];
     }
 
