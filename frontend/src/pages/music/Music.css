@@ -70,7 +70,6 @@
   opacity: 0.9;
 }
 
-/* mini overlay de “cargando” sobre la card */
 .lanzamientoLoading {
   position: absolute;
   inset: 0;

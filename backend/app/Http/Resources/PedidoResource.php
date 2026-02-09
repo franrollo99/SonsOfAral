@@ -15,6 +15,13 @@ class PedidoResource extends JsonResource
             'estado'        => $this->estado,
             'precio_total'  => (float) $this->precio_total,
             'created_at'    => $this->created_at,
+            'nombre_envio'  => $this->nombre_envio,
+            'direccion'     => $this->direccion,
+            'municipio'     => $this->municipio,
+            'provincia'     => $this->provincia,
+            'cp'            => $this->cp,
+            'gastos_envio'  => (float) $this->gastos_envio,
+            'metodo_pago'   => $this->metodo_pago,
             'productos'     => PedidoProductoResource::collection(
                 $this->whenLoaded('productos')
             ),

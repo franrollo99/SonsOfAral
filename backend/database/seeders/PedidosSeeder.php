@@ -24,13 +24,34 @@ class PedidosSeeder extends Seeder
 
         $userIds = [2, 3];
 
-        foreach ($userIds as $userId) {
+        // Datos de envío fake (para no dejar nulls si ahora son required)
+        $direcciones = [
+            ['nombre_envio' => 'Laura Martínez', 'direccion' => 'Calle Metal 12, 3ºA', 'municipio' => 'Santander', 'provincia' => 'Cantabria', 'cp' => '39001'],
+            ['nombre_envio' => 'Fran Rodríguez', 'direccion' => 'Av. Sons of Aral 7', 'municipio' => 'Torrelavega', 'provincia' => 'Cantabria', 'cp' => '39300'],
+        ];
+
+        foreach ($userIds as $idx => $userId) {
+            $envio = $direcciones[$idx % count($direcciones)];
+
             foreach ($estados as $estado) {
+                // Puedes variar el envío si quieres (0 o 5)
+                $gastosEnvio = 5.00;
+
                 $pedido = Pedido::create([
                     'user_id'       => $userId,
                     'codigo_pedido' => $this->generateCodigoPedido(),
                     'estado'        => $estado,
                     'precio_total'  => 0,
+
+                    // NUEVOS CAMPOS
+                    'nombre_envio'  => $envio['nombre_envio'],
+                    'telefono'      => null, // como quieres: NO rellenar por defecto
+                    'direccion'     => $envio['direccion'],
+                    'municipio'     => $envio['municipio'],
+                    'provincia'     => $envio['provincia'],
+                    'cp'            => $envio['cp'],
+                    'metodo_pago'   => 'tarjeta',
+                    'gastos_envio'  => $gastosEnvio,
                 ]);
 
                 $total = 0.0;
@@ -57,8 +78,9 @@ class PedidosSeeder extends Seeder
                     ]);
                 }
 
+                // Total final incluye gastos de envío
                 $pedido->update([
-                    'precio_total' => round($total, 2),
+                    'precio_total' => round($total + (float) $pedido->gastos_envio, 2),
                 ]);
             }
         }

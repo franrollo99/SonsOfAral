@@ -1,10 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../AdminManagement.css";
 import ConfirmModal from "./ConfirmModal";
 import AdminEntityModal from "./AdminEntityModal";
 
+const API_URL = import.meta.env.VITE_API_URL;
 const normalize = (v) => String(v ?? "").toLowerCase();
 
 function AdminCrudPage({

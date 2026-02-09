@@ -1,7 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "./Auth.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function ResetPassword() {
   const navigate = useNavigate();

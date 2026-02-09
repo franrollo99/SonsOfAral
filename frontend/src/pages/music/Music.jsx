@@ -1,8 +1,9 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import "./Music.css";
 
-export function Musica() {
+const API_URL = import.meta.env.VITE_API_URL;
+
+function Musica() {
   const [lanzamientos, setLanzamientos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -12,6 +13,10 @@ export function Musica() {
   const [detalleCargando, setDetalleCargando] = useState(false);
   const [detalleError, setDetalleError] = useState(null);
   const [lanzamientoSeleccionado, setLanzamientoSeleccionado] = useState(null);
+
+  const compraUrl = (lanzamientoSeleccionado?.compraUrl || "").trim();
+  const audioUrl = (lanzamientoSeleccionado?.audioUrl || "").trim();
+  const videoUrl = (lanzamientoSeleccionado?.videoUrl || "").trim();
 
   useEffect(() => {
     async function cargarLanzamientos() {
@@ -23,8 +28,12 @@ export function Musica() {
         if (!res.ok) throw new Error("Error al cargar lanzamientos");
 
         const data = await res.json();
-        const lista = Array.isArray(data) ? data : data.data;
-        setLanzamientos(lista || []);
+        const raw = data.data;
+
+        const ordered = [...raw].sort((a, b) => {
+          return new Date(b.fechaLanzamiento) - new Date(a.fechaLanzamiento);
+        });
+        setLanzamientos(ordered);
       } catch (e) {
         setError("No se pudieron cargar los discos.");
       } finally {
@@ -150,14 +159,50 @@ export function Musica() {
                 <div className="leftMeta d-flex flex-column gap-3">
                   <div className="smallMeta">PISTAS: {lanzamientoSeleccionado.canciones.length} <span>|</span> DURACION: {lanzamientoSeleccionado.duracionTotalMinutos} MIN</div>
 
-                  <div className="buttons d-flex flex-column gap-3">
-                    <div className="d-flex gap-3">
-                      <button type="button" className="btn btn-outline-light btnWide buyListen">COMPRAR</button>
-                      <button type="button" className="btn btn-outline-light btnWide buyListen">ESCUCHAR</button>
+                  {(compraUrl || audioUrl || videoUrl) && (
+                    <div className="buttons d-flex flex-column gap-3 mt-4">
+
+                      {(compraUrl || audioUrl) && (
+                        <div className="d-flex gap-3">
+                          {compraUrl && (
+                            <a
+                              href={compraUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn btn-outline-light btnWide buyListen"
+                            >
+                              COMPRAR
+                            </a>
+                          )}
+
+                          {audioUrl && (
+                            <a
+                              href={audioUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn btn-outline-light btnWide buyListen"
+                            >
+                              ESCUCHAR
+                            </a>
+                          )}
+                        </div>
+                      )}
+
+                      {videoUrl && (
+                        <a
+                          href={videoUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-danger btnWide"
+                        >
+                          VER
+                        </a>
+                      )}
 
                     </div>
-                    <button type="button" className="btn btn-danger btnWide">VER</button>
-                  </div>
+                  )}
+
+
                 </div>
               </aside>
 

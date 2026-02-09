@@ -14,6 +14,9 @@ const emptyLanzamiento = {
   titulo: "",
   fechaLanzamiento: "",
   descripcion: "",
+  compraUrl: "",
+  audioUrl: "",
+  videoUrl: "",
   imagen: null,
 };
 
@@ -78,6 +81,9 @@ function ReleasesManagement() {
           accept: "image/png,image/jpeg,image/webp",
         },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 6 },
+        { name: "compraUrl", label: "URL compra", type: "text", full: true },
+        { name: "audioUrl", label: "URL audio", type: "text", full: true },
+        { name: "videoUrl", label: "URL video", type: "text", full: true },
       ]}
       buildPayload={(f) => {
         const fd = new FormData();
@@ -85,6 +91,9 @@ function ReleasesManagement() {
         fd.append("titulo", f.titulo);
         fd.append("fecha_lanzamiento", f.fechaLanzamiento || "");
         fd.append("descripcion", f.descripcion || "");
+        fd.append("compra_url", f.compraUrl || "");
+        fd.append("audio_url", f.audioUrl || "");
+        fd.append("video_url", f.videoUrl || "");
 
         if (f.imagen instanceof File) {
           fd.append("imagen", f.imagen);

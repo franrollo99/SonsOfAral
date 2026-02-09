@@ -1,17 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./ProductDetails.css";
 
-function isNew(createdAt) {
-  if (!createdAt) return false;
-  const created = new Date(createdAt);
-  const now = new Date();
-  const diffDays = (now - created) / (1000 * 60 * 60 * 24);
-  return diffDays <= 30;
-}
+const API_URL = import.meta.env.VITE_API_URL;
 
 function ProductoDetalle() {
+  const navigate = useNavigate();
   const { slug } = useParams();
   const { state } = useLocation();
 
@@ -103,8 +98,6 @@ function ProductoDetalle() {
     }
   }, [producto, talla]);
 
-  const nuevo = isNew(producto?.created_at);
-
   const precioTxt =
     typeof producto?.precio_formateado === "string"
       ? producto.precio_formateado
@@ -112,16 +105,45 @@ function ProductoDetalle() {
         ? `${Number(producto.precio).toFixed(2)} €`
         : "";
 
-  const canAdd = tallas.length === 0 || (tallas.length > 0 && talla);
+  const CART_ITEMS = "cartItems";
 
-  const addToCart = () => {
-    console.log("ADD TO CART", {
-      producto_id: producto?.id,
-      slug: producto?.slug,
-      talla,
-      qty,
-    });
+  const handleAddToCart = () => {
+    if (!producto?.id) return;
+
+    let cart = [];
+    try {
+      const raw = localStorage.getItem(CART_ITEMS);
+      cart = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(cart)) cart = [];
+    } catch {
+      cart = [];
+    }
+
+    const addQty = Number(qty || 1);
+    const index = cart.findIndex(
+      (it) => it.id === producto.id && (it.talla ?? null) === (talla ?? null)
+    );
+
+
+    if (index !== -1) {
+      cart[index].qty = (Number(cart[index].qty) || 0) + addQty;
+    } else {
+      cart.push({
+        id: producto.id,
+        nombre: producto.nombre,
+        precio: Number(producto.precio || 0),
+        precio_formateado: producto.precio_formateado,
+        imagen: producto.imagen,
+        qty: addQty,
+        talla: talla ?? null,
+      });
+    }
+
+    localStorage.setItem(CART_ITEMS, JSON.stringify(cart));
+
+    navigate("/carrito");
   };
+
 
   return (
     <section>
@@ -142,7 +164,6 @@ function ProductoDetalle() {
             <div className="productoDetalleRight flex-grow-1">
               <div className="d-flex align-items-start justify-content-between gap-3">
                 <h1 className="productoDetalleTitle">{producto.nombre}</h1>
-                {nuevo && <span className="productoBadgeNew">NEW</span>}
               </div>
 
               <div className="productoDetallePrice">{precioTxt}</div>
@@ -170,20 +191,20 @@ function ProductoDetalle() {
 
                 <div className="d-flex align-items-center gap-2">
                   <button type="button" className="productoQtyBtn" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
-                  
+
                   <input type="number" className="productoQtyInput" min={1} max={99} value={qty} onChange={(e) => {
-                      const v = e.target.value;
+                    const v = e.target.value;
 
-                      if (v === "") {
-                        setQty("");
-                        return;
-                      }
+                    if (v === "") {
+                      setQty("");
+                      return;
+                    }
 
-                      const n = Number(v);
-                      if (Number.isNaN(n)) return;
+                    const n = Number(v);
+                    if (Number.isNaN(n)) return;
 
-                      setQty(Math.min(99, Math.max(1, n)));
-                    }}
+                    setQty(Math.min(99, Math.max(1, n)));
+                  }}
                     onBlur={() => {
                       if (!qty || qty < 1) setQty(1);
                     }}
@@ -195,10 +216,7 @@ function ProductoDetalle() {
               </div>
 
               {/* ADD TO CART */}
-              <button type="button" className="productoAddBtn" onClick={addToCart} disabled={!canAdd} title={!canAdd ? "Selecciona una talla" : ""}>
-                AÑADIR AL CARRITO
-              </button>
-
+              <button className="productoAddBtn" onClick={handleAddToCart}>Añadir al carrito</button>
             </div>
           </div>
         )}

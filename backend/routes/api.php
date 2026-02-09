@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/pedidos', [PedidoController::class, 'index']);
     Route::get('/pedidos/{pedido}', [PedidoController::class, 'show']);
+    Route::post('/pedidos', [PedidoController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {

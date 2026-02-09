@@ -15,6 +15,10 @@ class LanzamientoRequest extends FormRequest
             'fecha_lanzamiento' => ['nullable', 'date'],
             'descripcion' => ['nullable', 'string'],
             'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'compra_url' => ['nullable', 'string', 'max:255'],
+            'audio_url'  => ['nullable', 'string', 'max:255'],
+            'video_url'  => ['nullable', 'string', 'max:255'],
+
         ];
     }
 

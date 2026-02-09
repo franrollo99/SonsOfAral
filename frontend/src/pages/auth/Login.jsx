@@ -1,7 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Auth.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -76,7 +77,6 @@ function Login() {
       setLoading(false);
     }
   };
-
 
   return (
     <section>

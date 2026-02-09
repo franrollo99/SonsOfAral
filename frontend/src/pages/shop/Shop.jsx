@@ -1,7 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import "./Shop.css";
 import { Link } from "react-router-dom";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const TIPOS_FIJOS = [
     { id: 1, nombre: "Ropa" },
@@ -100,7 +101,7 @@ function Tienda() {
 
         load();
         return () => controller.abort();
-    }, [tipoSeleccionado, order, baseUrl]);
+    }, [tipoSeleccionado, order, API_URL]);
 
     const totalItems = productos.length;
 
@@ -154,7 +155,8 @@ function Tienda() {
                         {loading ? (
                             <div className="tiendaLoading">Cargando productos...</div>
                         ) : totalItems === 0 ? (
-                            <div className="tiendaEmpty">No hay productos para mostrar.</div>
+                            // <div className="tiendaEmpty">No hay productos para mostrar.</div>
+                            <div className="tiendaEmpty"></div>
                         ) : (
                             <div className="row row-cols-1 row-cols-md-3 g-4">
                                 {productos.map((p) => (

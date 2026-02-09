@@ -9,6 +9,9 @@ import Concerts from "../pages/concerts/Concerts";
 import Music from "../pages/music/Music";
 import Shop from "../pages/shop/Shop";
 import ProductDetails from "../pages/shop/ProductDetails";
+import Cart from "../pages/clientArea/Cart";
+import Checkout from "../pages/checkout/Checkout";
+import CheckoutSuccess from "../pages/checkout/CheckoutSuccess";
 import AdminArea from "../pages/admin/AdminArea";
 import ConcertsManagement from "../pages/admin/adminManagement/ConcertsManagement";
 import ReleasesManagement from "../pages/admin/adminManagement/ReleasesManagement";
@@ -30,6 +33,9 @@ export function AppRouter() {
         <Route path="/musica" element={<Music />} />
         <Route path="/tienda" element={<Shop />} />
         <Route path="/tienda/:slug" element={<ProductDetails />} />
+        <Route path="/carrito" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/checkout/success/:pedidoId" element={<CheckoutSuccess />} />
         <Route path="/area-cliente" element={<ClientArea />} />
         <Route path="/area-admin" element={<AdminArea />} />
         <Route path="/area-admin/conciertos" element={<ConcertsManagement />} />

@@ -1,0 +1,156 @@
+.checkoutPage {
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 70vh;
+}
+
+.checkoutHeader h1 {
+  margin: 0;
+}
+
+.checkoutSmall {
+  font-size: 0.9rem;
+}
+
+.checkoutGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.checkoutCard {
+  background: var(--bg-alt);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.checkoutCard h2 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+}
+
+.checkoutSectionTitle {
+  margin-top: 18px;
+}
+
+.checkoutError {
+  background: rgba(255, 0, 0, 0.12);
+  border: 1px solid rgba(255, 0, 0, 0.25);
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.checkoutForm {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.checkoutField label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.checkoutField input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #0e0e0e;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+  outline: none;
+}
+
+.checkoutField input:focus {
+  border-color: rgba(255,255,255,0.25);
+}
+
+.checkoutFieldGrow {
+  flex: 1;
+}
+
+.checkoutFieldCP {
+  width: 140px;
+}
+
+.checkoutPayMethods {
+  margin-top: 8px;
+}
+
+.checkoutRadio {
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 8px;
+}
+
+.checkoutSummaryList {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.checkoutItemName {
+  font-weight: 600;
+}
+
+.checkoutBadge {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+.checkoutTotals {
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.checkoutLineTotal {
+  margin-top: 4px;
+  font-size: 1.05rem;
+}
+
+.checkoutBtnPrimary {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #ffffff;
+  color: #000;
+  font-weight: 700;
+}
+
+.checkoutBtnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkoutBtnGhost {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: transparent;
+  color: var(--text);
+}
+
+@media (max-width: 980px) {
+  .checkoutGrid {
+    grid-template-columns: 1fr;
+  }
+  .checkoutFieldCP {
+    width: 120px;
+  }
+}

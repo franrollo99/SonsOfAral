@@ -1,8 +1,9 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../auth/Auth.css";
 import "./ClientArea.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function ClientArea() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ function ClientArea() {
     direccion: "",
     cp: "",
   });
+
   const [initialForm, setInitialForm] = useState(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -143,8 +145,15 @@ function ClientArea() {
           throw new Error(data?.message || "No se pudieron cargar tus pedidos.");
         }
 
-        // Espera: data.pedidos = [{id, codigo_pedido, estado, precio_total, created_at}, ...]
-        setOrders(Array.isArray(data?.data) ? data.data : []);
+        const list = Array.isArray(data?.data) ? data.data : [];
+
+        list.sort((a, b) => {
+          const da = new Date(a?.created_at || 0).getTime();
+          const db = new Date(b?.created_at || 0).getTime();
+          return db - da;
+        });
+
+        setOrders(list);
 
       } catch (e) {
         setOrdersError(e.message || "Error cargando pedidos.");
@@ -218,17 +227,19 @@ function ClientArea() {
       await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
         },
       });
-    } catch {
-      // da igual, igualmente borramos token local
+    } catch (e) {
+      console.error("Error al cerrar sesión:", e);
     } finally {
+      localStorage.removeItem("cartItems");
       localStorage.removeItem("token");
       navigate("/login", { replace: true });
     }
   };
+
 
   const onChangePassword = async (e) => {
     e.preventDefault();

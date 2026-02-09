@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "./AppLayout.css";
 
-export function AppLayout() {
+function AppLayout() {
   return (
     <div className="appLayout">
       <Navbar />

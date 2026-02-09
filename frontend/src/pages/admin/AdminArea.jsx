@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./AdminArea.css";
 
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function AdminArea() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ function AdminArea() {
       }
 
       try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
+        const res = await fetch(`${API_URL}/auth/me`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -59,7 +59,7 @@ function AdminArea() {
 
   const onLogout = async () => {
     try {
-      await fetch(`${API_URL}/api/auth/logout`, {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       });

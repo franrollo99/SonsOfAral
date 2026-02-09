@@ -13,10 +13,19 @@ class Pedido extends Model
         'codigo_pedido',
         'estado',
         'precio_total',
+        'nombre_envio',
+        'telefono',
+        'direccion',
+        'municipio',
+        'provincia',
+        'cp',
+        'metodo_pago',
+        'gastos_envio',
     ];
 
     protected $casts = [
         'precio_total' => 'float',
+        'gastos_envio' => 'float',
     ];
 
     protected static function booted(): void
@@ -54,7 +63,7 @@ class Pedido extends Model
     public function calcularTotal(): void
     {
         $this->loadMissing('productos');
-        $this->precio_total = (float) $this->productos->sum('subtotal');
+        $this->precio_total = (float) $this->productos->sum('subtotal') + (float) ($this->gastos_envio ?? 0);
         $this->save();
     }
 

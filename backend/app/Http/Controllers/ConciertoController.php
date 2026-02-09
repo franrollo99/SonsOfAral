@@ -43,9 +43,7 @@ class ConciertoController extends Controller
      */
     public function index()
     {
-        return ConciertoResource::collection(
-            Concierto::orderBy('fecha', 'asc')->get()
-        );
+        return ConciertoResource::collection(Concierto::all());
     }
 
     public function store(ConciertoRequest $request)

@@ -29,6 +29,9 @@ class LanzamientoResource extends JsonResource
                 ? intdiv($this->canciones->sum('duracion'), 60)
                 : null,
             'canciones' => CancionResource::collection($this->whenLoaded('canciones')),
+            'compraUrl' => $this->compra_url,
+            'audioUrl' => $this->audio_url,
+            'videoUrl' => $this->video_url,
             'imagen' =>  $this->imagen ? asset('storage/lanzamientos/' . $this->imagen) : null,
         ];
     }

@@ -22,6 +22,16 @@ function Navbar() {
     }
   };
 
+  const handleCartClick = (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      navigate("/carrito");
+    }
+  };
+
   return (
     <header className="d-flex justify-content-between align-items-center gap-5">
       <Link to="/">
@@ -37,9 +47,14 @@ function Navbar() {
         <Link to="/tienda">Tienda</Link>
       </nav>
 
+    <div className="d-flex gap-3">
+      <button className="cartIcon" onClick={handleCartClick}>
+        <img src="/images/carrito.png" alt="Carrito" />
+      </button>
       <button className="loginIcon" onClick={handleLoginClick}>
         <img src="/images/login.png" alt="Login" />
       </button>
+    </div>
     </header>
   );
 }

@@ -1,11 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Auth.css";
 
-function Register() {
-  const navigate = useNavigate();
+const API_URL = import.meta.env.VITE_API_URL;
 
+function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");

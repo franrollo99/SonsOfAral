@@ -1,6 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react";
 import "./Concerts.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function Conciertos() {
   const [conciertos, setConciertos] = useState([]);
@@ -20,9 +21,34 @@ function Conciertos() {
         }
 
         const data = await respuesta.json();
-        const lista = Array.isArray(data) ? data : data.data;
+        const lista = data.data;
 
-        setConciertos(lista || []);
+        const raw = Array.isArray(data?.data) ? data.data : [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcoming = raw
+          .filter((c) => {
+            const rawDate = c?.fecha;
+
+            if (!rawDate) return false;
+
+            const d = new Date(rawDate);
+            if (Number.isNaN(d.getTime())) return false;
+
+            d.setHours(0, 0, 0, 0);
+            return d >= today;
+          })
+          .sort((a, b) => {
+            const da = new Date(a?.fecha).getTime();
+            const db = new Date(b?.fecha).getTime();
+            return da - db;
+          });
+
+        setConciertos(upcoming);
+
+
       } catch (err) {
         console.error(err);
         setError("No se pudieron cargar los conciertos.");
