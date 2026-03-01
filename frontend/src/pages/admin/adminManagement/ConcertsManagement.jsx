@@ -33,7 +33,6 @@ function ConcertsManagement() {
   return (
     <AdminCrudPage
       title="Conciertos"
-      subtitle="Lectura + edición por modal (crear/editar)."
       entityName="concierto"
       listPath="/conciertos"
       createPath="/conciertos"
@@ -47,7 +46,6 @@ function ConcertsManagement() {
         "provincia",
         "municipio",
         "lugar",
-        "descripcion",
         "precioEntrada",
         "entradaAnticipada",
         "enlaceEntradaAnticipada",
@@ -58,21 +56,17 @@ function ConcertsManagement() {
         { key: "provincia", header: "Provincia" },
         { key: "municipio", header: "Municipio" },
         { key: "lugar", header: "Lugar", className: "adminTruncate", title: (v) => v || "" },
-        { key: "descripcion", header: "Descripción", className: "adminTruncate", title: (v) => v || "" },
         { key: "precioEntrada", header: "Precio", render: (v) => money(v) },
         { key: "entradaAnticipada", header: "Anticipada", render: (v) => yesNo(v) },
-        { key: "enlaceEntradaAnticipada", header: "Enlace", className: "adminTruncate", title: (v) => v },
       ]}
       columnsGridCss={`
         grid-template-columns:
           100px
-          110px
-          110px
-          1.1fr
-          1.6fr
-          80px
-          80px
           1fr
+          1fr
+          2fr
+          100px
+          100px
           150px;
         min-width: 1050px;
       `}

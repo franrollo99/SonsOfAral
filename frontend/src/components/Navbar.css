@@ -1,4 +1,4 @@
-header {
+.navbarHeader {
   height: 100px;
   padding: 1rem 5rem;
   background: var(--bg-alt);
@@ -11,6 +11,7 @@ header {
 
 .navbarLogo img {
   width: 100px;
+  display: block;
 }
 
 .navbarLinks a {
@@ -29,13 +30,116 @@ header {
 
 .cartIcon,
 .loginIcon {
-  padding: 0;
-  background-color: var(--bg-alt);
+  background: none;
   border: none;
+  padding: 10px;
+  border-radius: 8px;
   cursor: pointer;
+  outline: none;
+}
+
+.cartIcon:focus,
+.loginIcon:focus {
+  outline: none;
+}
+
+.cartIcon:hover,
+.loginIcon:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.cartIcon,
+.loginIcon {
+  display: inline-block;
 }
 
 .cartIcon img,
 .loginIcon img {
-  width: 70px;
+  width: 50px;
+  display: block;
+}
+
+.navBurger {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text);
+  padding: 12px 16px;
+  font-size: 22px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.navBurger:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mobileMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  background: var(--bg-alt);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  padding: 10px 0;
+}
+
+.mobileLink {
+  color: var(--text);
+  text-decoration: none;
+  padding: 14px 18px;
+  font-weight: 600;
+}
+
+.mobileLink:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mobileDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 8px 0;
+}
+
+.mobileMenu .cartIcon,
+.mobileMenu .loginIcon {
+  background: none;
+  border: none;
+  padding: 14px 18px;
+  text-align: left;
+  width: 100%;
+  color: var(--text);
+}
+
+.mobileMenu .cartIcon:hover,
+.mobileMenu .loginIcon:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.mobileBtn {
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 14px 18px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.mobileBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mobileBtn:focus {
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .navbarHeader {
+    height: 100px;
+    padding: 1rem 1.25rem;
+  }
 }

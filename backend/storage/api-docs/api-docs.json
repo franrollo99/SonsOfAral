@@ -1,14 +1,773 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API de Reto Grupo 2",
-        "description": "Documentación de la API para el proyecto Reto Grupo 2",
-        "contact": {
-            "email": "tu-email@example.com"
-        },
+        "title": "API de Sons of Aral Website",
+        "description": "Documentación de la API para Sons of Aral Website",
         "version": "1.0"
     },
     "paths": {
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registro de usuario",
+                "operationId": "authRegister",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Fran"
+                                    },
+                                    "apellidos": {
+                                        "type": "string",
+                                        "example": "Pérez",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "fran@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Aa123456!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Aa123456!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Cuenta creada (requiere verificación por email)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nombre": {
+                                                            "type": "string",
+                                                            "example": "Fran"
+                                                        },
+                                                        "apellidos": {
+                                                            "type": "string",
+                                                            "example": "Pérez",
+                                                            "nullable": true
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "fran@email.com"
+                                                        },
+                                                        "rol": {
+                                                            "type": "string",
+                                                            "example": "cliente"
+                                                        },
+                                                        "direccion": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "municipio": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "provincia": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "cp": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "28/02/2026",
+                                                            "nullable": true
+                                                        },
+                                                        "pedidos_count": {
+                                                            "type": "integer",
+                                                            "example": 0
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cuenta creada. Revisa tu correo para verificarla."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "fran@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Aa123456!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login correcto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Credenciales incorrectas."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Email no verificado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Debes verificar tu email antes de iniciar sesión."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "operationId": "authLogout",
+                "responses": {
+                    "200": {
+                        "description": "Sesión cerrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesión cerrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Usuario autenticado",
+                "operationId": "authMe",
+                "responses": {
+                    "200": {
+                        "description": "Usuario actual",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile": {
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Actualizar perfil",
+                "operationId": "authProfileUpdate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Fran"
+                                    },
+                                    "apellidos": {
+                                        "type": "string",
+                                        "example": "Pérez",
+                                        "nullable": true
+                                    },
+                                    "provincia": {
+                                        "type": "string",
+                                        "example": "Cantabria",
+                                        "nullable": true
+                                    },
+                                    "municipio": {
+                                        "type": "string",
+                                        "example": "Torrelavega",
+                                        "nullable": true
+                                    },
+                                    "direccion": {
+                                        "type": "string",
+                                        "example": "Calle X 12",
+                                        "nullable": true
+                                    },
+                                    "cp": {
+                                        "type": "string",
+                                        "example": "39300",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perfil actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/change-password": {
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Cambiar contraseña",
+                "operationId": "authChangePassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "OldPass123!"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewPass123!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewPass123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contraseña actualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contraseña actualizada correctamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error (validación o contraseña actual incorrecta)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "La contraseña actual no es correcta."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Solicitar reseteo de contraseña",
+                "operationId": "authForgotPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "fran@email.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK (mensaje genérico)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Si el email existe, te enviamos un enlace para restablecer la contraseña."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resetear contraseña",
+                "operationId": "authResetPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "xxxxxxxxxxxxxxxxxxxx"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "fran@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewPass123!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewPass123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contraseña restablecida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contraseña restablecida correctamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error (token inválido o validación)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/canciones": {
             "get": {
                 "tags": [
@@ -28,20 +787,35 @@
                                             "items": {
                                                 "properties": {
                                                     "id": {
-                                                        "type": "integer"
+                                                        "type": "integer",
+                                                        "example": 1
                                                     },
                                                     "lanzamientoId": {
-                                                        "type": "integer"
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "lanzamiento": {
+                                                        "type": "string",
+                                                        "example": "Nombre del lanzamiento",
+                                                        "nullable": true
                                                     },
                                                     "titulo": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "example": "Mi canción"
                                                     },
                                                     "duracion": {
                                                         "description": "Duración en segundos",
-                                                        "type": "integer"
+                                                        "type": "integer",
+                                                        "example": 225
+                                                    },
+                                                    "duracionFormateada": {
+                                                        "type": "string",
+                                                        "example": "03:45"
                                                     },
                                                     "trackNumber": {
-                                                        "type": "integer"
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -54,6 +828,160 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Canciones"
+                ],
+                "summary": "Crear una canción",
+                "operationId": "5d96d76e71f35ab29f20a760271c4757",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "titulo",
+                                    "duracion",
+                                    "lanzamiento_id"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "Mi canción"
+                                    },
+                                    "duracion": {
+                                        "type": "integer",
+                                        "example": 225
+                                    },
+                                    "track_number": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "lanzamiento_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Canción creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lanzamientoId": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "lanzamiento": {
+                                                    "type": "string",
+                                                    "example": "Nombre del lanzamiento",
+                                                    "nullable": true
+                                                },
+                                                "titulo": {
+                                                    "type": "string",
+                                                    "example": "Mi canción"
+                                                },
+                                                "duracion": {
+                                                    "type": "integer",
+                                                    "example": 225
+                                                },
+                                                "duracionFormateada": {
+                                                    "type": "string",
+                                                    "example": "03:45"
+                                                },
+                                                "trackNumber": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "titulo": [
+                                                    "El título de la canción es obligatorio."
+                                                ],
+                                                "lanzamiento_id": [
+                                                    "El lanzamiento asociado no existe."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/canciones/{id}": {
@@ -70,7 +998,8 @@
                         "description": "ID de la canción",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -81,20 +1010,41 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "lanzamientoId": {
-                                            "type": "integer"
-                                        },
-                                        "titulo": {
-                                            "type": "string"
-                                        },
-                                        "duracion": {
-                                            "type": "integer"
-                                        },
-                                        "trackNumber": {
-                                            "type": "integer"
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lanzamientoId": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "lanzamiento": {
+                                                    "type": "string",
+                                                    "example": "Nombre del lanzamiento",
+                                                    "nullable": true
+                                                },
+                                                "titulo": {
+                                                    "type": "string",
+                                                    "example": "Mi canción"
+                                                },
+                                                "duracion": {
+                                                    "description": "Duración en segundos",
+                                                    "type": "integer",
+                                                    "example": 225
+                                                },
+                                                "duracionFormateada": {
+                                                    "type": "string",
+                                                    "example": "03:45"
+                                                },
+                                                "trackNumber": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -103,9 +1053,294 @@
                         }
                     },
                     "404": {
-                        "description": "Canción no encontrada"
+                        "description": "Canción no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Cancion] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Canciones"
+                ],
+                "summary": "Actualizar una canción",
+                "operationId": "54afcd1bef548042294622794008c9dc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la canción",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "titulo",
+                                    "duracion",
+                                    "lanzamiento_id"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "Mi canción editada"
+                                    },
+                                    "duracion": {
+                                        "type": "integer",
+                                        "example": 240
+                                    },
+                                    "track_number": {
+                                        "type": "integer",
+                                        "example": 2,
+                                        "nullable": true
+                                    },
+                                    "lanzamiento_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Canción actualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lanzamientoId": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "lanzamiento": {
+                                                    "type": "string",
+                                                    "example": "Nombre del lanzamiento",
+                                                    "nullable": true
+                                                },
+                                                "titulo": {
+                                                    "type": "string",
+                                                    "example": "Mi canción editada"
+                                                },
+                                                "duracion": {
+                                                    "type": "integer",
+                                                    "example": 240
+                                                },
+                                                "duracionFormateada": {
+                                                    "type": "string",
+                                                    "example": "04:00"
+                                                },
+                                                "trackNumber": {
+                                                    "type": "integer",
+                                                    "example": 2,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Canción no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Cancion] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "titulo": [
+                                                    "El título de la canción es obligatorio."
+                                                ],
+                                                "duracion": [
+                                                    "La duración debe ser mayor que 0."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Canciones"
+                ],
+                "summary": "Eliminar una canción",
+                "operationId": "0da3d1f5616f9cc4453626f95324d9a3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la canción",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Canción eliminada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Canción no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Cancion] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/conciertos": {
@@ -114,7 +1349,7 @@
                     "Conciertos"
                 ],
                 "summary": "Obtener todos los conciertos",
-                "operationId": "84d62df96cbe7f163c4661bbe2dcbd33",
+                "operationId": "conciertosIndex",
                 "responses": {
                     "200": {
                         "description": "Lista de conciertos",
@@ -127,31 +1362,55 @@
                                             "items": {
                                                 "properties": {
                                                     "id": {
-                                                        "type": "integer"
+                                                        "type": "integer",
+                                                        "example": 1
                                                     },
                                                     "fecha": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2026-02-28"
+                                                    },
+                                                    "fecha_formateada": {
+                                                        "type": "string",
+                                                        "example": "28 de febrero, 2026",
+                                                        "nullable": true
                                                     },
                                                     "provincia": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "example": "Cantabria",
+                                                        "nullable": true
                                                     },
                                                     "municipio": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "example": "Torrelavega",
+                                                        "nullable": true
                                                     },
                                                     "lugar": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "example": "Teatro Principal"
                                                     },
                                                     "descripcion": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "example": "Concierto presentación",
+                                                        "nullable": true
                                                     },
                                                     "precioEntrada": {
-                                                        "type": "number"
+                                                        "type": "number",
+                                                        "example": 12.5,
+                                                        "nullable": true
                                                     },
                                                     "entradaAnticipada": {
-                                                        "type": "boolean"
+                                                        "type": "boolean",
+                                                        "example": true
                                                     },
                                                     "enlaceEntradaAnticipada": {
                                                         "type": "string",
+                                                        "example": "https://...",
+                                                        "nullable": true
+                                                    },
+                                                    "imagen": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/conciertos/cover.webp",
                                                         "nullable": true
                                                     }
                                                 },
@@ -165,6 +1424,134 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Conciertos"
+                ],
+                "summary": "Crear un concierto",
+                "operationId": "conciertosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "fecha",
+                                    "lugar",
+                                    "entrada_anticipada"
+                                ],
+                                "properties": {
+                                    "fecha": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-28"
+                                    },
+                                    "provincia": {
+                                        "type": "string",
+                                        "example": "Cantabria",
+                                        "nullable": true
+                                    },
+                                    "municipio": {
+                                        "type": "string",
+                                        "example": "Torrelavega",
+                                        "nullable": true
+                                    },
+                                    "lugar": {
+                                        "type": "string",
+                                        "example": "Teatro Principal"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Concierto presentación",
+                                        "nullable": true
+                                    },
+                                    "precio_entrada": {
+                                        "type": "number",
+                                        "example": 12.5,
+                                        "nullable": true
+                                    },
+                                    "entrada_anticipada": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "enlace_entrada_anticipada": {
+                                        "type": "string",
+                                        "example": "https://...",
+                                        "nullable": true
+                                    },
+                                    "imagen": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Concierto creado"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/conciertos/{id}": {
@@ -173,7 +1560,7 @@
                     "Conciertos"
                 ],
                 "summary": "Obtener un concierto por ID",
-                "operationId": "92f05c7517f0817785abd2f4afc4f8bc",
+                "operationId": "conciertosShow",
                 "parameters": [
                     {
                         "name": "id",
@@ -181,44 +1568,74 @@
                         "description": "ID del concierto",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Información del concierto",
+                        "description": "Concierto encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "fecha": {
-                                            "type": "string"
-                                        },
-                                        "provincia": {
-                                            "type": "string"
-                                        },
-                                        "municipio": {
-                                            "type": "string"
-                                        },
-                                        "lugar": {
-                                            "type": "string"
-                                        },
-                                        "descripcion": {
-                                            "type": "string"
-                                        },
-                                        "precioEntrada": {
-                                            "type": "number"
-                                        },
-                                        "entradaAnticipada": {
-                                            "type": "boolean"
-                                        },
-                                        "enlaceEntradaAnticipada": {
-                                            "type": "string",
-                                            "nullable": true
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "fecha": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2026-02-28"
+                                                },
+                                                "fecha_formateada": {
+                                                    "type": "string",
+                                                    "example": "28 de febrero, 2026",
+                                                    "nullable": true
+                                                },
+                                                "provincia": {
+                                                    "type": "string",
+                                                    "example": "Cantabria",
+                                                    "nullable": true
+                                                },
+                                                "municipio": {
+                                                    "type": "string",
+                                                    "example": "Torrelavega",
+                                                    "nullable": true
+                                                },
+                                                "lugar": {
+                                                    "type": "string",
+                                                    "example": "Teatro Principal"
+                                                },
+                                                "descripcion": {
+                                                    "type": "string",
+                                                    "example": "Concierto presentación",
+                                                    "nullable": true
+                                                },
+                                                "precioEntrada": {
+                                                    "type": "number",
+                                                    "example": 12.5,
+                                                    "nullable": true
+                                                },
+                                                "entradaAnticipada": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "enlaceEntradaAnticipada": {
+                                                    "type": "string",
+                                                    "example": "https://...",
+                                                    "nullable": true
+                                                },
+                                                "imagen": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/conciertos/cover.webp",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -227,9 +1644,267 @@
                         }
                     },
                     "404": {
-                        "description": "Concierto no encontrado"
+                        "description": "Concierto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Concierto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Conciertos"
+                ],
+                "summary": "Actualizar un concierto",
+                "operationId": "conciertosUpdate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del concierto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "fecha",
+                                    "lugar",
+                                    "entrada_anticipada"
+                                ],
+                                "properties": {
+                                    "fecha": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-28"
+                                    },
+                                    "provincia": {
+                                        "type": "string",
+                                        "example": "Cantabria",
+                                        "nullable": true
+                                    },
+                                    "municipio": {
+                                        "type": "string",
+                                        "example": "Torrelavega",
+                                        "nullable": true
+                                    },
+                                    "lugar": {
+                                        "type": "string",
+                                        "example": "Teatro Principal"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "precio_entrada": {
+                                        "type": "number",
+                                        "example": 12.5,
+                                        "nullable": true
+                                    },
+                                    "entrada_anticipada": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "enlace_entrada_anticipada": {
+                                        "type": "string",
+                                        "example": "https://...",
+                                        "nullable": true
+                                    },
+                                    "imagen": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Concierto actualizado"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Concierto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Concierto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Conciertos"
+                ],
+                "summary": "Eliminar un concierto",
+                "operationId": "conciertosDestroy",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del concierto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Concierto eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Concierto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Concierto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/lanzamientos": {
@@ -238,7 +1913,7 @@
                     "Lanzamientos"
                 ],
                 "summary": "Obtener todos los lanzamientos",
-                "operationId": "a3b0344d06ca9da97b794a601b105b12",
+                "operationId": "lanzamientosIndex",
                 "responses": {
                     "200": {
                         "description": "Lista de lanzamientos",
@@ -251,16 +1926,47 @@
                                             "items": {
                                                 "properties": {
                                                     "id": {
-                                                        "type": "integer"
+                                                        "type": "integer",
+                                                        "example": 1
                                                     },
                                                     "titulo": {
-                                                        "type": "string"
+                                                        "type": "string",
+                                                        "example": "Mi EP"
                                                     },
-                                                    "fechaLanzamiento": {
-                                                        "type": "string"
+                                                    "tipo": {
+                                                        "type": "string",
+                                                        "example": "EP"
                                                     },
-                                                    "descripcion": {
-                                                        "type": "string"
+                                                    "fecha_lanzamiento": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2026-02-28",
+                                                        "nullable": true
+                                                    },
+                                                    "imagen": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/lanzamientos/cover.webp",
+                                                        "nullable": true
+                                                    },
+                                                    "compra_url": {
+                                                        "type": "string",
+                                                        "example": "https://...",
+                                                        "nullable": true
+                                                    },
+                                                    "audio_url": {
+                                                        "type": "string",
+                                                        "example": "https://...",
+                                                        "nullable": true
+                                                    },
+                                                    "video_url": {
+                                                        "type": "string",
+                                                        "example": "https://...",
+                                                        "nullable": true
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "mi-ep",
+                                                        "nullable": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -273,6 +1979,124 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Lanzamientos"
+                ],
+                "summary": "Crear un lanzamiento",
+                "operationId": "lanzamientosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "titulo",
+                                    "tipo"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "Mi EP"
+                                    },
+                                    "tipo": {
+                                        "type": "string",
+                                        "example": "EP"
+                                    },
+                                    "fecha_lanzamiento": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-28",
+                                        "nullable": true
+                                    },
+                                    "compra_url": {
+                                        "type": "string",
+                                        "example": "https://...",
+                                        "nullable": true
+                                    },
+                                    "audio_url": {
+                                        "type": "string",
+                                        "example": "https://...",
+                                        "nullable": true
+                                    },
+                                    "video_url": {
+                                        "type": "string",
+                                        "example": "https://...",
+                                        "nullable": true
+                                    },
+                                    "imagen": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Lanzamiento creado"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/lanzamientos/{id}": {
@@ -281,7 +2105,7 @@
                     "Lanzamientos"
                 ],
                 "summary": "Obtener un lanzamiento por ID",
-                "operationId": "b1ceb33c1c3904ea7eeabc1aee91c3c9",
+                "operationId": "lanzamientosShow",
                 "parameters": [
                     {
                         "name": "id",
@@ -289,66 +2113,65 @@
                         "description": "ID del lanzamiento",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Información del lanzamiento con sus canciones e imagen",
+                        "description": "Lanzamiento encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "titulo": {
-                                            "type": "string"
-                                        },
-                                        "fechaLanzamiento": {
-                                            "type": "string"
-                                        },
-                                        "descripcion": {
-                                            "type": "string"
-                                        },
-                                        "canciones": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "titulo": {
-                                                        "type": "string"
-                                                    },
-                                                    "duracion": {
-                                                        "type": "integer"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "imagen": {
+                                        "data": {
                                             "properties": {
                                                 "id": {
-                                                    "type": "integer"
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
-                                                "url": {
-                                                    "type": "string"
+                                                "titulo": {
+                                                    "type": "string",
+                                                    "example": "Mi EP"
                                                 },
-                                                "alt": {
-                                                    "type": "string"
+                                                "tipo": {
+                                                    "type": "string",
+                                                    "example": "EP"
                                                 },
-                                                "mime": {
-                                                    "type": "string"
+                                                "fecha_lanzamiento": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2026-02-28",
+                                                    "nullable": true
                                                 },
-                                                "esPrincipal": {
-                                                    "type": "boolean"
+                                                "imagen": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/storage/lanzamientos/cover.webp",
+                                                    "nullable": true
+                                                },
+                                                "compra_url": {
+                                                    "type": "string",
+                                                    "example": "https://...",
+                                                    "nullable": true
+                                                },
+                                                "audio_url": {
+                                                    "type": "string",
+                                                    "example": "https://...",
+                                                    "nullable": true
+                                                },
+                                                "video_url": {
+                                                    "type": "string",
+                                                    "example": "https://...",
+                                                    "nullable": true
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "mi-ep",
+                                                    "nullable": true
                                                 }
                                             },
-                                            "type": "object",
-                                            "nullable": true
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -357,9 +2180,825 @@
                         }
                     },
                     "404": {
-                        "description": "Álbum no encontrado"
+                        "description": "Lanzamiento no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Lanzamiento] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Lanzamientos"
+                ],
+                "summary": "Actualizar un lanzamiento",
+                "operationId": "lanzamientosUpdate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del lanzamiento",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "titulo",
+                                    "tipo"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string",
+                                        "example": "Mi EP (editado)"
+                                    },
+                                    "tipo": {
+                                        "type": "string",
+                                        "example": "EP"
+                                    },
+                                    "fecha_lanzamiento": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-28",
+                                        "nullable": true
+                                    },
+                                    "compra_url": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "audio_url": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "video_url": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "imagen": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lanzamiento actualizado"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Lanzamiento no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Lanzamiento] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Lanzamientos"
+                ],
+                "summary": "Eliminar un lanzamiento",
+                "operationId": "lanzamientosDestroy",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del lanzamiento",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lanzamiento eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Lanzamiento no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Lanzamiento] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos": {
+            "get": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Lista pedidos (cliente: los suyos / admin: todos)",
+                "operationId": "pedidosIndex",
+                "responses": {
+                    "200": {
+                        "description": "Listado de pedidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "codigo_pedido": {
+                                                        "type": "string",
+                                                        "example": "SOA-2026-0001"
+                                                    },
+                                                    "estado": {
+                                                        "type": "string",
+                                                        "example": "pendiente"
+                                                    },
+                                                    "precio_total": {
+                                                        "type": "number",
+                                                        "example": 44.97
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2026-02-28T20:57:00.000000Z"
+                                                    },
+                                                    "nombre_envio": {
+                                                        "type": "string",
+                                                        "example": "Fran Pérez"
+                                                    },
+                                                    "direccion": {
+                                                        "type": "string",
+                                                        "example": "Calle X 12"
+                                                    },
+                                                    "municipio": {
+                                                        "type": "string",
+                                                        "example": "Torrelavega"
+                                                    },
+                                                    "provincia": {
+                                                        "type": "string",
+                                                        "example": "Cantabria"
+                                                    },
+                                                    "cp": {
+                                                        "type": "string",
+                                                        "example": "39300"
+                                                    },
+                                                    "gastos_envio": {
+                                                        "type": "number",
+                                                        "example": 4.99
+                                                    },
+                                                    "metodo_pago": {
+                                                        "type": "string",
+                                                        "example": "tarjeta"
+                                                    },
+                                                    "productos": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 10
+                                                                },
+                                                                "nombre": {
+                                                                    "type": "string",
+                                                                    "example": "Camiseta SoA"
+                                                                },
+                                                                "precio": {
+                                                                    "type": "number",
+                                                                    "example": 19.99
+                                                                },
+                                                                "nombre_producto": {
+                                                                    "type": "string",
+                                                                    "example": "Camiseta SoA",
+                                                                    "nullable": true
+                                                                },
+                                                                "talla": {
+                                                                    "type": "string",
+                                                                    "example": "L",
+                                                                    "nullable": true
+                                                                },
+                                                                "cantidad": {
+                                                                    "type": "integer",
+                                                                    "example": 2
+                                                                },
+                                                                "precio_unitario_snapshot": {
+                                                                    "type": "number",
+                                                                    "example": 19.99
+                                                                },
+                                                                "subtotal": {
+                                                                    "type": "number",
+                                                                    "example": 39.98
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Crear pedido (cliente autenticado)",
+                "operationId": "pedidosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre_envio",
+                                    "direccion",
+                                    "municipio",
+                                    "provincia",
+                                    "cp",
+                                    "metodo_pago",
+                                    "gastos_envio",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "nombre_envio": {
+                                        "type": "string",
+                                        "example": "Fran Pérez"
+                                    },
+                                    "telefono": {
+                                        "type": "string",
+                                        "example": "600111222",
+                                        "nullable": true
+                                    },
+                                    "direccion": {
+                                        "type": "string",
+                                        "example": "Calle X 12"
+                                    },
+                                    "municipio": {
+                                        "type": "string",
+                                        "example": "Torrelavega"
+                                    },
+                                    "provincia": {
+                                        "type": "string",
+                                        "example": "Cantabria"
+                                    },
+                                    "cp": {
+                                        "type": "string",
+                                        "example": "39300"
+                                    },
+                                    "metodo_pago": {
+                                        "type": "string",
+                                        "enum": [
+                                            "tarjeta",
+                                            "contra_reembolso"
+                                        ],
+                                        "example": "tarjeta"
+                                    },
+                                    "gastos_envio": {
+                                        "type": "number",
+                                        "example": 4.99
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "id",
+                                                "qty"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "qty": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "talla": {
+                                                    "type": "string",
+                                                    "example": "L",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pedido creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación / producto inexistente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}": {
+            "get": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Detalle de un pedido (cliente: solo suyo / admin: cualquiera)",
+                "operationId": "pedidosShow",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "ID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "codigo_pedido": {
+                                                    "type": "string",
+                                                    "example": "SOA-2026-0001"
+                                                },
+                                                "estado": {
+                                                    "type": "string",
+                                                    "example": "pendiente"
+                                                },
+                                                "precio_total": {
+                                                    "type": "number",
+                                                    "example": 44.97
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2026-02-28T20:57:00.000000Z"
+                                                },
+                                                "nombre_envio": {
+                                                    "type": "string",
+                                                    "example": "Fran Pérez"
+                                                },
+                                                "direccion": {
+                                                    "type": "string",
+                                                    "example": "Calle X 12"
+                                                },
+                                                "municipio": {
+                                                    "type": "string",
+                                                    "example": "Torrelavega"
+                                                },
+                                                "provincia": {
+                                                    "type": "string",
+                                                    "example": "Cantabria"
+                                                },
+                                                "cp": {
+                                                    "type": "string",
+                                                    "example": "39300"
+                                                },
+                                                "gastos_envio": {
+                                                    "type": "number",
+                                                    "example": 4.99
+                                                },
+                                                "metodo_pago": {
+                                                    "type": "string",
+                                                    "example": "tarjeta"
+                                                },
+                                                "productos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos (pedido de otro usuario)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No tienes permisos para ver este pedido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado (pedido inexistente)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Pedido] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Actualizar estado del pedido (admin)",
+                "operationId": "pedidosUpdate",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "ID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "estado"
+                                ],
+                                "properties": {
+                                    "estado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pendiente",
+                                            "enviado",
+                                            "entregado",
+                                            "cancelado"
+                                        ],
+                                        "example": "enviado"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No tienes permisos para actualizar pedidos."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado (pedido inexistente)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Pedido] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/productos": {
@@ -367,23 +3006,141 @@
                 "tags": [
                     "Productos"
                 ],
-                "summary": "Lista productos",
+                "summary": "Lista de productos",
+                "description": "Devuelve productos activos para usuarios normales y todos para admin. Permite filtro por tipo y ordenación.",
                 "operationId": "productosIndex",
+                "parameters": [
+                    {
+                        "name": "tipo",
+                        "in": "query",
+                        "description": "Filtrar por tipo_producto_id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordenación: newest, oldest, price_asc, price_desc",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "newest",
+                                "oldest",
+                                "price_asc",
+                                "price_desc"
+                            ],
+                            "example": "newest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Listado de productos",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object"
-                                    }
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Camiseta SoA"
+                                                    },
+                                                    "descripcion": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "tallas_disponibles": {
+                                                        "type": "string",
+                                                        "example": "S,M,L",
+                                                        "nullable": true
+                                                    },
+                                                    "precio": {
+                                                        "type": "number",
+                                                        "example": 19.99
+                                                    },
+                                                    "precio_formateado": {
+                                                        "type": "string",
+                                                        "example": "19,99 €"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "camiseta-soa"
+                                                    },
+                                                    "activo": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "imagen": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/storage/productos/camiseta.webp",
+                                                        "nullable": true
+                                                    },
+                                                    "tipo_producto_id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "tipo": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "nombre": {
+                                                                "type": "string",
+                                                                "example": "Camisetas"
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Crear producto",
+                "operationId": "productosStore",
+                "responses": {
+                    "201": {
+                        "description": "Producto creado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "Sin permisos"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/productos/{id}": {
@@ -391,14 +3148,12 @@
                 "tags": [
                     "Productos"
                 ],
-                "summary": "Detalle de un producto",
-                "description": "Devuelve el detalle de un producto por ID (incluye tipo e imagen principal).",
+                "summary": "Detalle de producto",
                 "operationId": "productosShow",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID del producto",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -412,19 +3167,868 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
                                     "type": "object"
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "Producto no encontrado"
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\Producto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Actualizar producto",
+                "operationId": "productosUpdate",
+                "responses": {
+                    "200": {
+                        "description": "Producto actualizado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "Sin permisos"
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Eliminar producto",
+                "operationId": "productosDestroy",
+                "responses": {
+                    "200": {
+                        "description": "Producto eliminado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "Sin permisos"
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tipos-productos": {
+            "get": {
+                "tags": [
+                    "TiposProductos"
+                ],
+                "summary": "Lista de tipos de producto (admin)",
+                "operationId": "tiposProductosIndex",
+                "responses": {
+                    "200": {
+                        "description": "Listado de tipos de producto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Camisetas"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "TiposProductos"
+                ],
+                "summary": "Crear tipo de producto (admin)",
+                "operationId": "tiposProductosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Camisetas"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tipo de producto creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nombre": {
+                                                    "type": "string",
+                                                    "example": "Camisetas"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tipos-productos/{tipoProducto}": {
+            "get": {
+                "tags": [
+                    "TiposProductos"
+                ],
+                "summary": "Detalle de un tipo de producto (admin)",
+                "operationId": "tiposProductosShow",
+                "parameters": [
+                    {
+                        "name": "tipoProducto",
+                        "in": "path",
+                        "description": "ID del tipo de producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tipo de producto encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nombre": {
+                                                    "type": "string",
+                                                    "example": "Camisetas"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\TipoProducto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "TiposProductos"
+                ],
+                "summary": "Actualizar tipo de producto (admin)",
+                "operationId": "tiposProductosUpdate",
+                "parameters": [
+                    {
+                        "name": "tipoProducto",
+                        "in": "path",
+                        "description": "ID del tipo de producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Sudaderas"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tipo de producto actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nombre": {
+                                                    "type": "string",
+                                                    "example": "Sudaderas"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\TipoProducto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "TiposProductos"
+                ],
+                "summary": "Eliminar tipo de producto (admin)",
+                "operationId": "tiposProductosDestroy",
+                "parameters": [
+                    {
+                        "name": "tipoProducto",
+                        "in": "path",
+                        "description": "ID del tipo de producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Eliminado (sin contenido)"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\TipoProducto] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Lista de usuarios (admin)",
+                "operationId": "usuariosIndex",
+                "responses": {
+                    "200": {
+                        "description": "Listado de usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Fran"
+                                                    },
+                                                    "apellidos": {
+                                                        "type": "string",
+                                                        "example": "Pérez",
+                                                        "nullable": true
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "fran@email.com"
+                                                    },
+                                                    "rol": {
+                                                        "type": "string",
+                                                        "example": "admin"
+                                                    },
+                                                    "direccion": {
+                                                        "type": "string",
+                                                        "example": "Calle X 12",
+                                                        "nullable": true
+                                                    },
+                                                    "municipio": {
+                                                        "type": "string",
+                                                        "example": "Torrelavega",
+                                                        "nullable": true
+                                                    },
+                                                    "provincia": {
+                                                        "type": "string",
+                                                        "example": "Cantabria",
+                                                        "nullable": true
+                                                    },
+                                                    "cp": {
+                                                        "type": "string",
+                                                        "example": "39300",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "28/02/2026",
+                                                        "nullable": true
+                                                    },
+                                                    "pedidos_count": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/usuarios/{user}": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Detalle de usuario + pedidos (admin)",
+                "operationId": "usuariosShow",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID del usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuario y sus pedidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "nombre": {
+                                                            "type": "string",
+                                                            "example": "Fran"
+                                                        },
+                                                        "apellidos": {
+                                                            "type": "string",
+                                                            "example": "Pérez",
+                                                            "nullable": true
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "fran@email.com"
+                                                        },
+                                                        "rol": {
+                                                            "type": "string",
+                                                            "example": "cliente"
+                                                        },
+                                                        "direccion": {
+                                                            "type": "string",
+                                                            "example": "Calle X 12",
+                                                            "nullable": true
+                                                        },
+                                                        "municipio": {
+                                                            "type": "string",
+                                                            "example": "Torrelavega",
+                                                            "nullable": true
+                                                        },
+                                                        "provincia": {
+                                                            "type": "string",
+                                                            "example": "Cantabria",
+                                                            "nullable": true
+                                                        },
+                                                        "cp": {
+                                                            "type": "string",
+                                                            "example": "39300",
+                                                            "nullable": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "28/02/2026",
+                                                            "nullable": true
+                                                        },
+                                                        "pedidos_count": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "pedidos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\User] 999"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
     "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
         {
             "name": "Canciones",
             "description": "Canciones"
@@ -438,8 +4042,20 @@
             "description": "Lanzamientos"
         },
         {
+            "name": "Pedidos",
+            "description": "Pedidos"
+        },
+        {
             "name": "Productos",
             "description": "Productos"
+        },
+        {
+            "name": "TiposProductos",
+            "description": "TiposProductos"
+        },
+        {
+            "name": "Usuarios",
+            "description": "Usuarios"
         }
     ],
     "components": {

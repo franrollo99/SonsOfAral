@@ -18,7 +18,6 @@ function UsersManagement() {
   return (
     <AdminCrudPage
       title="Usuarios"
-      subtitle="Listado y detalles de usuarios registrados."
       entityName="usuario"
       listPath="/usuarios"
       requireAdmin

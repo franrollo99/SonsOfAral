@@ -2,17 +2,10 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $userId = $this->user()->id;
@@ -33,19 +26,14 @@ class UserUpdateRequest extends FormRequest
             'nombre.required' => 'El nombre es obligatorio.',
             'nombre.string' => 'El nombre debe introducirse como texto.',
             'nombre.max'      => 'El nombre no puede superar los 100 caracteres.',
-
             'apellidos.string' => 'Los apellidos deben ser un texto válido.',
             'apellidos.max'    => 'Los apellidos no pueden superar los 150 caracteres.',
-
             'provincia.string' => 'La provincia debe ser un texto válido.',
             'provincia.max'    => 'La provincia no puede superar los 100 caracteres.',
-
             'municipio.string' => 'El municipio debe ser un texto válido.',
             'municipio.max'    => 'El municipio no puede superar los 100 caracteres.',
-
             'direccion.string' => 'La dirección debe ser un texto válido.',
             'direccion.max'    => 'La dirección no puede superar los 255 caracteres.',
-
             'cp.string' => 'El código postal debe ser un texto válido.',
             'cp.max'    => 'El código postal no puede superar los 10 caracteres.',
         ];

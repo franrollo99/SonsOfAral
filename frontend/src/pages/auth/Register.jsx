@@ -13,12 +13,12 @@ function Register() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
+
+  const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setOk("");
 
     if (password !== password2) {
       setError("La contraseña no coincide.");
@@ -53,8 +53,7 @@ function Register() {
         throw new Error(data?.message || "No se pudo registrar.");
       }
 
-      setOk("Cuenta creada. Revisa tu correo para verificarla antes de iniciar sesión.");
-
+      navigate("/register-success", { replace: true });
     } catch (err) {
       setError(err.message || "Error al registrarse");
     } finally {
@@ -78,7 +77,9 @@ function Register() {
               autoComplete="given-name"
               required
             />
-            <label className="flLabel" htmlFor="firstName">Nombre</label>
+            <label className="flLabel" htmlFor="firstName">
+              Nombre
+            </label>
           </div>
 
           <div className={`flField ${lastName ? "hasValue" : ""}`}>
@@ -91,7 +92,9 @@ function Register() {
               autoComplete="family-name"
               required
             />
-            <label className="flLabel" htmlFor="lastName">Apellidos</label>
+            <label className="flLabel" htmlFor="lastName">
+              Apellidos
+            </label>
           </div>
 
           <div className={`flField ${email ? "hasValue" : ""}`}>
@@ -104,7 +107,9 @@ function Register() {
               autoComplete="email"
               required
             />
-            <label className="flLabel" htmlFor="email">Email</label>
+            <label className="flLabel" htmlFor="email">
+              Email
+            </label>
           </div>
 
           <div className={`flField ${password ? "hasValue" : ""}`}>
@@ -117,7 +122,9 @@ function Register() {
               autoComplete="new-password"
               required
             />
-            <label className="flLabel" htmlFor="password">Contraseña</label>
+            <label className="flLabel" htmlFor="password">
+              Contraseña
+            </label>
           </div>
 
           <div className={`flField ${password2 ? "hasValue" : ""}`}>
@@ -130,10 +137,11 @@ function Register() {
               autoComplete="new-password"
               required
             />
-            <label className="flLabel" htmlFor="password2">Confirmar contraseña</label>
+            <label className="flLabel" htmlFor="password2">
+              Confirmar contraseña
+            </label>
           </div>
 
-          {ok && <p className="userSessionOk">{ok}</p>}
           {error && <p className="userSessionError">{error}</p>}
 
           <button className="userSessionBtn" type="submit" disabled={loading}>

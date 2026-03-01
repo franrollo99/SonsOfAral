@@ -9,7 +9,7 @@ import Concerts from "../pages/concerts/Concerts";
 import Music from "../pages/music/Music";
 import Shop from "../pages/shop/Shop";
 import ProductDetails from "../pages/shop/ProductDetails";
-import Cart from "../pages/clientArea/Cart";
+import Cart from "../pages/cart/Cart";
 import Checkout from "../pages/checkout/Checkout";
 import CheckoutSuccess from "../pages/checkout/CheckoutSuccess";
 import AdminArea from "../pages/admin/AdminArea";
@@ -20,6 +20,8 @@ import ProductsManagement from "../pages/admin/adminManagement/ProductsManagemen
 import ProductTypesManagement from "../pages/admin/adminManagement/ProductTypesManagement";
 import UsersManagement from "../pages/admin/adminManagement/UsersManagement";
 import OrdersManagement from "../pages/admin/adminManagement/OrdersManagement";
+import ProtectedRoute from "../components/ProtectedRoute";
+import RegisterSuccess from "../pages/auth/RegisterSuccess";
 
 export function AppRouter() {
   return (
@@ -29,12 +31,15 @@ export function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register-success" element={<RegisterSuccess />} />
         <Route path="/conciertos" element={<Concerts />} />
         <Route path="/musica" element={<Music />} />
         <Route path="/tienda" element={<Shop />} />
         <Route path="/tienda/:slug" element={<ProductDetails />} />
-        <Route path="/carrito" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/carrito" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+        </Route>
         <Route path="/checkout/success/:pedidoId" element={<CheckoutSuccess />} />
         <Route path="/area-cliente" element={<ClientArea />} />
         <Route path="/area-admin" element={<AdminArea />} />

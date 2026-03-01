@@ -21,7 +21,6 @@ function Conciertos() {
         }
 
         const data = await respuesta.json();
-        const lista = data.data;
 
         const raw = Array.isArray(data?.data) ? data.data : [];
 
@@ -47,8 +46,6 @@ function Conciertos() {
           });
 
         setConciertos(upcoming);
-
-
       } catch (err) {
         console.error(err);
         setError("No se pudieron cargar los conciertos.");
@@ -61,34 +58,58 @@ function Conciertos() {
   }, []);
 
   return (
-    <section className="container">
+    <section>
       {cargando && <p>Cargando conciertos...</p>}
       {error && !cargando && <p className="errorMessage">{error}</p>}
-      {!cargando && !error && conciertos.length === 0 && (<p>No hay conciertos disponibles por ahora.</p>)}
+      {!cargando && !error && conciertos.length === 0 && (
+        <p>No hay conciertos disponibles por ahora.</p>
+      )}
 
       {!cargando && !error && conciertos.length > 0 && (
         <div className="d-flex flex-column gap-4 py-3">
           {conciertos.map((concierto) => (
             <article key={concierto.id} className="concierto card gap-3">
-              <div className="d-flex align-items-baseline justify-content-between gap-5">
-                <div>
-                  <h1>{concierto.lugar} <span>{concierto.municipio}, {concierto.provincia}</span></h1>
+              <div className="row g-3 align-items-baseline">
+                <div className="col-12 col-md-8">
+                  <h1 className="m-0">
+                    {concierto.lugar}{" "}
+                    <span>
+                      {concierto.municipio}, {concierto.provincia}
+                    </span>
+                  </h1>
                 </div>
-                <h2>{concierto.fecha_formateada}</h2>
+                <div className="col-12 col-md-4 text-md-end">
+                  <h2 className="m-0">{concierto.fecha_formateada}</h2>
+                </div>
               </div>
-              <div className="d-flex justify-content-between align-items-end">
 
-                {concierto.descripcion && (
-                  <p className="descripcion w-50">{concierto.descripcion}</p>
-                )}
-                <div className="entrada d-flex align-items-center gap-3">
-                  {concierto.precioEntrada && (
-                    <h4 className="m-0">Entrada{concierto.precioEntrada == 0 ? ' gratis' : `: ${concierto.precioEntrada} €`}</h4>
+              <div className="row g-3 align-items-end">
+                <div className="col-12 col-md-7">
+                  {concierto.descripcion && (
+                    <p className="descripcion m-0">{concierto.descripcion}</p>
                   )}
-                  {concierto.entradaAnticipada &&
-                    concierto.enlaceEntradaAnticipada && (
-                      <a href={concierto.enlaceEntradaAnticipada} className="btn btn-secondary">Entrada anticipada</a>
+                </div>
+
+                <div className="col-12 col-md-5">
+                  <div className="entrada d-flex flex-wrap align-items-center justify-content-md-end gap-3">
+                    {concierto.precioEntrada && (
+                      <h4 className="m-0">
+                        Entrada
+                        {concierto.precioEntrada == 0
+                          ? " gratis"
+                          : `: ${concierto.precioEntrada} €`}
+                      </h4>
                     )}
+                    {concierto.entradaAnticipada &&
+                      concierto.enlaceEntradaAnticipada && (
+                        <a
+                          href={concierto.enlaceEntradaAnticipada}
+                          className="btn btn-secondary entradaBtn"
+                        >
+                          Entrada anticipada
+                        </a>
+                      )}
+                  </div>
                 </div>
               </div>
             </article>

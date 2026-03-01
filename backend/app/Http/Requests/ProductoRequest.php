@@ -26,23 +26,17 @@ class ProductoRequest extends FormRequest
             'nombre.required' => 'El nombre del producto es obligatorio.',
             'nombre.string' => 'El nombre del producto debe ser un texto.',
             'nombre.max' => 'El nombre del producto no puede superar los 255 caracteres.',
-
             'descripcion.string' => 'La descripción debe ser un texto.',
-
             'precio.required' => 'El precio del producto es obligatorio.',
             'precio.numeric' => 'El precio del producto debe ser un número.',
             'precio.min' => 'El precio del producto no puede ser negativo.',
-
             'slug.string' => 'El slug debe ser un texto.',
             'slug.max' => 'El slug no puede superar los 255 caracteres.',
-
             'activo.required' => 'Debes indicar si el producto está activo.',
             'activo.boolean' => 'El campo activo debe ser verdadero o falso.',
-
             'tipo_producto_id.required' => 'Debes seleccionar un tipo de producto.',
             'tipo_producto_id.integer' => 'El tipo de producto no es válido.',
             'tipo_producto_id.exists' => 'El tipo de producto seleccionado no existe.',
-
             'imagen.image' => 'El archivo debe ser una imagen.',
             'imagen.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
             'imagen.max'   => 'La imagen no puede superar los 2 MB.',

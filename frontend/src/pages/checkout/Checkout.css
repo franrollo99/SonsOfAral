@@ -1,10 +1,3 @@
-.checkoutPage {
-  padding: 24px;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 70vh;
-}
-
 .checkoutHeader h1 {
   margin: 0;
 }
@@ -22,7 +15,7 @@
 
 .checkoutCard {
   background: var(--bg-alt);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 18px;
 }
@@ -63,12 +56,12 @@
   border-radius: 10px;
   background: #0e0e0e;
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   outline: none;
 }
 
 .checkoutField input:focus {
-  border-color: rgba(255,255,255,0.25);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .checkoutFieldGrow {
@@ -91,7 +84,7 @@
 
 .checkoutSummaryList {
   display: grid;
-  gap: 10px;
+  gap: 30px;
   margin-top: 10px;
 }
 
@@ -103,13 +96,14 @@
   font-size: 0.8rem;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text);
+  white-space: nowrap;
 }
 
 .checkoutTotals {
   margin-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 12px;
   display: grid;
   gap: 8px;
@@ -141,16 +135,46 @@
   margin-top: 10px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   background: transparent;
   color: var(--text);
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
   .checkoutGrid {
     grid-template-columns: 1fr;
   }
+
   .checkoutFieldCP {
     width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .checkoutCard {
+    padding: 16px;
+  }
+
+  .checkoutFieldCP {
+    width: 100%;
+  }
+}
+
+@media (max-width: 425px) {
+  .checkoutItemName {
+    padding-bottom: 10px;
+  }
+
+  .checkoutItemName {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .checkoutItemName .checkoutBadge {
+    flex: 0 0 auto;
+    width: auto;
+    display: inline-flex;
+    margin-top: 6px;
   }
 }

@@ -1,10 +1,3 @@
-.cartPage {
-    min-height: 70vh;
-    padding: 40px 20px;
-    background: var(--bg);
-    color: var(--text);
-}
-
 .cartHeader {
     max-width: 1100px;
     margin: 0 auto 20px;
@@ -207,4 +200,72 @@
     .cartSummary {
         position: static;
     }
+}
+
+@media (max-width: 480px) {
+  .cartGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cartSummary {
+    position: static;
+    top: auto;
+  }
+
+  .cartItem {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .cartItemImg {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px;
+  }
+
+  .cartItemImg img {
+    width: 100%;
+    height: 210px;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+
+  .cartItemTop {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .cartBtnDanger {
+    justify-self: end;
+    align-self: start;
+    padding: 8px 10px;
+  }
+
+  .cartItemBottom {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .cartQtyControls {
+    justify-content: flex-start;
+  }
+
+  .cartSubtotal {
+    text-align: right;
+  }
+
+  .cartSubtotal strong,
+  .cartSubtotalValue {
+    white-space: nowrap;
+  }
 }

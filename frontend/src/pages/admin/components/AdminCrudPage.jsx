@@ -9,27 +9,23 @@ const normalize = (v) => String(v ?? "").toLowerCase();
 
 function AdminCrudPage({
   title = "Entidad",
-  subtitle = "Gestión por modal (crear/editar).",
   entityName = "registro",
   hideSave = false,
-  listPath,   // "/api/conciertos"
-  createPath, // "/api/conciertos"  (puede ser null para desactivar crear)
-  updatePath, // (id) => `/api/conciertos/${id}`
-  deletePath, // (id) => `/api/conciertos/${id}` (puede ser null para desactivar borrar)
-
-  // table
-  columns = [], // [{ key, header, render?, className?, title? }]
+  listPath,
+  createPath,
+  updatePath,
+  deletePath,
+  columns = [],
   columnsGridCss,
-
   searchKeys = [],
   editLabel = "Editar",
   emptyForm = {},
   formFields = [],
   buildPayload = (form) => form,
-
-  // auth
   requireAdmin = true,
   backTo = "/area-admin",
+  modalAfterFields,
+  mapRowToForm,
 }) {
   const navigate = useNavigate();
   const token = useMemo(() => localStorage.getItem("token"), []);
@@ -90,9 +86,11 @@ function AdminCrudPage({
             return;
           }
 
-          const rol = meData?.user?.rol || meData?.user?.role;
+          const user = meData?.data?.user ?? meData?.user ?? null;
+          const rol = user?.rol || user?.role;
+
           if (rol !== "admin") {
-            navigate("/area-usuario", { replace: true });
+            navigate("/area-cliente", { replace: true });
             return;
           }
         }
@@ -182,14 +180,18 @@ function AdminCrudPage({
     if (!canCreate) return;
     setEditorError("");
     setEditorOk("");
-    setForm({ ...emptyForm });
+    const base = { ...emptyForm };
+    const finalForm = typeof mapRowToForm === "function" ? mapRowToForm(base, null) : base;
+    setForm(finalForm);
     setEditorOpen(true);
   };
 
   const openEdit = (row) => {
     setEditorError("");
     setEditorOk("");
-    setForm({ ...emptyForm, ...(row || {}) });
+    const base = { ...emptyForm, ...(row || {}) };
+    const finalForm = typeof mapRowToForm === "function" ? mapRowToForm(base, row) : base;
+    setForm(finalForm);
     setEditorOpen(true);
   };
 
@@ -212,9 +214,7 @@ function AdminCrudPage({
         throw new Error("Crear está deshabilitado para esta entidad.");
       }
 
-      const url = isEdit
-        ? `${API_URL}${updatePath(form.id)}`
-        : `${API_URL}${createPath}`;
+      const url = isEdit ? `${API_URL}${updatePath(form.id)}` : `${API_URL}${createPath}`;
 
       const payload = buildPayload(form);
       const isFD = payload instanceof FormData;
@@ -222,7 +222,6 @@ function AdminCrudPage({
       let method = isEdit ? "PUT" : "POST";
 
       if (isEdit && isFD) {
-        // Laravel/PHP no parsea bien multipart en PUT -> spoof
         payload.append("_method", "PUT");
         method = "POST";
       }
@@ -280,7 +279,9 @@ function AdminCrudPage({
         <div className="adminPageCard">
           <h1 className="adminPageTitle">{title}</h1>
           <p className="adminError">{error}</p>
-          <button className="adminBtn" onClick={() => navigate(backTo)}>Volver al panel</button>
+          <button className="adminBtn" onClick={() => navigate(backTo)}>
+            Volver al panel
+          </button>
         </div>
       </section>
     );
@@ -294,7 +295,6 @@ function AdminCrudPage({
         <div className="d-flex align-items-start justify-content-between gap-3">
           <div>
             <h1 className="adminPageTitle">{title}</h1>
-            <p className="adminMuted">{subtitle}</p>
           </div>
 
           <button className="adminLinkBtn" type="button" onClick={() => navigate(backTo)}>
@@ -350,7 +350,7 @@ function AdminCrudPage({
                   <div key={r.id} className={`adminTableRow ${colsClass}`}>
                     {columns.map((c) => {
                       const raw = r?.[c.key];
-                      const content = c.render ? c.render(raw, r) : (raw ?? "-");
+                      const content = c.render ? c.render(raw, r) : raw ?? "-";
                       const titleAttr = typeof c.title === "function" ? c.title(raw, r) : c.title;
                       return (
                         <div key={c.key} className={c.className || ""} title={titleAttr || ""}>
@@ -363,7 +363,6 @@ function AdminCrudPage({
                       <button className="adminActionBtn" type="button" onClick={() => openEdit(r)}>
                         {editLabel}
                       </button>
-
 
                       {canDelete ? (
                         <button
@@ -383,22 +382,30 @@ function AdminCrudPage({
         </div>
 
         <div className="adminPager">
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(1)} disabled={page === 1}>«</button>
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(page - 1)} disabled={page === 1}>‹</button>
+          <button className="adminPagerBtn" type="button" onClick={() => goTo(1)} disabled={page === 1}>
+            «
+          </button>
+          <button className="adminPagerBtn" type="button" onClick={() => goTo(page - 1)} disabled={page === 1}>
+            ‹
+          </button>
 
           <div className="adminPagerInfo">
             Página <b>{page}</b> de <b>{totalPages}</b>
           </div>
 
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(page + 1)} disabled={page === totalPages}>›</button>
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(totalPages)} disabled={page === totalPages}>»</button>
+          <button className="adminPagerBtn" type="button" onClick={() => goTo(page + 1)} disabled={page === totalPages}>
+            ›
+          </button>
+          <button className="adminPagerBtn" type="button" onClick={() => goTo(totalPages)} disabled={page === totalPages}>
+            »
+          </button>
         </div>
 
         {canCreate ? (
           <div className="adminCreateBand">
             <div className="adminCreateBandInner">
               <button className="adminCreateBtn" type="button" onClick={openCreate}>
-                + Crear {entityName}
+                Crear {entityName}
               </button>
             </div>
           </div>
@@ -409,7 +416,7 @@ function AdminCrudPage({
         <ConfirmModal
           open={confirmOpen}
           title="Confirmar borrado"
-          text={`¿Seguro que quieres borrar el ${entityName} #${toDelete?.id}?`}
+          text={`¿Seguro que quieres borrar el ${entityName}?`}
           loading={confirmLoading}
           onCancel={closeConfirm}
           onConfirm={doDelete}
@@ -418,7 +425,7 @@ function AdminCrudPage({
 
       <AdminEntityModal
         open={editorOpen}
-        title={form.id ? `Editar ${entityName} #${form.id}` : `Crear ${entityName}`}
+        title={form.id ? `Editar ${entityName}` : `Crear ${entityName}`}
         formFields={formFields}
         form={form}
         setForm={setForm}
@@ -429,9 +436,9 @@ function AdminCrudPage({
         onSave={onSave}
         saveText="Guardar"
         showSave={!hideSave}
+        afterFields={typeof modalAfterFields === "function" ? modalAfterFields({ form, setForm }) : null}
       />
 
-      {/* columnas de la tabla */}
       <style>{`
         .adminEntityCols{
           ${columnsGridCss}

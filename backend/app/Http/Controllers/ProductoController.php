@@ -6,9 +6,8 @@ use App\Models\Producto;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductoRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\ProductoRequest;
 use App\Http\Resources\ProductoResource;
 
 class ProductoController extends Controller
@@ -18,24 +17,60 @@ class ProductoController extends Controller
      *     path="/api/productos",
      *     operationId="productosIndex",
      *     tags={"Productos"},
-     *     summary="Lista productos",
+     *     summary="Lista de productos",
+     *     description="Devuelve productos activos para usuarios normales y todos para admin. Permite filtro por tipo y ordenación.",
+     *     @OA\Parameter(
+     *         name="tipo",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrar por tipo_producto_id",
+     *         @OA\Schema(type="integer", example=2)
+     *     ),
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="query",
+     *         required=false,
+     *         description="Ordenación: newest, oldest, price_asc, price_desc",
+     *         @OA\Schema(type="string", enum={"newest","oldest","price_asc","price_desc"}, example="newest")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Listado de productos",
      *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(type="object")
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
+     *                     @OA\Property(property="descripcion", type="string", nullable=true),
+     *                     @OA\Property(property="tallas_disponibles", type="string", nullable=true, example="S,M,L"),
+     *                     @OA\Property(property="precio", type="number", example=19.99),
+     *                     @OA\Property(property="precio_formateado", type="string", example="19,99 €"),
+     *                     @OA\Property(property="slug", type="string", example="camiseta-soa"),
+     *                     @OA\Property(property="activo", type="integer", example=1),
+     *                     @OA\Property(property="imagen", type="string", nullable=true, example="http://localhost/storage/productos/camiseta.webp"),
+     *                     @OA\Property(property="tipo_producto_id", type="integer", example=2),
+     *                     @OA\Property(
+     *                         property="tipo",
+     *                         type="object",
+     *                         nullable=true,
+     *                         @OA\Property(property="id", type="integer", example=2),
+     *                         @OA\Property(property="nombre", type="string", example="Camisetas")
+     *                     )
+     *                 )
+     *             )
      *         )
      *     )
      * )
      */
     public function index(Request $request)
     {
-        $query = Producto::query()
-            ->with(['tipo']);
+        $query = Producto::with('tipo');
 
         $user = auth('sanctum')->user();
-
         $rol = $user?->rol ?? $user?->role ?? null;
         $isAdmin = in_array($rol, ['admin', 'ADMIN', 'Administrador'], true);
 
@@ -47,9 +82,7 @@ class ProductoController extends Controller
             $query->where('tipo_producto_id', (int) $request->query('tipo'));
         }
 
-        $order = $request->query('order', 'newest');
-
-        match ($order) {
+        match ($request->query('order', 'newest')) {
             'oldest'     => $query->orderBy('created_at', 'asc'),
             'price_asc'  => $query->orderBy('precio', 'asc'),
             'price_desc' => $query->orderBy('precio', 'desc'),
@@ -59,6 +92,39 @@ class ProductoController extends Controller
         return ProductoResource::collection($query->get());
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/productos/{id}",
+     *     operationId="productosShow",
+     *     tags={"Productos"},
+     *     summary="Detalle de producto",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Producto encontrado",
+     *         @OA\JsonContent(type="object",
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Producto no encontrado",
+     *         @OA\JsonContent(type="object",
+     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Producto] 999")
+     *         )
+     *     )
+     * )
+     */
+    public function show(int $id)
+    {
+        $producto = Producto::with('tipo')->findOrFail($id);
+        return new ProductoResource($producto);
+    }
 
     /**
      * @OA\Post(
@@ -66,11 +132,11 @@ class ProductoController extends Controller
      *     operationId="productosStore",
      *     tags={"Productos"},
      *     summary="Crear producto",
-     *     @OA\Response(
-     *         response=201,
-     *         description="Producto creado",
-     *         @OA\JsonContent(type="object")
-     *     )
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=201, description="Producto creado"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="Sin permisos"),
+     *     @OA\Response(response=422, description="Error de validación")
      * )
      */
     public function store(ProductoRequest $request)
@@ -88,42 +154,11 @@ class ProductoController extends Controller
             $producto->save();
         }
 
-        $producto->load(['tipo']);
+        $producto->load('tipo');
 
         return (new ProductoResource($producto))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/api/productos/{id}",
-     *     operationId="productosShow",
-     *     tags={"Productos"},
-     *     summary="Detalle de un producto",
-     *     description="Devuelve el detalle de un producto por ID (incluye tipo e imagen principal).",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID del producto",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Producto encontrado",
-     *         @OA\JsonContent(type="object")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Producto no encontrado"
-     *     )
-     * )
-     */
-    public function show(int $id)
-    {
-        $producto = Producto::with(['tipo'])->findOrFail($id);
-        return new ProductoResource($producto);
     }
 
     /**
@@ -132,26 +167,21 @@ class ProductoController extends Controller
      *     operationId="productosUpdate",
      *     tags={"Productos"},
      *     summary="Actualizar producto",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID del producto",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Producto actualizado",
-     *         @OA\JsonContent(type="object")
-     *     )
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Producto actualizado"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="Sin permisos"),
+     *     @OA\Response(response=404, description="Producto no encontrado"),
+     *     @OA\Response(response=422, description="Error de validación")
      * )
      */
     public function update(ProductoRequest $request, int $id)
     {
-        $model = Producto::findOrFail($id);
+        $producto = Producto::findOrFail($id);
+
         $data = $request->validated();
 
-        if (isset($data['nombre']) && $data['nombre'] !== $model->nombre) {
+        if (isset($data['nombre']) && $data['nombre'] !== $producto->nombre) {
             $data['slug'] = Str::slug($data['nombre']);
         } else {
             unset($data['slug']);
@@ -159,21 +189,21 @@ class ProductoController extends Controller
 
         unset($data['imagen']);
 
-        $model->update($data);
+        $producto->update($data);
 
         if ($request->hasFile('imagen')) {
-            if (!empty($model->imagen)) {
-                Storage::disk('public')->delete('productos/' . $model->imagen);
+            if (!empty($producto->imagen)) {
+                Storage::disk('public')->delete('productos/' . $producto->imagen);
             }
 
             $path = $request->file('imagen')->store('productos', 'public');
-            $model->imagen = basename($path);
-            $model->save();
+            $producto->imagen = basename($path);
+            $producto->save();
         }
 
-        $model->load(['tipo']);
+        $producto->load('tipo');
 
-        return new ProductoResource($model);
+        return new ProductoResource($producto);
     }
 
     /**
@@ -182,29 +212,23 @@ class ProductoController extends Controller
      *     operationId="productosDestroy",
      *     tags={"Productos"},
      *     summary="Eliminar producto",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID del producto",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="OK"
-     *     )
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Producto eliminado"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="Sin permisos"),
+     *     @OA\Response(response=404, description="Producto no encontrado")
      * )
      */
     public function destroy(int $id)
     {
-        $model = Producto::findOrFail($id);
+        $producto = Producto::findOrFail($id);
 
-        if (!empty($model->imagen)) {
-            Storage::disk('public')->delete('productos/' . $model->imagen);
+        if (!empty($producto->imagen)) {
+            Storage::disk('public')->delete('productos/' . $producto->imagen);
         }
 
-        $model->delete();
-
+        $producto->delete();
+        
         return response()->json(['message' => 'OK']);
     }
 }

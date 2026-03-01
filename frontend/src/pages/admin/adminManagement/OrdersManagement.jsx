@@ -25,7 +25,6 @@ function OrdersManagement() {
   return (
     <AdminCrudPage
       title="Pedidos"
-      subtitle="Gestión de pedidos."
       entityName="pedido"
       listPath="/pedidos"
       createPath={null}
@@ -39,7 +38,7 @@ function OrdersManagement() {
         { key: "id", header: "ID", className: "adminMono" },
         { key: "codigo_pedido", header: "Código" },
         { key: "estado", header: "Estado" },
-        { key: "precio_total", header: "Total", className: "text-end", render: (v) => money(v) },
+        { key: "precio_total", header: "Total", render: (v) => money(v) },
         { key: "created_at", header: "Creado", render: (v) => dateTime(v) },
       ]}
       columnsGridCss={`

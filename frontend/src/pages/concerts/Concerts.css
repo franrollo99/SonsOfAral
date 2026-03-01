@@ -2,24 +2,74 @@
   color: var(--text);
 }
 
+.concierto h1 {
+  line-height: 1.1;
+}
+
 .concierto h1 span {
   padding-left: 10px;
   font-size: 60%;
-  color: var(--muted)
+  color: var(--muted);
 }
 
 .concierto h2 {
-  white-space: nowrap;
+  max-width: 100%;
   letter-spacing: 0;
 }
 
 .entrada a {
   font-weight: bold;
-  border: 1px solid #6D363E;
+  border: 1px solid #6d363e;
   background: #442226;
 }
 
 .entrada a:hover {
-  border: 1px solid #6D363E;
-  background: #6D363E;
+  border: 1px solid #6d363e;
+  background: #6d363e;
+}
+
+.entradaBtn {
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .concierto h2 {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.15;
+    font-size: 1.35rem;
+  }
+
+  .concierto h1 span {
+    padding-left: 8px;
+    font-size: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+  .concierto h1 span {
+    display: block;
+    padding-left: 0;
+    margin-top: 6px;
+    font-size: 75%;
+  }
+
+  .concierto h2 {
+    font-size: 1.25rem;
+    word-break: break-word;
+    text-align: left;
+  }
+
+  .entrada {
+    width: 100%;
+  }
+
+  .entradaBtn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
 }

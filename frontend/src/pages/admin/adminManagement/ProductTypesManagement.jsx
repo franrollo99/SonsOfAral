@@ -7,7 +7,6 @@ function ProductTypesManagement() {
   return (
     <AdminCrudPage
       title="Tipos de producto"
-      subtitle="Gestión de categorías/tipos."
       entityName="tipo"
       listPath="/tipos-productos"
       createPath="/tipos-productos"

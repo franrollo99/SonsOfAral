@@ -24,15 +24,20 @@ function Musica() {
         setCargando(true);
         setError(null);
 
-        const res = await fetch(`${API_URL}/lanzamientos`);
+        const res = await fetch(`${API_URL}/lanzamientos`, {
+          headers: { Accept: "application/json" },
+        });
         if (!res.ok) throw new Error("Error al cargar lanzamientos");
 
-        const data = await res.json();
-        const raw = data.data;
+        const data = await res.json().catch(() => ({}));
+        const raw = Array.isArray(data?.data) ? data.data : [];
 
         const ordered = [...raw].sort((a, b) => {
-          return new Date(b.fechaLanzamiento) - new Date(a.fechaLanzamiento);
+          const da = a?.fechaLanzamiento ? new Date(a.fechaLanzamiento) : new Date(0);
+          const db = b?.fechaLanzamiento ? new Date(b.fechaLanzamiento) : new Date(0);
+          return db - da;
         });
+
         setLanzamientos(ordered);
       } catch (e) {
         setError("No se pudieron cargar los discos.");
@@ -44,7 +49,6 @@ function Musica() {
     cargarLanzamientos();
   }, []);
 
-  // bloquear scroll del body cuando modal está abierto
   useEffect(() => {
     if (!modalOpen) return;
     const prev = document.body.style.overflow;
@@ -59,13 +63,16 @@ function Musica() {
       setDetalleCargando(true);
       setDetalleError(null);
 
-      const res = await fetch(`${API_URL}/lanzamientos/${lanzamiento.id}`);
+      const res = await fetch(`${API_URL}/lanzamientos/${lanzamiento.id}`, {
+        headers: { Accept: "application/json" },
+      });
       if (!res.ok) throw new Error("Error al cargar detalle");
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       const detalle = data?.data ?? data;
+      const canciones = Array.isArray(detalle?.canciones) ? detalle.canciones : [];
 
-      setLanzamientoSeleccionado(detalle);
+      setLanzamientoSeleccionado({ ...detalle, canciones });
       setModalOpen(true);
     } catch (e) {
       setDetalleError("No se pudo cargar el lanzamiento.");
@@ -80,37 +87,40 @@ function Musica() {
     setDetalleError(null);
   };
 
-  // useMemo memoriza el resultado para no repetirlo en cada render si los datos no han cambiado
   const lanzamientosFiltrados = useMemo(() => {
     const f = (filtro ?? "all").toLowerCase();
     if (f === "all") return lanzamientos;
     const tipoBuscado = f === "albums" ? "album" : f === "singles" ? "single" : f;
-    return lanzamientos.filter(l => (l?.tipo ?? "").toLowerCase() === tipoBuscado);
+    return lanzamientos.filter((l) => (l?.tipo ?? "").toLowerCase() === tipoBuscado);
   }, [lanzamientos, filtro]);
 
   return (
-    <section className="container">
+    <section>
       <div className="d-flex align-items-end justify-content-between gap-3">
         <h1>Explorar lanzamientos</h1>
 
         <div className="d-flex flex-wrap justify-content-end gap-2">
-          <button className={`filtroMusica ${filtro == "all" ? "isActive" : ""}`} onClick={() => setFiltro("all")} type="button">Todos</button>
-          <button className={`filtroMusica ${filtro == "albums" ? "isActive" : ""}`} onClick={() => setFiltro("albums")} type="button">Albums</button>
-          <button className={`filtroMusica ${filtro == "singles" ? "isActive" : ""}`} onClick={() => setFiltro("singles")} type="button">Singles</button>
+          <button className={`filtroMusica ${filtro == "all" ? "isActive" : ""}`} onClick={() => setFiltro("all")} type="button">
+            Todos
+          </button>
+          <button className={`filtroMusica ${filtro == "albums" ? "isActive" : ""}`} onClick={() => setFiltro("albums")} type="button">
+            Albums
+          </button>
+          <button className={`filtroMusica ${filtro == "singles" ? "isActive" : ""}`} onClick={() => setFiltro("singles")} type="button">
+            Singles
+          </button>
         </div>
       </div>
       <hr />
 
       {cargando && <p>Cargando música...</p>}
       {error && !cargando && <p className="errorMessage">{error}</p>}
-      {!cargando && !error && lanzamientosFiltrados.length === 0 && (<p>No hay lanzamientos disponibles por ahora.</p>)}
+      {!cargando && !error && lanzamientosFiltrados.length === 0 && <p>No hay lanzamientos disponibles por ahora.</p>}
 
-      {!detalleCargando && detalleError && (
-        <p className="errorMessage">{detalleError}</p>
-      )}
+      {!detalleCargando && detalleError && <p className="errorMessage">{detalleError}</p>}
 
       {!cargando && !error && lanzamientosFiltrados.length > 0 && (
-        <div className="row g-4">
+        <div className="lanzamientos row g-4">
           {lanzamientosFiltrados.map((lanzamiento) => (
             <div key={lanzamiento.id} className="py-3 col-12 col-sm-6 col-lg-3">
               <article
@@ -120,7 +130,6 @@ function Musica() {
                 tabIndex={0}
               >
                 <div className="lanzamientoPortada">
-                  {/* Quitar imagen por defecto */}
                   <img src={lanzamiento.imagen ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamiento.titulo}`} loading="lazy" />
                 </div>
 
@@ -131,18 +140,13 @@ function Musica() {
                   <div className="lanzamientoTitulo">{lanzamiento.titulo}</div>
                 </div>
 
-                {/* Bloquear la vista mientras se carga el detalle */}
-                {detalleCargando && (
-                  <div className="lanzamientoLoading">
-                  </div>
-                )}
+                {detalleCargando && <div className="lanzamientoLoading"></div>}
               </article>
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal para mostrar los detalles del lanzamiento */}
       {modalOpen && lanzamientoSeleccionado && (
         <div className="releaseModalOverlay" onMouseDown={cerrarModal}>
           <div className="releaseModal d-flex flex-column" onMouseDown={(e) => e.stopPropagation()}>
@@ -157,31 +161,22 @@ function Musica() {
                 </div>
 
                 <div className="leftMeta d-flex flex-column gap-3">
-                  <div className="smallMeta">PISTAS: {lanzamientoSeleccionado.canciones.length} <span>|</span> DURACION: {lanzamientoSeleccionado.duracionTotalMinutos} MIN</div>
+                  <div className="smallMeta">
+                    PISTAS: {(lanzamientoSeleccionado.canciones ?? []).length} <span>|</span> DURACION: {lanzamientoSeleccionado.duracionTotalMinutos} MIN
+                  </div>
 
                   {(compraUrl || audioUrl || videoUrl) && (
                     <div className="buttons d-flex flex-column gap-3 mt-4">
-
                       {(compraUrl || audioUrl) && (
                         <div className="d-flex gap-3">
                           {compraUrl && (
-                            <a
-                              href={compraUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-outline-light btnWide buyListen"
-                            >
+                            <a href={compraUrl} target="_blank" rel="noreferrer" className="btn btn-outline-light btnWide buyListen">
                               COMPRAR
                             </a>
                           )}
 
                           {audioUrl && (
-                            <a
-                              href={audioUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-outline-light btnWide buyListen"
-                            >
+                            <a href={audioUrl} target="_blank" rel="noreferrer" className="btn btn-outline-light btnWide buyListen">
                               ESCUCHAR
                             </a>
                           )}
@@ -189,27 +184,21 @@ function Musica() {
                       )}
 
                       {videoUrl && (
-                        <a
-                          href={videoUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-danger btnWide"
-                        >
+                        <a href={videoUrl} target="_blank" rel="noreferrer" className="btn btn-danger btnWide">
                           VER
                         </a>
                       )}
-
                     </div>
                   )}
-
-
                 </div>
               </aside>
 
               <main className="modalRight d-flex flex-column gap-3">
                 <header className="headerModal">
                   <h2 className="title">{lanzamientoSeleccionado.titulo}</h2>
-                  <div className="sub">{lanzamientoSeleccionado.fechaFormateada} · {lanzamientoSeleccionado.tipo}</div>
+                  <div className="sub">
+                    {lanzamientoSeleccionado.fechaFormateada} · {lanzamientoSeleccionado.tipo}
+                  </div>
                 </header>
 
                 <div className="rightContent d-flex flex-column gap-3">

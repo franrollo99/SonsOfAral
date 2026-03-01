@@ -15,6 +15,10 @@ footer {
   border-bottom: 2px solid var(--muted);
 }
 
+.redesSociales{
+  flex-wrap: wrap;
+}
+
 .redesSociales img {
   width: 30px;
   transition: opacity 0.2s ease, transform 0.2s ease;

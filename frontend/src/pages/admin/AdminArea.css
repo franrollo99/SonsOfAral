@@ -1,8 +1,8 @@
 .adminCard {
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid var(--bg-alt);
   border-radius: 14px;
   padding: 22px;
-  background: rgba(0,0,0,.35);
+  background: var(--bg);
   box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset;
 }
 
@@ -24,7 +24,7 @@
 
 .adminDivider {
   height: 1px;
-  background: var(--bg-alt);,255,.08);
+  background: var(--bg-alt);
   margin: 18px 0;
 }
 
@@ -42,7 +42,7 @@
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,.12);
   padding: 10px 14px;
-  background: var(--bg-alt);,255,.06);
+  background: var(--bg-alt);
   color: #fff;
 }
 
@@ -59,37 +59,35 @@
   padding: 14px;
   text-decoration: none;
   color: #fff;
-  background: var(--bg-alt);,255,.03);
+  background: var(--bg-alt);
   transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
 
 .adminTile:hover {
   transform: translateY(-2px);
-  background: var(--bg-alt);,255,.05);
+  background: var(--bg-alt);
   border-color: rgba(255,255,255,.18);
 }
 
 .adminTileTitle {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .adminTileDesc {
   margin-top: 6px;
-  opacity: .75;
-  font-size: 13px;
+  color: var(--muted);
   line-height: 1.35;
 }
 
 .adminTileGo {
   margin-top: 10px;
-  opacity: .9;
   font-size: 13px;
 }
 
 .adminHint {
   margin: 14px 0 0;
-  opacity: .75;
+  color: var(--muted);
   font-size: 13px;
 }
 

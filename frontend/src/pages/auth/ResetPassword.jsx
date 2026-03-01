@@ -84,7 +84,7 @@ function ResetPassword() {
           throw new Error(data?.message || "No se pudo enviar el enlace.");
         }
 
-        setOk("Si el email existe, te hemos enviado un enlace para restablecer la contraseña.");
+        setOk("Te hemos enviado un enlace para restablecer la contraseña.");
         return;
       }
 

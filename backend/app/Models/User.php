@@ -40,15 +40,14 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function setEmailAttribute($value)
-    {
-        $this->attributes['email'] = strtolower(trim($value));
-    }
-
-
     public function pedidos()
     {
         return $this->hasMany(Pedido::class);
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = strtolower(trim($value));
     }
 
     public function sendPasswordResetNotification($token)

@@ -22,7 +22,7 @@ function AdminArea() {
       }
 
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
+        const meRes = await fetch(`${API_URL}/auth/me`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -30,21 +30,24 @@ function AdminArea() {
           },
         });
 
-        const data = await res.json();
+        const meData = await meRes.json().catch(() => ({}));
 
-        if (!res.ok) {
+        if (!meRes.ok) {
           localStorage.removeItem("token");
           navigate("/login", { replace: true });
           return;
         }
 
-        const me = data?.user || null;
-        setUser(me);
+        const user = meData?.data?.user ?? meData?.user ?? null;
 
-        // Protege por rol (ajusta si tu campo es "role" en vez de "rol")
-        const rol = me?.rol || me?.role;
-        if (rol !== "admin") {
-          navigate("/area-usuario", { replace: true });
+        if (!user) {
+          localStorage.removeItem("token");
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        if (user.rol !== "admin") {
+          navigate("/", { replace: true });
           return;
         }
       } catch {
@@ -72,13 +75,13 @@ function AdminArea() {
   };
 
   const sections = [
-    { title: "Conciertos", desc: "Fechas, salas, ciudades, entradas.", to: "conciertos" },
-    { title: "Lanzamientos", desc: "Álbums / Singles, portada, links.", to: "lanzamientos" },
-    { title: "Canciones", desc: "Tracklist, duración, relación con lanzamiento.", to: "canciones" },
-    { title: "Productos", desc: "Crear/editar productos y stock.", to: "productos" },
-    { title: "Categorías", desc: "Gestionar categorías del merch.", to: "categorias" },
-    { title: "Pedidos", desc: "Ver pedidos, estados, detalle.", to: "pedidos" },
-    { title: "Usuarios", desc: "Roles, listado y gestión básica.", to: "usuarios" },
+    { title: "Conciertos", desc: "Gestionar conciertos.", to: "conciertos" },
+    { title: "Lanzamientos", desc: "Gestionar lanzamientos.", to: "lanzamientos" },
+    { title: "Canciones", desc: "Visualizar detalles de canciones.", to: "canciones" },
+    { title: "Productos", desc: "Gestionar productos .", to: "productos" },
+    { title: "Tipos de productos", desc: "Gestionar tipos de productos.", to: "categorias" },
+    { title: "Pedidos", desc: "Ver detalles de pedidos y cambiar estados.", to: "pedidos" },
+    { title: "Usuarios", desc: "Listado de usuarios y visualizacion de información.", to: "usuarios" },
   ];
 
   if (loading) {

@@ -300,12 +300,65 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .modalGrid {
     grid-template-columns: 1fr;
   }
 
   .releaseModal {
     max-height: 88vh;
+  }
+
+  .cover {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .lanzamientos{
+    padding: 0 14px;
+  }
+
+
+  .releaseModalOverlay {
+    padding: 14px;
+  }
+
+  .modalGrid {
+    padding: 14px;
+  }
+
+  .cover {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .releaseModal {
+    max-height: 88vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modalGrid,
+  .modalLeft,
+  .modalRight,
+  .rightContent {
+    min-height: auto;
+  }
+
+  .tracklist {
+    overflow: visible;
+    max-height: none;
+    padding-right: 0;
+    flex: initial;
+    scrollbar-gutter: auto;
+  }
+
+  .cover img {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
   }
 }

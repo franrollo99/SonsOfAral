@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+
 import "./Cart.css";
 
 const CART_ITEMS = "cartItems";
@@ -20,7 +21,6 @@ function Cart() {
 
     // ✅ para no guardar en el primer render
     const didMount = useRef(false);
-
     useEffect(() => {
         if (!didMount.current) {
             didMount.current = true;
@@ -79,7 +79,7 @@ function Cart() {
 
 
     return (
-        <section className="cartPage">
+        <section>
             <div className="cartHeader">
                 <h1>Carrito</h1>
                 <div className="cartHeaderRight">

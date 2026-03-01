@@ -26,17 +26,16 @@ function ClientArea() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveOk, setSaveOk] = useState("");
+
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
   const [orders, setOrders] = useState([]);
 
-  // Modal
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetailLoading, setOrderDetailLoading] = useState(false);
   const [orderDetailError, setOrderDetailError] = useState("");
 
-  // Cambiar contraseña
   const [showPwdSection, setShowPwdSection] = useState(false);
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdError, setPwdError] = useState("");
@@ -52,9 +51,9 @@ function ClientArea() {
 
   const authHeaders = useMemo(() => {
     return {
-      "Accept": "application/json",
+      Accept: "application/json",
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
   }, [token]);
 
@@ -70,7 +69,6 @@ function ClientArea() {
     );
   }, [form, initialForm]);
 
-  // 1) Cargar usuario (/auth/me)
   useEffect(() => {
     const run = async () => {
       setError("");
@@ -84,25 +82,29 @@ function ClientArea() {
         const meRes = await fetch(`${API_URL}/auth/me`, {
           method: "GET",
           headers: {
-            "Accept": "application/json",
-            "Authorization": `Bearer ${token}`,
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        const meData = await meRes.json();
+        const meData = await meRes.json().catch(() => ({}));
 
         if (!meRes.ok) {
-          // Token inválido / expirado / logout en otro sitio
           localStorage.removeItem("token");
           navigate("/login", { replace: true });
           return;
         }
 
-        // Si quieres bloquear admin aquí:
-        // if (meData.user?.rol !== "cliente") navigate("/area-admin", { replace: true });
+        const u = meData?.data?.user ?? meData?.user ?? null;
 
-        setUser(meData.user);
-        const u = meData.user;
+        if (!u) {
+          localStorage.removeItem("token");
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        setUser(u);
+
         const next = {
           nombre: u?.nombre || "",
           apellidos: u?.apellidos || "",
@@ -124,10 +126,8 @@ function ClientArea() {
     run();
   }, [navigate, token]);
 
-  // 2) Cargar pedidos del usuario
   useEffect(() => {
-    if (!token) return;
-    if (!user) return;
+    if (!token || !user) return;
 
     const run = async () => {
       setOrdersError("");
@@ -139,22 +139,24 @@ function ClientArea() {
           headers: authHeaders,
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
           throw new Error(data?.message || "No se pudieron cargar tus pedidos.");
         }
 
-        const list = Array.isArray(data?.data) ? data.data : [];
+        const list =
+          Array.isArray(data?.data) ? data.data :
+          Array.isArray(data?.data?.data) ? data.data.data :
+          [];
 
         list.sort((a, b) => {
-          const da = new Date(a?.created_at || 0).getTime();
-          const db = new Date(b?.created_at || 0).getTime();
+          const da = new Date(a?.created_at ?? a?.createdAt ?? 0).getTime();
+          const db = new Date(b?.created_at ?? b?.createdAt ?? 0).getTime();
           return db - da;
         });
 
         setOrders(list);
-
       } catch (e) {
         setOrdersError(e.message || "Error cargando pedidos.");
       } finally {
@@ -194,21 +196,19 @@ function ClientArea() {
     setModalOpen(true);
 
     try {
-      // Puedes usar /{id} o /{codigo_pedido}. Ajusta a tu API.
       const res = await fetch(`${API_URL}/pedidos/${order.id}`, {
         method: "GET",
         headers: authHeaders,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         throw new Error(data?.message || "No se pudo cargar el detalle del pedido.");
       }
 
-      // Espera:
-      // data.pedido = { id, codigo_pedido, estado, precio_total, created_at, productos: [...] }
-      setSelectedOrder(data?.data || null);
+      const detail = data?.data?.data ?? data?.data ?? null;
+      setSelectedOrder(detail);
     } catch (e) {
       setOrderDetailError(e.message || "Error cargando detalle.");
     } finally {
@@ -232,14 +232,12 @@ function ClientArea() {
         },
       });
     } catch (e) {
-      console.error("Error al cerrar sesión:", e);
     } finally {
       localStorage.removeItem("cartItems");
       localStorage.removeItem("token");
       navigate("/login", { replace: true });
     }
   };
-
 
   const onChangePassword = async (e) => {
     e.preventDefault();
@@ -268,16 +266,14 @@ function ClientArea() {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         if (res.status === 422 && data?.errors) {
           const firstPwdError = data.errors?.password?.[0];
           const firstAnyError = Object.values(data.errors).flat()[0];
-
           throw new Error(firstPwdError || firstAnyError || "Datos inválidos.");
         }
-
         throw new Error(data?.message || "No se pudo cambiar la contraseña.");
       }
 
@@ -321,7 +317,6 @@ function ClientArea() {
   return (
     <section className="container">
       <div className="d-flex gap-4 areaClienteGrid">
-        {/* Columna Izquierda */}
         <div className="areaClienteLeft">
           <div className="areaClienteCard">
             <div className="d-flex align-items-center justify-content-between">
@@ -331,17 +326,14 @@ function ClientArea() {
               </button>
             </div>
 
-            {/* Datos usuario (estilo login / Auth.css) */}
             <div className="userSessionForm">
-              <div className={`flField ${user?.nombre ? "hasValue" : ""}`}>
-                {/* <input className="flInput" value={user?.nombre || ""} readOnly /> */}
+              <div className={`flField ${form.nombre ? "hasValue" : ""}`}>
                 <input className="flInput" value={form.nombre} onChange={(e) => { setSaveError(""); setSaveOk(""); setForm((p) => ({ ...p, nombre: e.target.value })); }} />
                 <label className="flLabel">Nombre</label>
               </div>
 
-              <div className={`flField ${user?.apellidos ? "hasValue" : ""}`}>
+              <div className={`flField ${form.apellidos ? "hasValue" : ""}`}>
                 <input className="flInput" value={form.apellidos} onChange={(e) => { setSaveError(""); setSaveOk(""); setForm((p) => ({ ...p, apellidos: e.target.value })); }} />
-                {/* <input className="flInput" value={user?.apellidos || ""} readOnly /> */}
                 <label className="flLabel">Apellidos</label>
               </div>
 
@@ -350,28 +342,24 @@ function ClientArea() {
                 <label className="flLabel">Email</label>
               </div>
 
-              <div className="d-flex gap-3">
-                <div className={`flField flex-fill ${user?.provincia ? "hasValue" : ""}`}>
-                  {/* <input className="flInput" value={user?.provincia || ""} readOnly /> */}
+              <div className="formRow d-flex gap-3">
+                <div className={`flField flex-fill ${form.provincia ? "hasValue" : ""}`}>
                   <input className="flInput" value={form.provincia} onChange={(e) => { setSaveError(""); setSaveOk(""); setForm((p) => ({ ...p, provincia: e.target.value })); }} />
                   <label className="flLabel">Provincia</label>
                 </div>
 
-                <div className={`flField flex-fill ${user?.municipio ? "hasValue" : ""}`}>
-                  {/* <input className="flInput" value={user?.municipio || ""} readOnly /> */}
+                <div className={`flField flex-fill ${form.municipio ? "hasValue" : ""}`}>
                   <input className="flInput" value={form.municipio} onChange={(e) => { setSaveError(""); setSaveOk(""); setForm((p) => ({ ...p, municipio: e.target.value })); }} />
-                  <label className="flLabel">municipio</label>
+                  <label className="flLabel">Municipio</label>
                 </div>
               </div>
 
-              <div className={`flField ${user?.direccion ? "hasValue" : ""}`}>
-                {/* <input className="flInput" value={user?.direccion || ""} readOnly /> */}
+              <div className={`flField ${form.direccion ? "hasValue" : ""}`}>
                 <input className="flInput" value={form.direccion} onChange={(e) => { setSaveError(""); setSaveOk(""); setForm((p) => ({ ...p, direccion: e.target.value })); }} />
                 <label className="flLabel">Dirección</label>
               </div>
 
-              <div className={`flField ${user?.cp ? "hasValue" : ""}`}>
-                {/* <input className="flInput" value={user?.cp || ""} readOnly /> */}
+              <div className={`flField ${form.cp ? "hasValue" : ""}`}>
                 <input className="flInput" value={form.cp} onChange={(e) => { setSaveError(""); setSaveOk(""); setForm((p) => ({ ...p, cp: e.target.value })); }} />
                 <label className="flLabel">Código postal</label>
               </div>
@@ -389,14 +377,13 @@ function ClientArea() {
                   setSaveLoading(true);
 
                   try {
-                    // OJO: este endpoint aún no existe. Lo crearemos luego.
                     const res = await fetch(`${API_URL}/auth/profile`, {
                       method: "PUT",
                       headers: authHeaders,
                       body: JSON.stringify(form),
                     });
 
-                    const data = await res.json();
+                    const data = await res.json().catch(() => ({}));
 
                     if (!res.ok) {
                       const msg =
@@ -405,9 +392,10 @@ function ClientArea() {
                       throw new Error(msg);
                     }
 
-                    setUser((prev) => ({ ...prev, ...form }));
-                    setInitialForm(form);
+                    const updatedUser = data?.data?.user ?? data?.user ?? null;
 
+                    setUser((prev) => (updatedUser ? updatedUser : { ...prev, ...form }));
+                    setInitialForm(form);
                     setSaveOk("Datos actualizados.");
                   } catch (e) {
                     setSaveError(e.message || "Error guardando.");
@@ -418,10 +406,8 @@ function ClientArea() {
               >
                 {saveLoading ? "Guardando..." : "Guardar cambios"}
               </button>
-
             </div>
 
-            {/* Cambiar contraseña */}
             <div className="areaClienteDivider" />
 
             <button
@@ -499,7 +485,14 @@ function ClientArea() {
                   />
                   <label className="flLabel">Confirmar nueva contraseña</label>
 
-                  <button type="button" className="areaClienteEyeBtn" onPointerDown={() => setShowNewPwd2(true)} onPointerUp={() => setShowNewPwd2(false)} onPointerLeave={() => setShowNewPwd2(false)} aria-label="Mostrar contraseña">
+                  <button
+                    type="button"
+                    className="areaClienteEyeBtn"
+                    onPointerDown={() => setShowNewPwd2(true)}
+                    onPointerUp={() => setShowNewPwd2(false)}
+                    onPointerLeave={() => setShowNewPwd2(false)}
+                    aria-label="Mostrar contraseña"
+                  >
                     👁
                   </button>
                 </div>
@@ -512,70 +505,86 @@ function ClientArea() {
           </div>
         </div>
 
-        {/* Columna Derecha */}
         <div className="areaClienteRight">
-          <div className="areaClienteCard areaClienteOrdersCard">
-            <div className="d-flex align-items-center justify-content-between">
+          {ordersLoading ? (
+            <div className="areaClienteCard areaClienteOrdersCard">
               <h2 className="areaClienteSubtitle">Tus pedidos</h2>
+              <p className="areaClienteMuted areaClientePad">Cargando pedidos...</p>
             </div>
-
-            {ordersError && <p className="userSessionError">{ordersError}</p>}
-
-            <div className="areaClienteOrdersTableWrap">
-              <div className="areaClienteOrdersTableHead">
-                <div>Pedido</div>
-                <div>Fecha</div>
-                <div>Estado</div>
-                <div className="text-end">Total</div>
+          ) : ordersError ? (
+            <div className="areaClienteCard areaClienteOrdersCard">
+              <h2 className="areaClienteSubtitle">Tus pedidos</h2>
+              <p className="userSessionError">{ordersError}</p>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="areaClienteCard areaClienteOrdersCard">
+              <h2 className="areaClienteSubtitle">Tus pedidos</h2>
+              <p className="areaClienteMuted areaClientePad">Aún no has realizado pedidos.</p>
+            </div>
+          ) : (
+            <div className="areaClienteCard areaClienteOrdersCard">
+              <div className="d-flex align-items-center justify-content-between">
+                <h2 className="areaClienteSubtitle">Tus pedidos</h2>
               </div>
 
-              <div className="areaClienteOrdersScroll">
-                {ordersLoading ? (
-                  <p className="areaClienteMuted areaClientePad">Cargando pedidos...</p>
-                ) : orders.length === 0 ? (
-                  <p className="areaClienteMuted areaClientePad">Aún no has realizado pedidos.</p>
-                ) : (
-                  orders.map((o) => (
-                    <button
-                      key={o.id}
-                      type="button"
-                      className="areaClienteOrderRow"
-                      onClick={() => openOrderModal(o)}
-                    >
-                      <div className="areaClienteOrderCode">
-                        {o.codigo_pedido ? `#${o.codigo_pedido}` : `Pedido ${o.id}`}
-                      </div>
-                      <div>{formatDate(o.created_at)}</div>
-                      <div>
-                        <span className={`areaClienteBadge areaClienteBadge--${o.estado || "unknown"}`}>
-                          {estadoLabel(o.estado)}
-                        </span>
-                      </div>
-                      <div className="text-end">{formatMoney(o.precio_total)}</div>
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
+              <div className="areaClienteOrdersTableWrap">
+                <div className="areaClienteOrdersTableHead">
+                  <div>Pedido</div>
+                  <div>Fecha</div>
+                  <div>Estado</div>
+                  <div className="text-end">Total</div>
+                </div>
 
-            <p className="areaClienteHint">Pulsa sobre un pedido para ver los detalles.</p>
-          </div>
+                <div className="areaClienteOrdersScroll">
+                  {orders.map((o) => {
+                    const codigo = o.codigoPedido ?? o.codigo_pedido;
+                    const created = o.createdAt ?? o.created_at;
+                    const estado = o.estado;
+                    const total = o.precioTotal ?? o.precio_total;
+
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        className="areaClienteOrderRow"
+                        onClick={() => openOrderModal(o)}
+                      >
+                        <div className="areaClienteOrderCode">
+                          {codigo ? `#${codigo}` : `Pedido ${o.id}`}
+                        </div>
+                        <div>{formatDate(created)}</div>
+                        <div>
+                          <span className={`areaClienteBadge areaClienteBadge--${estado || "unknown"}`}>
+                            {estadoLabel(estado)}
+                          </span>
+                        </div>
+                        <div className="text-end">{formatMoney(total)}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <p className="areaClienteHint">Pulsa sobre un pedido para ver los detalles.</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Modal */}
       {modalOpen && (
         <div className="areaClienteModalOverlay" role="dialog" aria-modal="true" onMouseDown={closeModal}>
           <div className="areaClienteModal" onMouseDown={(e) => e.stopPropagation()}>
             <div className="d-flex align-items-start justify-content-between">
               <div>
                 <h3 className="areaClienteModalTitle">
-                  {selectedOrder?.codigo_pedido
-                    ? `Pedido #${selectedOrder.codigo_pedido}`
+                  {(selectedOrder?.codigoPedido ?? selectedOrder?.codigo_pedido)
+                    ? `Pedido #${selectedOrder.codigoPedido ?? selectedOrder.codigo_pedido}`
                     : "Detalle de pedido"}
                 </h3>
                 <p className="areaClienteMuted areaClienteModalSub">
-                  {selectedOrder?.created_at ? `Fecha: ${formatDate(selectedOrder.created_at)}` : ""}
+                  {(selectedOrder?.createdAt ?? selectedOrder?.created_at)
+                    ? `Fecha: ${formatDate(selectedOrder.createdAt ?? selectedOrder.created_at)}`
+                    : ""}
                 </p>
               </div>
 
@@ -602,7 +611,9 @@ function ClientArea() {
 
                   <div className="text-end">
                     <div className="areaClienteMetaLabel">Total</div>
-                    <div className="areaClienteTotal">{formatMoney(selectedOrder.precio_total)}</div>
+                    <div className="areaClienteTotal">
+                      {formatMoney(selectedOrder.precioTotal ?? selectedOrder.precio_total)}
+                    </div>
                   </div>
                 </div>
 
@@ -620,12 +631,12 @@ function ClientArea() {
                   {(selectedOrder.productos || []).length === 0 ? (
                     <p className="areaClienteMuted areaClientePad">Este pedido no tiene líneas.</p>
                   ) : (
-                    (selectedOrder.productos || []).map((p) => (
-                      <div className="areaClienteLineRow" key={p.id}>
-                        <div className="areaClienteLineName">{p.nombre_producto}</div>
+                    (selectedOrder.productos || []).map((p, idx) => (
+                      <div className="areaClienteLineRow" key={p.id ?? idx}>
+                        <div className="areaClienteLineName">{p.nombreProducto ?? p.nombre_producto ?? "-"}</div>
                         <div>{p.talla || "-"}</div>
                         <div className="text-end">{p.cantidad}</div>
-                        <div className="text-end">{formatMoney(p.precio_unitario_snapshot)}</div>
+                        <div className="text-end">{formatMoney(p.precioUnitarioSnapshot ?? p.precio_unitario_snapshot)}</div>
                         <div className="text-end">{formatMoney(p.subtotal)}</div>
                       </div>
                     ))

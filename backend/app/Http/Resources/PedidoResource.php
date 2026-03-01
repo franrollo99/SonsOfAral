@@ -7,6 +7,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PedidoResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -16,6 +21,7 @@ class PedidoResource extends JsonResource
             'precio_total'  => (float) $this->precio_total,
             'created_at'    => $this->created_at,
             'nombre_envio'  => $this->nombre_envio,
+            'telefono'  => $this->telefono,
             'direccion'     => $this->direccion,
             'municipio'     => $this->municipio,
             'provincia'     => $this->provincia,

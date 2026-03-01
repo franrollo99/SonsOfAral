@@ -93,7 +93,6 @@ function ProductsManagement() {
   return (
     <AdminCrudPage
       title="Productos"
-      subtitle="Gestión de catálogo."
       entityName="producto"
       listPath="/productos"
       createPath="/productos"
@@ -101,7 +100,7 @@ function ProductsManagement() {
       deletePath={(id) => `/productos/${id}`}
       requireAdmin
       emptyForm={emptyProducto}
-      searchKeys={["id", "nombre", "descripcion", "tallas_disponibles", "precio", "slug", "activo"]}
+      searchKeys={["id", "nombre", "tallas_disponibles", "precio", "slug", "activo"]}
       columns={[
         { key: "id", header: "ID", className: "adminMono" },
         { key: "nombre", header: "Nombre" },
@@ -120,8 +119,6 @@ function ProductsManagement() {
           render: (v) => (Array.isArray(v) ? v.join(",") : v ? String(v) : "-"),
           title: (v) => (Array.isArray(v) ? v.join(",") : v ? String(v) : ""),
         },
-
-        { key: "descripcion", header: "Descripción", className: "adminTruncate", title: (v) => v || "" },
       ]}
       columnsGridCss={`
         grid-template-columns:
@@ -131,7 +128,6 @@ function ProductsManagement() {
           80px
           220px
           100px
-          1.6fr
           170px;
         min-width: 1100px;
       `}

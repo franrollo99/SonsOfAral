@@ -47,10 +47,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('/canciones/{id}', [CancionController::class, 'update']);
     Route::delete('/canciones/{id}', [CancionController::class, 'destroy']);
 
-    Route::post('/', [CancionController::class, 'store']);
-    Route::put('/canciones/{id}', [CancionController::class, 'update']);
-    Route::delete('/canciones/{id}', [CancionController::class, 'destroy']);
-
     Route::get('/tipos-productos', [TipoProductoController::class, 'index']);
     Route::get('/tipos-productos/{id}', [TipoProductoController::class, 'show']);
     Route::post('/tipos-productos', [TipoProductoController::class, 'store']);
@@ -87,7 +83,6 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
         $user->markEmailAsVerified();
     }
 
-    // ✅ Redirigir al frontend (bonito)
     $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
     return redirect()->away($frontendUrl . '/login?verified=1');
 

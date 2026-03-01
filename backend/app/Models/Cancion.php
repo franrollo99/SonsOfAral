@@ -19,11 +19,4 @@ class Cancion extends Model
     {
         return $this->belongsTo(Lanzamiento::class);
     }
-
-    public function duracionFormateada()
-    {
-        $min = floor($this->duracion / 60);
-        $seg = $this->duracion % 60;
-        return sprintf('%02d:%02d', $min, $seg);
-    }
 }

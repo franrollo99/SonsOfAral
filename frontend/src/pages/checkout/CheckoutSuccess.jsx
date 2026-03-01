@@ -182,7 +182,7 @@ export default function CheckoutSuccess() {
         <h1>Pago realizado correctamente</h1>
         <div className="d-flex gap-3 flex-wrap">
           <button className="successBtn" onClick={downloadTicket}>Descargar ticket de compra</button>
-          <button className="successBtnGhost" onClick={() => navigate("/")}>Volver a la tienda</button>
+          <button className="successBtnGhost" onClick={() => navigate("/")}>Volver</button>
         </div>
       </div>
     </section>

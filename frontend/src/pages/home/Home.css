@@ -5,7 +5,7 @@
 .homeHero {
   position: relative;
   width: 100%;
-  height: calc(100vh - 90px); /* ajusta según tu navbar */
+  height: calc(100vh - 90px);
   min-height: 520px;
   overflow: hidden;
   background: #000;
@@ -88,7 +88,6 @@
   filter: brightness(1.05);
 }
 
-/* LIGHTBOX */
 .homeLightbox {
   position: fixed;
   inset: 0;

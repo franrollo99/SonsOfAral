@@ -37,18 +37,6 @@ class Producto extends Model
         return $this->hasMany(PedidoProducto::class);
     }
 
-    public function activar()
-    {
-        $this->activo = true;
-        $this->save();
-    }
-
-    public function desactivar()
-    {
-        $this->activo = false;
-        $this->save();
-    }
-
     public function getPrecioFormateadoAttribute()
     {
         return number_format($this->precio, 2, ',', '.') . ' €';

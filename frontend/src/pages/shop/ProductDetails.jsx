@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import "./ProductDetails.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -10,7 +9,6 @@ function ProductoDetalle() {
   const { slug } = useParams();
   const { state } = useLocation();
 
-  // Si vienes desde la tienda y pasas state={{ producto: p }}, esto pinta instantáneo
   const [producto, setProducto] = useState(state?.producto ?? null);
   const [loading, setLoading] = useState(!state?.producto);
 
@@ -30,66 +28,43 @@ function ProductoDetalle() {
     }
   }, [producto]);
 
-  // Si ya tenemos producto por state, no hacemos fetch
   useEffect(() => {
-    if (state?.producto) {
-      // Selecciona talla por defecto si hay (y no hay talla ya seleccionada)
-      if (!talla && Array.isArray(state.producto?.tallas_disponibles) && state.producto.tallas_disponibles.length > 0) {
-        setTalla(state.producto.tallas_disponibles[0]);
-      }
-      return;
+  if (state?.producto) return;
+
+  const load = async () => {
+    try {
+      setLoading(true);
+
+      const params = new URLSearchParams();
+      params.set("order", "newest");
+
+      const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
+        headers: { Accept: "application/json" },
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const json = await res.json();
+      const lista = Array.isArray(json) ? json : json?.data ?? [];
+
+      const found = lista.find((p) => p.slug === slug) ?? null;
+      setProducto(found);
+    } catch (e) {
+      console.error("Error cargando producto:", e);
+      setProducto(null);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // URL directa / refresh: no hay state, toca fetch
-    const controller = new AbortController();
+  load();
+}, [slug, state?.producto]);
 
-    const load = async () => {
-      try {
-        setLoading(true);
-
-        // No quieres endpoint por slug, así que pedimos lista y buscamos por slug
-        // (Para pocos productos en un PFG, esto va bien. Si crece, se cambia por un endpoint de lookup.)
-        const params = new URLSearchParams();
-        params.set("order", "newest");
-
-        const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const json = await res.json();
-        const lista = Array.isArray(json) ? json : (json?.data ?? []);
-
-        const found = lista.find((p) => p.slug === slug) ?? null;
-        setProducto(found);
-
-        // Selecciona una talla por defecto si hay
-        const t = found?.tallas_disponibles;
-        if (Array.isArray(t) && t.length > 0) setTalla(t[0]);
-      } catch (e) {
-        if (e.name !== "AbortError") {
-          console.error("Error cargando producto:", e);
-          setProducto(null);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-    return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
-
-  // Si cambias de producto (otra ruta), resetea qty y talla
   useEffect(() => {
     setQty(1);
     setTalla(null);
   }, [slug]);
 
-  // Si producto existe y trae tallas pero talla no está aún seleccionada, selecciona primera
   useEffect(() => {
     if (!producto) return;
     if (talla) return;
@@ -124,7 +99,6 @@ function ProductoDetalle() {
       (it) => it.id === producto.id && (it.talla ?? null) === (talla ?? null)
     );
 
-
     if (index !== -1) {
       cart[index].qty = (Number(cart[index].qty) || 0) + addQty;
     } else {
@@ -140,10 +114,8 @@ function ProductoDetalle() {
     }
 
     localStorage.setItem(CART_ITEMS, JSON.stringify(cart));
-
     navigate("/carrito");
   };
-
 
   return (
     <section>
@@ -154,10 +126,13 @@ function ProductoDetalle() {
           <div className="productoDetalleEmpty">Producto no encontrado.</div>
         ) : (
           <div className="d-flex productoDetalleLayout gap-5">
-
             <div className="productoDetalleLeft">
               <div className="productoDetalleImgBox">
-                <img className="productoDetalleImg" src={producto.imagen ?? "/images/productos/camiseta01.png"} alt={producto.nombre} />
+                <img
+                  className="productoDetalleImg"
+                  src={producto.imagen ?? "/images/productos/camiseta01.png"}
+                  alt={producto.nombre}
+                />
               </div>
             </div>
 
@@ -178,7 +153,12 @@ function ProductoDetalle() {
 
                   <div className="d-flex flex-wrap gap-2">
                     {tallas.map((t) => (
-                      <button key={t} type="button" className={`productoTallaBtn ${talla === t ? "isActive" : ""}`} onClick={() => setTalla(t)}>
+                      <button
+                        key={t}
+                        type="button"
+                        className={`productoTallaBtn ${talla === t ? "isActive" : ""}`}
+                        onClick={() => setTalla(t)}
+                      >
                         {t}
                       </button>
                     ))}
@@ -190,33 +170,52 @@ function ProductoDetalle() {
                 <div className="productoDetalleLabel">Cantidad</div>
 
                 <div className="d-flex align-items-center gap-2">
-                  <button type="button" className="productoQtyBtn" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
+                  <button
+                    type="button"
+                    className="productoQtyBtn"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  >
+                    −
+                  </button>
 
-                  <input type="number" className="productoQtyInput" min={1} max={99} value={qty} onChange={(e) => {
-                    const v = e.target.value;
+                  <input
+                    type="number"
+                    className="productoQtyInput"
+                    min={1}
+                    max={99}
+                    value={qty}
+                    onChange={(e) => {
+                      const v = e.target.value;
 
-                    if (v === "") {
-                      setQty("");
-                      return;
-                    }
+                      if (v === "") {
+                        setQty("");
+                        return;
+                      }
 
-                    const n = Number(v);
-                    if (Number.isNaN(n)) return;
+                      const n = Number(v);
+                      if (Number.isNaN(n)) return;
 
-                    setQty(Math.min(99, Math.max(1, n)));
-                  }}
+                      setQty(Math.min(99, Math.max(1, n)));
+                    }}
                     onBlur={() => {
                       if (!qty || qty < 1) setQty(1);
                     }}
                     aria-label="Cantidad"
                   />
 
-                  <button type="button" className="productoQtyBtn" onClick={() => setQty((q) => Math.min(99, q + 1))}>+</button>
+                  <button
+                    type="button"
+                    className="productoQtyBtn"
+                    onClick={() => setQty((q) => Math.min(99, q + 1))}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
 
-              {/* ADD TO CART */}
-              <button className="productoAddBtn" onClick={handleAddToCart}>Añadir al carrito</button>
+              <button className="productoAddBtn" onClick={handleAddToCart}>
+                Añadir al carrito
+              </button>
             </div>
           </div>
         )}

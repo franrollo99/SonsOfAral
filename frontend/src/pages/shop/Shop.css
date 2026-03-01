@@ -1,22 +1,14 @@
 .tiendaCats button {
-  color: white;
+  color: var(--text);
 }
 
-/* Contenedor */
-.tiendaContainer {
-  padding-top: 24px;
-  padding-bottom: 48px;
-}
-
-/* Layout principal */
 .tiendaLayout {
   align-items: flex-start;
 }
 
-/* Sidebar */
 .tiendaSidebar {
   max-width: 240px;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   padding-right: 18px;
 }
 
@@ -27,7 +19,6 @@
   margin: 0 0 18px 0;
 }
 
-/* Categorías */
 .tiendaCatBtn {
   width: 100%;
   background: transparent;
@@ -57,49 +48,65 @@
 
 .tiendaCatCount {
   font-weight: 700;
-  font-size: 12px;
-  opacity: 0.65;
+  color: var(--muted);
 }
 
-/* Topbar */
 .tiendaTopbar {
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 18px;
 }
 
 .tiendaItemsCount {
   font-weight: 700;
-  opacity: 0.8;
+  color: var(--muted);
 }
 
 .tiendaSortLabel {
   font-weight: 800;
   letter-spacing: 0.08em;
-  font-size: 12px;
   margin: 0;
 }
 
 .tiendaSortSelect {
   min-width: 230px;
   border-radius: 3px;
-  border-color: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(20, 20, 20, 0.65);
+  color: var(--text);
 }
 
-/* Cards */
+.tiendaSortSelect:focus {
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.tiendaSortSelect option {
+  background: #111;
+  color: var(--text);
+}
+
+.tiendaTopbarMobile {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 18px;
+  background: rgba(20, 20, 20, 0.45);
+}
+
 .tiendaCard {
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: var();
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 20, 20, 0.45);
   height: 100%;
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .tiendaCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
-.tiendaCardLink{
+.tiendaCardLink {
   text-decoration: none;
   margin: 24px 0;
   padding: 0;
@@ -158,24 +165,50 @@
   object-fit: contain;
 }
 
-
-/* Responsive */
-@media (max-width: 991px) {
+@media (max-width: 1024px) {
   .tiendaSidebar {
-    width: 200px;
+    max-width: 210px;
+  }
+
+  .tiendaSortSelect {
+    min-width: 210px;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .tiendaLayout {
     flex-direction: column;
   }
 
+  .tiendaCard:hover {
+    transform: none;
+  }
+
+  .tiendaSortSelect {
+    min-width: 0;
+  }
+
+  .tiendaImgWrap {
+    height: 320px;
+    max-height: 320px;
+  }
+}
+
+@media (max-width: 768px) {
   .tiendaSidebar {
-    width: 100%;
-    border-right: 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    padding-right: 0;
-    padding-bottom: 14px;
+    display: none !important;
+  }
+
+  .tiendaTopbar {
+    display: none !important;
+  }
+
+  .tiendaTopbarMobile {
+    display: block !important;
+  }
+
+  .tiendaImgWrap {
+    height: 260px;
+    max-height: 260px;
   }
 }

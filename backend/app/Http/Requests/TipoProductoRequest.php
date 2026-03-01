@@ -3,13 +3,22 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TipoProductoRequest extends FormRequest
 {
     public function rules(): array
     {
+        $tipoProducto = $this->route('tipoProducto');
+
         return [
-            'nombre' => ['required','string','max:100','unique:tipos_productos,nombre,' . $this->route('tipos_productos'),],
+            'nombre' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('tipos_productos', 'nombre')
+                    ->ignore($tipoProducto?->id),
+            ],
         ];
     }
 

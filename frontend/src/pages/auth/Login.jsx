@@ -24,7 +24,7 @@ function Login() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -32,44 +32,30 @@ function Login() {
       const loginData = await loginRes.json();
 
       if (!loginRes.ok) {
-        const msg =
-          loginData?.errors
-            ? Object.values(loginData.errors).flat()[0]
-            : loginData?.message || "Credenciales incorrectas";
+        const msg = loginData?.errors
+          ? Object.values(loginData.errors).flat()[0]
+          : loginData?.message || "Credenciales incorrectas";
 
         throw new Error(msg);
       }
 
+      const token = loginData?.data?.token;
+      const userData = loginData?.data?.user;
 
-      setUser(loginData.user);
-
-      const meRes = await fetch(`${API_URL}/auth/me`, {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${loginData.token}`,
-        },
-      });
-
-      const meData = await meRes.json();
-
-      if (!meRes.ok) {
-        throw new Error(meData.message || "Sesión no válida");
+      if (!token || !userData) {
+        throw new Error("Respuesta de login inválida");
       }
 
-      console.log("Usuario autenticado:", meData.user);
-      const rol = meData.user.rol;
+      setUser(userData);
 
-      localStorage.setItem("token", loginData.token);
-      localStorage.setItem("rol", rol);
+      localStorage.setItem("token", token);
+      localStorage.setItem("rol", userData.rol);
 
-      if (rol === "admin") {
+      if (userData.rol === "admin") {
         navigate("/area-admin", { replace: true });
       } else {
         navigate("/area-cliente", { replace: true });
       }
-
-
     } catch (err) {
       setUser(null);
       setError(err.message || "Error al iniciar sesión");
@@ -94,7 +80,9 @@ function Login() {
               autoComplete="email"
               required
             />
-            <label className="flLabel" htmlFor="email">Email</label>
+            <label className="flLabel" htmlFor="email">
+              Email
+            </label>
           </div>
 
           <div className={`flField ${password ? "hasValue" : ""}`}>
@@ -107,7 +95,9 @@ function Login() {
               autoComplete="current-password"
               required
             />
-            <label className="flLabel" htmlFor="password">Contraseña</label>
+            <label className="flLabel" htmlFor="password">
+              Contraseña
+            </label>
           </div>
 
           <Link className="userSessionLink" to="/reset-password">
@@ -115,12 +105,6 @@ function Login() {
           </Link>
 
           {error && <p className="userSessionError">{error}</p>}
-
-          {user && (
-            <p className="userSessionOk">
-              Sesión iniciada como <strong>{user.email}</strong>
-            </p>
-          )}
 
           <button className="userSessionBtn" type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Iniciar Sesión"}

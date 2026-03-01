@@ -12,9 +12,7 @@ function normalizeArrayValue(v) {
       try {
         const parsed = JSON.parse(s);
         if (Array.isArray(parsed)) return parsed.map(String);
-      } catch {
-        // fallback abajo
-      }
+      } catch { }
     }
 
     if (s.includes(",")) {
@@ -47,7 +45,6 @@ function Field({ field, form, setForm }) {
     sizes = ["XS", "S", "M", "L", "XL", "XXL"],
   } = field;
 
-  // ✅ ocultar campo dinámicamente (lo usaremos para tallas y lo que quieras)
   const showWhen = field.showWhen;
   if (typeof showWhen === "function" && !showWhen(form)) {
     return null;
@@ -185,7 +182,6 @@ function Field({ field, form, setForm }) {
           </div>
         </div>
       ) : type === "orderLines" ? (
-        // ✅ NUEVO: detalle de líneas de pedido (solo lectura)
         <div className="adminSizes" style={{ padding: 0 }}>
           <div style={{ overflowX: "auto" }}>
             <table className="adminTable" style={{ width: "100%", minWidth: 560 }}>
@@ -275,6 +271,7 @@ function AdminEntityModal({
   onSave,
   showSave = true,
   saveText = "Guardar",
+  afterFields,
 }) {
   if (!open) return null;
 
@@ -297,6 +294,8 @@ function AdminEntityModal({
               <Field key={f.name} field={f} form={form} setForm={setForm} />
             ))}
           </div>
+
+          {afterFields ? <div className="adminAfterFields">{afterFields}</div> : null}
         </div>
 
         <div className="adminModalFooter">

@@ -65,20 +65,6 @@ export default function Checkout() {
         })();
     }, []);
 
-    useEffect(() => {
-        // si carrito vacío -> fuera
-        if (!cartItems || cartItems.length === 0) {
-            navigate("/carrito", { replace: true });
-            return;
-        }
-
-        // si no token -> login
-        const token = getToken();
-        if (!token) {
-            navigate("/login", { replace: true });
-        }
-    }, [cartItems, navigate]);
-
     const { subtotal, totalItems } = useMemo(() => {
         const sub = cartItems.reduce(
             (acc, it) => acc + (Number(it.precio) || 0) * (Number(it.qty) || 0),
@@ -169,10 +155,7 @@ export default function Checkout() {
                 throw new Error(message);
             }
 
-            // Limpia carrito y navega a success
             localStorage.removeItem(CART_ITEMS);
-
-            // ojo: PedidoResource normalmente devuelve data.id o id directo según tu Resource
             const pedidoId = data?.data?.id ?? data?.id;
             navigate(`/checkout/success/${pedidoId}`, { replace: true });
         } catch (err) {
@@ -183,7 +166,7 @@ export default function Checkout() {
     };
 
     return (
-        <section className="checkoutPage">
+        <section>
             <div className="checkoutHeader d-flex justify-content-between align-items-center gap-3">
                 <h1>Pago</h1>
             </div>
@@ -222,7 +205,7 @@ export default function Checkout() {
                             />
                         </div>
 
-                        <div className="d-flex gap-3">
+                        <div className="d-flex flex-column flex-md-row gap-3">
                             <div className="checkoutField checkoutFieldGrow">
                                 <label>Municipio</label>
                                 <input
@@ -257,7 +240,7 @@ export default function Checkout() {
                     <div className="checkoutForm">
                         <div className="checkoutField"><label>Nombre</label><input name="card_name" value={form.card_name} onChange={onChange} /></div>
                         <div className="checkoutField"><label>Número de tarjeta</label><input name="card_number" value={form.card_number} onChange={onChange} inputMode="numeric" /></div>
-                        <div className="d-flex gap-3">
+                        <div className="d-flex flex-column flex-md-row gap-3">
                             <div className="checkoutField checkoutFieldGrow"><label>Caducidad (MM/AA)</label><input name="card_exp" value={form.card_exp} onChange={onChange} inputMode="numeric" /></div>
                             <div className="checkoutField checkoutFieldCP"><label>CVC</label><input name="card_cvc" value={form.card_cvc} onChange={onChange} inputMode="numeric" /></div>
                         </div>

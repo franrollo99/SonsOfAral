@@ -6,12 +6,9 @@ use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
- *     title="API de Reto Grupo 2",
+ *     title="API de Sons of Aral Website",
  *     version="1.0",
- *     description="Documentación de la API para el proyecto Reto Grupo 2",
- *     @OA\Contact(
- *         email="tu-email@example.com"
- *     )
+ *     description="Documentación de la API para Sons of Aral Website"
  * )
  */
 class Controller extends BaseController
