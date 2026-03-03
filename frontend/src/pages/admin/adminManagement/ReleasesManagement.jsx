@@ -1,3 +1,4 @@
+import { useState } from "react";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
 
@@ -18,11 +19,52 @@ const emptyLanzamiento = {
   audioUrl: "",
   videoUrl: "",
   imagen: null,
-  cancionesDraft: [{ _k: "base", titulo: "", duracion: "" }],
+  cancionesDraft: [{ _k: "base", titulo: "", duracionMin: "", duracionSeg: "" }],
+};
 
+const toSeconds = (min, sec) => {
+  const m = Number(min) || 0;
+  let s = Number(sec) || 0;
+  if (s < 0) s = 0;
+  if (s > 59) s = 59;
+  return m * 60 + s;
+};
+
+const fromSeconds = (total) => {
+  const t = Number(total);
+  if (!Number.isFinite(t) || t <= 0) return { duracionMin: "", duracionSeg: "" };
+  return { duracionMin: String(Math.floor(t / 60)), duracionSeg: String(t % 60) };
 };
 
 function ReleasesManagement() {
+  const [form, setForm] = useState(emptyLanzamiento);
+
+  const handleDurationChange = (setFormFn, index, field, value, max) => {
+    if (value === "") {
+      setFormFn((p) => ({
+        ...p,
+        cancionesDraft: (p.cancionesDraft || []).map((x, i) =>
+          i === index ? { ...x, [field]: "" } : x
+        ),
+      }));
+      return;
+    }
+
+    const clean = String(value).replace(/\D/g, "");
+    let n = Number(clean);
+
+    if (!Number.isFinite(n)) n = 0;
+    if (n < 0) n = 0;
+    if (typeof max === "number" && n > max) n = max;
+
+    setFormFn((p) => ({
+      ...p,
+      cancionesDraft: (p.cancionesDraft || []).map((x, i) =>
+        i === index ? { ...x, [field]: String(n) } : x
+      ),
+    }));
+  };
+
   return (
     <AdminCrudPage
       title="Lanzamientos"
@@ -45,7 +87,7 @@ function ReleasesManagement() {
                 id: s.id ?? null,
                 _k: String(s.id ?? crypto?.randomUUID?.() ?? Date.now() + Math.random()),
                 titulo: s.titulo ?? "",
-                duracion: s.duracion ?? "",
+                ...fromSeconds(s.duracion ?? 0),
               }))
             : base.cancionesDraft && base.cancionesDraft.length
               ? base.cancionesDraft
@@ -119,22 +161,29 @@ function ReleasesManagement() {
                 </div>
 
                 <div className="adminSongField">
-                  <label className="adminSongLabel">Duración (segundos)</label>
-                  <input
-                    className="adminInput"
-                    type="number"
-                    min="0"
-                    value={s.duracion ?? ""}
-                    onChange={(e) => {
-                      const duracion = e.target.value;
-                      setForm((p) => ({
-                        ...p,
-                        cancionesDraft: (p.cancionesDraft || []).map((x, idx) =>
-                          idx === i ? { ...x, duracion } : x
-                        ),
-                      }));
-                    }}
-                  />
+                  <label className="adminSongLabel">Duración</label>
+
+                  <div className="d-flex align-items-center gap-2">
+                    <input
+                      type="number"
+                      className="adminInput adminSongTimeInput"
+                      value={s.duracionMin ?? ""}
+                      onChange={(e) =>
+                        handleDurationChange(setForm, i, "duracionMin", e.target.value, 99)
+                      }
+                    />
+
+                    <span className="adminSongTimeSep">:</span>
+
+                    <input
+                      type="number"
+                      className="adminInput adminSongTimeInput"
+                      value={s.duracionSeg ?? ""}
+                      onChange={(e) =>
+                        handleDurationChange(setForm, i, "duracionSeg", e.target.value, 59)
+                      }
+                    />
+                  </div>
                 </div>
 
                 {i > 0 ? (
@@ -166,7 +215,7 @@ function ReleasesManagement() {
                   ...p,
                   cancionesDraft: [
                     ...(p.cancionesDraft || []),
-                    { _k: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()), titulo: "", duracion: "" },
+                    { _k: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()), titulo: "", duracionMin: "", duracionSeg: "" }
                   ],
                 }))
               }
@@ -190,7 +239,7 @@ function ReleasesManagement() {
         const cancionesNorm = (f.cancionesDraft || []).map((x) => ({
           id: x.id ?? null,
           titulo: (x.titulo ?? "").trim(),
-          duracion: Number(x.duracion ?? 0),
+          duracion: toSeconds(x.duracionMin, x.duracionSeg),
         }));
 
         const primeraOk = cancionesNorm[0] && cancionesNorm[0].titulo && cancionesNorm[0].duracion;

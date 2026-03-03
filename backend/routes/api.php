@@ -22,6 +22,7 @@ Route::apiResource('lanzamientos', LanzamientoController::class)->only(['index',
 Route::apiResource('canciones', CancionController::class)->only(['index', 'show']);
 Route::apiResource('conciertos', ConciertoController::class)->only(['index', 'show']);
 Route::apiResource('productos', ProductoController::class)->only(['index', 'show']);
+Route::get('/tipos-productos', [TipoProductoController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -47,7 +48,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('/canciones/{id}', [CancionController::class, 'update']);
     Route::delete('/canciones/{id}', [CancionController::class, 'destroy']);
 
-    Route::get('/tipos-productos', [TipoProductoController::class, 'index']);
     Route::get('/tipos-productos/{id}', [TipoProductoController::class, 'show']);
     Route::post('/tipos-productos', [TipoProductoController::class, 'store']);
     Route::put('/tipos-productos/{tipoProducto}', [TipoProductoController::class, 'update']);

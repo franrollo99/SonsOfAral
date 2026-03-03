@@ -63,12 +63,12 @@ function Navbar() {
 
         {token && (
           <button className="cartIcon d-none d-lg-inline-block" onClick={handleCartClick}>
-            <img src="/images/carrito.png" alt="Carrito" />
+            <img src="/images/carrito.svg" alt="Carrito" />
           </button>
         )}
 
         <button className="loginIcon d-none d-lg-inline-block" onClick={handleLoginClick}>
-          <img src="/images/login.png" alt="Login" />
+          <img src="/images/login.svg" alt="Login" />
         </button>
       </div>
 

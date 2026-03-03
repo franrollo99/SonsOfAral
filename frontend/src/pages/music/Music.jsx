@@ -3,6 +3,35 @@ import "./Music.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const LS_KEY = "lanzamientos";
+
+function readCache(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!("ts" in parsed) || !("data" in parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+  } catch {}
+}
+
+function normalizeOrdered(raw) {
+  return [...raw].sort((a, b) => {
+    const da = a?.fechaLanzamiento ? new Date(a.fechaLanzamiento) : new Date(0);
+    const db = b?.fechaLanzamiento ? new Date(b.fechaLanzamiento) : new Date(0);
+    return db - da;
+  });
+}
+
 function Musica() {
   const [lanzamientos, setLanzamientos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -10,8 +39,6 @@ function Musica() {
   const [filtro, setFiltro] = useState("all");
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [detalleCargando, setDetalleCargando] = useState(false);
-  const [detalleError, setDetalleError] = useState(null);
   const [lanzamientoSeleccionado, setLanzamientoSeleccionado] = useState(null);
 
   const compraUrl = (lanzamientoSeleccionado?.compraUrl || "").trim();
@@ -19,34 +46,44 @@ function Musica() {
   const videoUrl = (lanzamientoSeleccionado?.videoUrl || "").trim();
 
   useEffect(() => {
-    async function cargarLanzamientos() {
+    const cached = readCache(LS_KEY);
+
+    if (Array.isArray(cached?.data)) {
+      setLanzamientos(normalizeOrdered(cached.data));
+      setCargando(false);
+    }
+
+    const controller = new AbortController();
+
+    const cargarLanzamientos = async () => {
       try {
-        setCargando(true);
         setError(null);
 
         const res = await fetch(`${API_URL}/lanzamientos`, {
           headers: { Accept: "application/json" },
+          signal: controller.signal,
         });
-        if (!res.ok) throw new Error("Error al cargar lanzamientos");
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json().catch(() => ({}));
         const raw = Array.isArray(data?.data) ? data.data : [];
 
-        const ordered = [...raw].sort((a, b) => {
-          const da = a?.fechaLanzamiento ? new Date(a.fechaLanzamiento) : new Date(0);
-          const db = b?.fechaLanzamiento ? new Date(b.fechaLanzamiento) : new Date(0);
-          return db - da;
-        });
-
-        setLanzamientos(ordered);
+        writeCache(LS_KEY, raw);
+        setLanzamientos(normalizeOrdered(raw));
       } catch (e) {
-        setError("No se pudieron cargar los discos.");
+        if (e?.name !== "AbortError") {
+          console.error(e);
+          if (!Array.isArray(cached?.data)) setError("No se pudieron cargar los discos.");
+        }
       } finally {
         setCargando(false);
       }
-    }
+    };
 
     cargarLanzamientos();
+
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -58,33 +95,15 @@ function Musica() {
     };
   }, [modalOpen]);
 
-  const lanzarFetchDetalleYAbrir = async (lanzamiento) => {
-    try {
-      setDetalleCargando(true);
-      setDetalleError(null);
-
-      const res = await fetch(`${API_URL}/lanzamientos/${lanzamiento.id}`, {
-        headers: { Accept: "application/json" },
-      });
-      if (!res.ok) throw new Error("Error al cargar detalle");
-
-      const data = await res.json().catch(() => ({}));
-      const detalle = data?.data ?? data;
-      const canciones = Array.isArray(detalle?.canciones) ? detalle.canciones : [];
-
-      setLanzamientoSeleccionado({ ...detalle, canciones });
-      setModalOpen(true);
-    } catch (e) {
-      setDetalleError("No se pudo cargar el lanzamiento.");
-    } finally {
-      setDetalleCargando(false);
-    }
+  const abrirModal = (lanzamiento) => {
+    const canciones = Array.isArray(lanzamiento?.canciones) ? lanzamiento.canciones : [];
+    setLanzamientoSeleccionado({ ...lanzamiento, canciones });
+    setModalOpen(true);
   };
 
   const cerrarModal = () => {
     setModalOpen(false);
     setLanzamientoSeleccionado(null);
-    setDetalleError(null);
   };
 
   const lanzamientosFiltrados = useMemo(() => {
@@ -117,15 +136,13 @@ function Musica() {
       {error && !cargando && <p className="errorMessage">{error}</p>}
       {!cargando && !error && lanzamientosFiltrados.length === 0 && <p>No hay lanzamientos disponibles por ahora.</p>}
 
-      {!detalleCargando && detalleError && <p className="errorMessage">{detalleError}</p>}
-
       {!cargando && !error && lanzamientosFiltrados.length > 0 && (
         <div className="lanzamientos row g-4">
           {lanzamientosFiltrados.map((lanzamiento) => (
             <div key={lanzamiento.id} className="py-3 col-12 col-sm-6 col-lg-3">
               <article
-                className={`lanzamiento ${detalleCargando ? "isDisabled" : ""}`}
-                onClick={() => !detalleCargando && lanzarFetchDetalleYAbrir(lanzamiento)}
+                className="lanzamiento"
+                onClick={() => abrirModal(lanzamiento)}
                 role="button"
                 tabIndex={0}
               >
@@ -139,8 +156,6 @@ function Musica() {
                   </div>
                   <div className="lanzamientoTitulo">{lanzamiento.titulo}</div>
                 </div>
-
-                {detalleCargando && <div className="lanzamientoLoading"></div>}
               </article>
             </div>
           ))}
@@ -151,7 +166,7 @@ function Musica() {
         <div className="releaseModalOverlay" onMouseDown={cerrarModal}>
           <div className="releaseModal d-flex flex-column" onMouseDown={(e) => e.stopPropagation()}>
             <button className="modalClose d-flex align-items-center justify-content-center" type="button" aria-label="Cerrar" onClick={cerrarModal}>
-              <img src="/images/closeIcon.png" alt="" />
+              <img src="/images/close.svg" alt="" />
             </button>
 
             <div className="modalGrid">

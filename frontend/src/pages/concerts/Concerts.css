@@ -32,6 +32,10 @@
   white-space: nowrap;
 }
 
+.descripcion {
+  font-size: 1.05rem;
+}
+
 @media (max-width: 1024px) {
   .concierto h2 {
     white-space: normal;

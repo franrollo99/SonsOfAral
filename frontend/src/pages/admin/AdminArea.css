@@ -91,6 +91,31 @@
   font-size: 13px;
 }
 
+.adminSongTimeInput {
+  width: 50px;
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  border-radius: 14px;
+}
+
+.adminSongTimeSep {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--muted);
+  line-height: 1;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 @media (max-width: 992px) {
   .adminGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

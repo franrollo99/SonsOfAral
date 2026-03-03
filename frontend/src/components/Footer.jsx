@@ -11,16 +11,13 @@ function Footer() {
           <li className="nav-item">
             <a href="/aviso-legal" className="nav-link active">Aviso Legal</a>
           </li>
-          <li className="nav-item">
-            <a href="/politica-de-cookies" className="nav-link active">Política de Cookies</a>
-          </li>
         </ul>
         <div className="redesSociales d-flex align-items-center gap-4">
-          <a href="#"><img src="/images/redesSociales/instagram.png" alt="Icono instagram" /></a>
-          <a href="#"><img src="/images/redesSociales/youtube.png" alt="Icono youtube" /></a>
-          <a href="#"><img src="/images/redesSociales/facebook.png" alt="Icono facebook" /></a>
-          <a href="#"><img src="/images/redesSociales/tiktok.png" alt="Icono tik tok" /></a>
-          <a href="#"><img src="/images/redesSociales/spotify.png" alt="Icono spotify" /></a>
+          <a href="https://www.instagram.com/sonsofaral/"><img src="/images/redesSociales/instagram.png" alt="Icono instagram" /></a>
+          <a href="https://www.youtube.com/@SonsOfAral"><img src="/images/redesSociales/youtube.png" alt="Icono youtube" /></a>
+          <a href="https://www.facebook.com/sonsofaral"><img src="/images/redesSociales/facebook.png" alt="Icono facebook" /></a>
+          <a href="https://www.tiktok.com/@sonsofaral_band"><img src="/images/redesSociales/tiktok.png" alt="Icono tik tok" /></a>
+          <a href="https://open.spotify.com/intl-es/artist/3rXaE7VIG232g8KyMp1Rul?si=hbUXYXQpTkS4OMBoQYeNnA"><img src="/images/redesSociales/spotify.png" alt="Icono spotify" /></a>
         </div>
       </div>
       <p className="copyrigth">© {new Date().getFullYear()} Sons of Aral. Todos los derechos reservados.</p>

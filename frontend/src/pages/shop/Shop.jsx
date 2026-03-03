@@ -4,103 +4,168 @@ import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const TIPOS_FIJOS = [
-  { id: 1, nombre: "Ropa" },
-  { id: 2, nombre: "Discos" },
-  { id: 3, nombre: "Accesorios" },
-  { id: 4, nombre: "Otros" },
-];
-
 const ORDER_OPTIONS = [
   { value: "newest", label: "Más nuevo" },
   { value: "oldest", label: "Más antiguo" },
   { value: "price_asc", label: "Precio: menor a mayor" },
-  { value: "price_desc", label: "Precio: mayor a menor" },
+  { value: "price_desc", label: "Precio: mayor a mayor" },
 ];
 
+const LS_KEYS = {
+  productos: "productos",
+  tipos: "tipos-productos",
+};
+
+const TTL_MS = 5 * 60 * 1000;
+
+function readCache(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!("ts" in parsed) || !("data" in parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+  } catch { }
+}
+
+function isFresh(ts) {
+  return typeof ts === "number" && Date.now() - ts < TTL_MS;
+}
+
 function Tienda() {
-  const [productos, setProductos] = useState([]);
   const [productosAll, setProductosAll] = useState([]);
+  const [tiposAll, setTiposAll] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [tipoSeleccionado, setTipoSeleccionado] = useState(null);
   const [order, setOrder] = useState("newest");
 
-  const tipos = TIPOS_FIJOS;
-
-  const countByTipo = useMemo(() => {
-    const map = new Map();
-    for (const t of tipos) map.set(t.id, 0);
-
-    for (const p of productosAll) {
-      const id = p?.tipo?.id ?? p?.tipo_producto_id;
-      if (id != null) map.set(id, (map.get(id) || 0) + 1);
-    }
-
-    return map;
-  }, [productosAll, tipos]);
-
-  const mobileTipoValue = tipoSeleccionado === null ? "all" : String(tipoSeleccionado);
-
   useEffect(() => {
-    const loadAll = async () => {
+    const cachedProd = readCache(LS_KEYS.productos);
+    const cachedTipos = readCache(LS_KEYS.tipos);
+
+    const hasAnyCache = Boolean(cachedProd?.data || cachedTipos?.data);
+
+    if (Array.isArray(cachedProd?.data)) setProductosAll(cachedProd.data);
+    if (Array.isArray(cachedTipos?.data)) setTiposAll(cachedTipos.data);
+
+    setLoading(!hasAnyCache);
+
+    const controller = new AbortController();
+
+    const loadFresh = async () => {
       try {
-        const params = new URLSearchParams();
-        params.set("order", "newest");
+        const [prodData, tiposData] = await Promise.all([
+          fetch(`${API_URL}/productos`, {
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+          }).then(async (r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status} (productos)`);
+            const json = await r.json();
+            return Array.isArray(json) ? json : (json?.data ?? []);
+          }),
+          fetch(`${API_URL}/tipos-productos`, {
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+          }).then(async (r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status} (tipos)`);
+            const json = await r.json();
+            return Array.isArray(json) ? json : (json?.data ?? []);
+          }),
+        ]);
 
-        const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
-          headers: { Accept: "application/json" },
-        });
+        setProductosAll(prodData);
+        setTiposAll(tiposData);
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const json = await res.json();
-        const data = Array.isArray(json) ? json : (json?.data ?? []);
-        setProductosAll(data);
+        writeCache(LS_KEYS.productos, prodData);
+        writeCache(LS_KEYS.tipos, tiposData);
       } catch (e) {
-        console.error("Error cargando productosAll:", e);
-      }
-    };
-
-    loadAll();
-  }, []);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-
-        const params = new URLSearchParams();
-        params.set("order", order);
-        if (tipoSeleccionado) params.set("tipo", String(tipoSeleccionado));
-
-        const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
-          headers: { Accept: "application/json" },
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const json = await res.json();
-        const data = Array.isArray(json) ? json : (json?.data ?? []);
-        setProductos(data);
-      } catch (e) {
-        console.error("Error cargando productos:", e);
-        setProductos([]);
+        if (e?.name !== "AbortError") console.error("Error cargando tienda:", e);
       } finally {
         setLoading(false);
       }
     };
 
-    load();
-  }, [tipoSeleccionado, order]);
+    loadFresh();
+
+    return () => controller.abort();
+  }, []);
+
+  const countByTipo = useMemo(() => {
+    const map = new Map();
+    for (const p of productosAll) {
+      const id = p?.tipo?.id ?? p?.tipo_producto_id;
+      if (id != null) map.set(id, (map.get(id) || 0) + 1);
+    }
+    return map;
+  }, [productosAll]);
+
+  const tiposVisibles = useMemo(() => {
+    const list = (Array.isArray(tiposAll) ? tiposAll : [])
+      .map((t) => ({
+        id: t.id,
+        nombre: t.nombre ?? t.name ?? `Tipo ${t.id}`,
+        count: countByTipo.get(t.id) || 0,
+      }))
+      .filter((t) => t.count > 0);
+
+    return list;
+  }, [tiposAll, countByTipo]);
+
+  useEffect(() => {
+    if (tipoSeleccionado === null) return;
+    const ok = tiposVisibles.some((t) => t.id === tipoSeleccionado);
+    if (!ok) setTipoSeleccionado(null);
+  }, [tipoSeleccionado, tiposVisibles]);
+
+  const productos = useMemo(() => {
+    let list = productosAll;
+
+    if (tipoSeleccionado !== null) {
+      list = list.filter((p) => {
+        const id = p?.tipo?.id ?? p?.tipo_producto_id;
+        return id === tipoSeleccionado;
+      });
+    }
+
+    const getTime = (p) => {
+      const raw = p?.created_at ?? p?.createdAt ?? p?.fecha_creacion ?? null;
+      const t = raw ? Date.parse(raw) : NaN;
+      return Number.isFinite(t) ? t : 0;
+    };
+
+    const getPrice = (p) => {
+      const n = Number(p?.precio);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const sorted = [...list];
+
+    if (order === "newest") sorted.sort((a, b) => getTime(b) - getTime(a));
+    if (order === "oldest") sorted.sort((a, b) => getTime(a) - getTime(b));
+    if (order === "price_asc") sorted.sort((a, b) => getPrice(a) - getPrice(b));
+    if (order === "price_desc") sorted.sort((a, b) => getPrice(b) - getPrice(a));
+
+    return sorted;
+  }, [productosAll, tipoSeleccionado, order]);
 
   const totalItems = productos.length;
+  const mobileTipoValue = tipoSeleccionado === null ? "all" : String(tipoSeleccionado);
 
   return (
     <section className="container tiendaContainer">
       <div className="d-flex tiendaLayout gap-4">
         <aside className="tiendaSidebar d-none d-md-block">
-          <h3 className="tiendaSidebarTitle">CATEGORIAS</h3>
+          <h3 className="tiendaSidebarTitle">CATEGORÍAS</h3>
           <ul className="tiendaCats list-unstyled">
             <li>
               <button
@@ -112,21 +177,19 @@ function Tienda() {
                 <span className="tiendaCatCount">{productosAll.length}</span>
               </button>
             </li>
-            {tipos.map((t) => {
-              const count = countByTipo.get(t.id) || 0;
-              return (
-                <li key={t.id}>
-                  <button
-                    type="button"
-                    className={`tiendaCatBtn ${tipoSeleccionado === t.id ? "isActive" : ""}`}
-                    onClick={() => setTipoSeleccionado(t.id)}
-                  >
-                    {t.nombre}
-                    <span className="tiendaCatCount">{count}</span>
-                  </button>
-                </li>
-              );
-            })}
+
+            {tiposVisibles.map((t) => (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  className={`tiendaCatBtn ${tipoSeleccionado === t.id ? "isActive" : ""}`}
+                  onClick={() => setTipoSeleccionado(t.id)}
+                >
+                  {t.nombre}
+                  <span className="tiendaCatCount">{t.count}</span>
+                </button>
+              </li>
+            ))}
           </ul>
         </aside>
 
@@ -169,14 +232,11 @@ function Tienda() {
                   }}
                 >
                   <option value="all">Todos ({productosAll.length})</option>
-                  {tipos.map((t) => {
-                    const count = countByTipo.get(t.id) || 0;
-                    return (
-                      <option key={t.id} value={String(t.id)}>
-                        {t.nombre} ({count})
-                      </option>
-                    );
-                  })}
+                  {tiposVisibles.map((t) => (
+                    <option key={t.id} value={String(t.id)}>
+                      {t.nombre} ({t.count})
+                    </option>
+                  ))}
                 </select>
               </div>
 

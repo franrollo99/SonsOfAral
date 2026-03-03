@@ -128,7 +128,7 @@
 }
 
 .modalClose img {
-  width: 16px;
+  width: 30px;
 }
 
 .modalClose:hover {
@@ -165,9 +165,13 @@
   padding: 0 2px;
 }
 
+.releaseDescription {
+  font-size: 1.05rem;
+}
+
 .smallMeta {
   color: rgba(255, 255, 255, .75);
-  font-size: .78rem;
+  font-size: .9rem;
   letter-spacing: .14em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -219,7 +223,7 @@
 .sub {
   margin-top: 8px;
   color: rgba(255, 255, 255, .72);
-  font-size: .85rem;
+  font-size: .9rem;
   letter-spacing: .12em;
   text-transform: uppercase;
 }
@@ -277,6 +281,7 @@
   align-items: center;
   padding: 10px 6px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
+  font-size: 1.05rem;
 }
 
 .trackRow::before {
@@ -307,6 +312,7 @@
 
   .releaseModal {
     max-height: 88vh;
+    max-width: 500px;
   }
 
   .cover {

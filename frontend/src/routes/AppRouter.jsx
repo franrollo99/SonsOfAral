@@ -22,6 +22,8 @@ import UsersManagement from "../pages/admin/adminManagement/UsersManagement";
 import OrdersManagement from "../pages/admin/adminManagement/OrdersManagement";
 import ProtectedRoute from "../components/ProtectedRoute";
 import RegisterSuccess from "../pages/auth/RegisterSuccess";
+import Privacidad from "../pages/legal/Privacidad";
+import AvisoLegal from "../pages/legal/AvisoLegal";
 
 export function AppRouter() {
   return (
@@ -50,6 +52,8 @@ export function AppRouter() {
         <Route path="/area-admin/categorias" element={<ProductTypesManagement />} />
         <Route path="/area-admin/usuarios" element={<UsersManagement />} />
         <Route path="/area-admin/pedidos" element={<OrdersManagement />} />
+        <Route path="/privacidad" element={<Privacidad />} />
+        <Route path="/aviso-legal" element={<AvisoLegal />} />
       </Route>
     </Routes>
   );

@@ -21,6 +21,7 @@
   letter-spacing: 0.1em;
   font-weight: 600;
   border-bottom: 2px solid transparent;
+  font-size: 18px;
 }
 
 .navbarLinks a:hover {
@@ -114,7 +115,7 @@
 
 .mobileMenu .cartIcon:hover,
 .mobileMenu .loginIcon:hover {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .mobileBtn {
