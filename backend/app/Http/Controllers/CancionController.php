@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cancion;
-use Illuminate\Http\Response;
 use App\Http\Requests\CancionRequest;
 use App\Http\Resources\CancionResource;
+use App\Models\Cancion;
+use App\Models\Multimedia;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class CancionController extends Controller
 {
@@ -39,7 +41,7 @@ class CancionController extends Controller
      */
     public function index()
     {
-        $canciones = Cancion::with('lanzamiento')->get();
+        $canciones = Cancion::with(['lanzamiento', 'audio'])->get();
         return CancionResource::collection($canciones);
     }
 
@@ -106,7 +108,23 @@ class CancionController extends Controller
     public function store(CancionRequest $request)
     {
         $cancion = Cancion::create($request->validated());
-        $cancion->load('lanzamiento');
+
+        if ($request->hasFile('audio')) {
+            $path = $request->file('audio')->store('audio/canciones', 'public');
+
+            $media = Multimedia::create([
+                'archivo' => $path,
+                'nombre_original' => $request->file('audio')->getClientOriginalName(),
+                'tipo' => 'audio',
+                'mime_type' => $request->file('audio')->getMimeType(),
+                'peso' => $request->file('audio')->getSize(),
+            ]);
+
+            $cancion->audio_id = $media->id;
+            $cancion->save();
+        }
+
+        $cancion->load(['lanzamiento', 'audio']);
 
         return (new CancionResource($cancion))
             ->response()
@@ -155,7 +173,7 @@ class CancionController extends Controller
      */
     public function show(int $id)
     {
-        $cancion = Cancion::with('lanzamiento')->findOrFail($id);
+        $cancion = Cancion::with(['lanzamiento', 'audio'])->findOrFail($id);
         return new CancionResource($cancion);
     }
 
@@ -232,13 +250,35 @@ class CancionController extends Controller
      * )
      */
     public function update(CancionRequest $request, int $id)
-    {
-        $cancion = Cancion::findOrFail($id);
-        $cancion->update($request->validated());
-        $cancion->load('lanzamiento');
+{
+    $cancion = Cancion::findOrFail($id);
 
-        return new CancionResource($cancion);
+    $cancion->update($request->validated());
+
+    if ($request->hasFile('audio')) {
+        if ($cancion->audio) {
+            Storage::disk('public')->delete($cancion->audio->archivo);
+            $cancion->audio->delete();
+        }
+
+        $path = $request->file('audio')->store('audio/canciones', 'public');
+
+        $media = Multimedia::create([
+            'archivo' => $path,
+            'nombre_original' => $request->file('audio')->getClientOriginalName(),
+            'tipo' => 'audio',
+            'mime_type' => $request->file('audio')->getMimeType(),
+            'peso' => $request->file('audio')->getSize(),
+        ]);
+
+        $cancion->audio_id = $media->id;
+        $cancion->save();
     }
+
+    $cancion->load(['lanzamiento', 'audio']);
+
+    return new CancionResource($cancion);
+}
 
     /**
      * @OA\Delete(
@@ -282,7 +322,7 @@ class CancionController extends Controller
     {
         $cancion = Cancion::findOrFail($id);
         $cancion->delete();
-        
+
         return response()->json(['message' => 'OK']);
     }
 }

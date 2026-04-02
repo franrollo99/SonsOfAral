@@ -13,6 +13,7 @@ class CancionRequest extends FormRequest
             'duracion' => ['required', 'integer', 'min:1',],
             'track_number' => ['nullable', 'integer', 'min:1',],
             'lanzamiento_id' => ['required', 'exists:lanzamientos,id',],
+            'audio' => ['nullable', 'file', 'mimes:mp3,wav,ogg'],
         ];
     }
 
@@ -29,6 +30,8 @@ class CancionRequest extends FormRequest
             'track_number.min' => 'El número de pista debe ser mayor que 0.',
             'lanzamiento_id.required' => 'Debes seleccionar un lanzamiento.',
             'lanzamiento_id.exists' => 'El lanzamiento asociado no existe.',
+            'audio.file' => 'El archivo debe ser un audio válido.',
+            'audio.mimes' => 'El audio debe ser mp3, wav o ogg.',
         ];
     }
 }

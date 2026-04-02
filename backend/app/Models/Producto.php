@@ -9,36 +9,31 @@ class Producto extends Model
     protected $table = 'productos';
 
     protected $fillable = [
-        'tipo_producto_id',
         'nombre',
         'descripcion',
+        'tipo_producto',
+        'tiene_talla',
         'tallas_disponibles',
         'precio',
         'slug',
         'activo',
-        'imagen',
+        'imagen_id',
     ];
 
     protected $casts = [
         'tallas_disponibles' => 'array',
-        'tipo_producto_id' => 'integer',
+        'tiene_talla' => 'boolean',
         'activo' => 'boolean',
         'precio' => 'float',
     ];
 
-
-    public function tipo()
-    {
-        return $this->belongsTo(TipoProducto::class, 'tipo_producto_id');
-    }
-
-    public function pedidoProductos()
-    {
-        return $this->hasMany(PedidoProducto::class);
-    }
-
     public function getPrecioFormateadoAttribute()
     {
         return number_format($this->precio, 2, ',', '.') . ' €';
+    }
+
+    public function imagen()
+    {
+        return $this->belongsTo(Multimedia::class, 'imagen_id');
     }
 }

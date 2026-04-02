@@ -18,16 +18,18 @@ class ProductoResource extends JsonResource
             'id' => $this->id,
             'nombre' => $this->nombre,
             'descripcion' => $this->descripcion,
+            'tipo_producto' => $this->tipo_producto,
+            'tiene_talla' => $this->tiene_talla,
             'tallas_disponibles' => $this->tallas_disponibles,
             'precio' => $this->precio,
             'precio_formateado' => $this->precio_formateado,
             'slug' => $this->slug,
             'activo' => $this->activo ? 1 : 0,
-            'imagen' =>  $this->imagen ? asset('storage/productos/' . $this->imagen) : null,
-            'tipo_producto_id' => $this->tipo_producto_id,
-            'tipo' => new TipoProductoResource(
-                $this->whenLoaded('tipo')
-            ),
+            'imagen' => $this->imagen ? [
+                'id' => $this->imagen->id,
+                'url' => $this->imagen->url,
+                'nombre_original' => $this->imagen->nombre_original,
+            ] : null,
         ];
     }
 }

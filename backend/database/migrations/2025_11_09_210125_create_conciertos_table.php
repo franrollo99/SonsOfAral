@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('precio_entrada', 10, 2)->nullable();
             $table->boolean('entrada_anticipada')->default(false);
             $table->string('enlace_entrada_anticipada')->nullable();
-            $table->string('imagen', 255)->nullable();
+            $table->foreignId('cartel_id')->nullable()->constrained('multimedia')->nullOnDelete();
             $table->timestamps();
         });
     }

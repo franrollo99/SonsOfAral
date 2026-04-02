@@ -104,7 +104,7 @@ function Cart() {
                             <div className="cartItem" key={`${it.id}-${it.talla ?? "nosize"}`}>
                                 <div className="cartItemImg">
                                     <img
-                                        src={it.imagen ?? "/images/productos/camiseta01.png"}
+                                        src={it.imagen?.url}
                                         alt={it.nombre}
                                         loading="lazy"
                                     />

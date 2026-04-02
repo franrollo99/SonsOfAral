@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Concierto;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ConciertoRequest;
 use App\Http\Resources\ConciertoResource;
+use App\Models\Concierto;
+use App\Models\Multimedia;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class ConciertoController extends Controller
 {
@@ -46,9 +46,17 @@ class ConciertoController extends Controller
      */
     public function index()
     {
-        $conciertos = Concierto::query()
-            ->orderBy('fecha', 'asc')
-            ->get();
+        $sort = request('sort');
+
+        $query = Concierto::query();
+
+        if ($sort === 'latest') {
+            $query->orderBy('fecha', 'desc');
+        } else {
+            $query->orderBy('fecha', 'asc');
+        }
+
+        $conciertos = $query->get();
 
         return ConciertoResource::collection($conciertos);
     }
@@ -147,13 +155,22 @@ class ConciertoController extends Controller
     {
         $data = $request->validated();
 
-        unset($data['imagen']);
+        unset($data['cartel']);
 
         $concierto = Concierto::create($data);
 
-        if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('conciertos', 'public');
-            $concierto->imagen = basename($path);
+        if ($request->hasFile('cartel')) {
+            $path = $request->file('cartel')->store('imagenes/conciertos', 'public');
+
+            $media = \App\Models\Multimedia::create([
+                'archivo' => $path,
+                'nombre_original' => $request->file('cartel')->getClientOriginalName(),
+                'tipo' => 'imagen',
+                'mime_type' => $request->file('cartel')->getMimeType(),
+                'peso' => $request->file('cartel')->getSize(),
+            ]);
+
+            $concierto->cartel_id = $media->id;
             $concierto->save();
         }
 
@@ -206,19 +223,38 @@ class ConciertoController extends Controller
         $concierto = Concierto::findOrFail($id);
 
         $data = $request->validated();
-        unset($data['imagen']);
+        unset($data['cartel']);
 
         $concierto->update($data);
 
-        if ($request->hasFile('imagen')) {
-            if (!empty($concierto->imagen)) {
-                Storage::disk('public')->delete('conciertos/' . $concierto->imagen);
-            }
-
-            $path = $request->file('imagen')->store('conciertos', 'public');
-            $concierto->imagen = basename($path);
+        if ($request->boolean('remove_cartel') && $concierto->cartel) {
+            Storage::disk('public')->delete($concierto->cartel->archivo);
+            $concierto->cartel->delete();
+            $concierto->cartel_id = null;
             $concierto->save();
         }
+
+        if ($request->hasFile('cartel')) {
+            if ($concierto->cartel) {
+                Storage::disk('public')->delete($concierto->cartel->archivo);
+                $concierto->cartel->delete();
+            }
+
+            $path = $request->file('cartel')->store('imagenes/conciertos', 'public');
+
+            $media = Multimedia::create([
+                'archivo' => $path,
+                'nombre_original' => $request->file('cartel')->getClientOriginalName(),
+                'tipo' => 'imagen',
+                'mime_type' => $request->file('cartel')->getMimeType(),
+                'peso' => $request->file('cartel')->getSize(),
+            ]);
+
+            $concierto->cartel_id = $media->id;
+            $concierto->save();
+        }
+
+        $concierto->load('cartel');
 
         return new ConciertoResource($concierto);
     }
@@ -251,8 +287,9 @@ class ConciertoController extends Controller
     {
         $concierto = Concierto::findOrFail($id);
 
-        if (!empty($concierto->imagen)) {
-            Storage::disk('public')->delete('conciertos/' . $concierto->imagen);
+        if ($concierto->cartel) {
+            Storage::disk('public')->delete($concierto->cartel->archivo);
+            $concierto->cartel->delete();
         }
 
         $concierto->delete();

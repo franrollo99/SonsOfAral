@@ -26,7 +26,10 @@ const emptyConcert = {
   precioEntrada: "",
   entradaAnticipada: "0",
   enlaceEntradaAnticipada: "",
-  imagen: null,
+  cartel: null,
+  cartelUrlActual: "",
+  cartelNombreActual: "",
+  removeCartel: false,
 };
 
 function ConcertsManagement() {
@@ -34,12 +37,20 @@ function ConcertsManagement() {
     <AdminCrudPage
       title="Conciertos"
       entityName="concierto"
-      listPath="/conciertos"
+      listPath="/conciertos?sort=latest"
       createPath="/conciertos"
       updatePath={(id) => `/conciertos/${id}`}
       deletePath={(id) => `/conciertos/${id}`}
       requireAdmin={true}
       emptyForm={emptyConcert}
+      mapRowToForm={(base, row) => ({
+        ...base,
+        ...(row || {}),
+        cartel: null,
+        cartelUrlActual: row?.cartel?.url || "",
+        cartelNombreActual: row?.cartel?.nombre_original || "",
+        removeCartel: false,
+      })}
       searchKeys={[
         "id",
         "fecha",
@@ -53,18 +64,18 @@ function ConcertsManagement() {
       columns={[
         { key: "id", header: "ID", className: "adminMono" },
         { key: "fecha", header: "Fecha", render: (v) => date(v) },
+        { key: "lugar", header: "Lugar", className: "adminTruncate", title: (v) => v || "" },
         { key: "provincia", header: "Provincia" },
         { key: "municipio", header: "Municipio" },
-        { key: "lugar", header: "Lugar", className: "adminTruncate", title: (v) => v || "" },
         { key: "precioEntrada", header: "Precio", render: (v) => money(v) },
         { key: "entradaAnticipada", header: "Anticipada", render: (v) => yesNo(v) },
       ]}
       columnsGridCss={`
         grid-template-columns:
           100px
-          1fr
-          1fr
           2fr
+          1fr
+          1fr
           100px
           100px
           150px;
@@ -77,11 +88,14 @@ function ConcertsManagement() {
         { name: "municipio", label: "Municipio", type: "text" },
         { name: "lugar", label: "Lugar", type: "text", full: true },
         {
-          name: "imagen",
+          name: "cartel",
           label: "Cartel",
           type: "file",
           full: true,
           accept: "image/png,image/jpeg,image/webp",
+          currentUrlKey: "cartelUrlActual",
+          currentNameKey: "cartelNombreActual",
+          removeFlagKey: "removeCartel",
         },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true },
         {
@@ -94,7 +108,6 @@ function ConcertsManagement() {
             { value: true, label: "Sí" },
           ],
         },
-
         {
           name: "enlaceEntradaAnticipada",
           label: "Enlace entrada anticipada",
@@ -119,14 +132,14 @@ function ConcertsManagement() {
         fd.append("precio_entrada", form.precioEntrada === "" ? "0" : String(Number(form.precioEntrada)));
         fd.append("entrada_anticipada", anticipada ? "1" : "0");
         fd.append("enlace_entrada_anticipada", anticipada ? (form.enlaceEntradaAnticipada || "") : "");
+        fd.append("remove_cartel", form.removeCartel ? "1" : "0");
 
-        if (form.imagen instanceof File) {
-          fd.append("imagen", form.imagen);
+        if (form.cartel instanceof File) {
+          fd.append("cartel", form.cartel);
         }
 
         return fd;
       }}
-
     />
   );
 }

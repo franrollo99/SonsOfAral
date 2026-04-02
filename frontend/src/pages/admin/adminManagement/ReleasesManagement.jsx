@@ -18,8 +18,11 @@ const emptyLanzamiento = {
   compraUrl: "",
   audioUrl: "",
   videoUrl: "",
-  imagen: null,
-  cancionesDraft: [{ _k: "base", titulo: "", duracionMin: "", duracionSeg: "" }],
+  portada: null,
+  portadaUrlActual: "",
+  portadaNombreActual: "",
+  removePortada: false,
+  cancionesDraft: [{ _k: "base", titulo: "", duracionMin: "", duracionSeg: "", audio: null }],
 };
 
 const toSeconds = (min, sec) => {
@@ -93,7 +96,15 @@ function ReleasesManagement() {
               ? base.cancionesDraft
               : [{ _k: "base", titulo: "", duracion: "" }];
 
-        return { ...base, cancionesDraft: draft };
+        return {
+          ...base,
+          ...(row || {}),
+          portada: null,
+          portadaUrlActual: row?.portada?.url || "",
+          portadaNombreActual: row?.portada?.nombre_original || "",
+          removePortada: false,
+          cancionesDraft: draft,
+        };
       }}
       columns={[
         { key: "id", header: "ID", className: "adminMono" },
@@ -127,7 +138,13 @@ function ReleasesManagement() {
         },
         { name: "titulo", label: "Título", type: "text", full: true },
         { name: "fechaLanzamiento", label: "Fecha lanzamiento", type: "date" },
-        { name: "imagen", label: "Imagen (portada)", type: "file", full: true, accept: "image/png,image/jpeg,image/webp" },
+        {
+          name: "portada", label: "Portada", type: "file", full: true,
+          accept: "image/png,image/jpeg,image/webp",
+          currentUrlKey: "portadaUrlActual",
+          currentNameKey: "portadaNombreActual",
+          removeFlagKey: "removePortada",
+        },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 6 },
         { name: "compraUrl", label: "URL compra", type: "text", full: true },
         { name: "audioUrl", label: "URL audio", type: "text", full: true },
@@ -235,26 +252,26 @@ function ReleasesManagement() {
         fd.append("compra_url", f.compraUrl || "");
         fd.append("audio_url", f.audioUrl || "");
         fd.append("video_url", f.videoUrl || "");
+        fd.append("remove_portada", f.removePortada ? "1" : "0");
+        if (f.portada instanceof File) fd.append("portada", f.portada);
 
         const cancionesNorm = (f.cancionesDraft || []).map((x) => ({
           id: x.id ?? null,
           titulo: (x.titulo ?? "").trim(),
           duracion: toSeconds(x.duracionMin, x.duracionSeg),
+          audio: x.audio || null,
         }));
 
         const primeraOk = cancionesNorm[0] && cancionesNorm[0].titulo && cancionesNorm[0].duracion;
         if (!primeraOk) throw new Error("Debes añadir al menos 1 canción (nombre y duración).");
 
-        fd.append(
-          "canciones",
-          JSON.stringify(
-            cancionesNorm
-              .filter((x) => x.titulo && x.duracion)
-              .map((x, i) => ({ ...x, track: i + 1 }))
-          )
+        fd.append("canciones", JSON.stringify(
+          cancionesNorm
+            .filter((x) => x.titulo && x.duracion)
+            .map((x, i) => ({ ...x, track: i + 1 }))
+        )
         );
 
-        if (f.imagen instanceof File) fd.append("imagen", f.imagen);
         return fd;
       }}
     />

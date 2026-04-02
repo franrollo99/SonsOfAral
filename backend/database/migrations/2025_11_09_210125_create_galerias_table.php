@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tipos_productos', function (Blueprint $table) {
+        Schema::create('galerias', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 100)->unique();
+            $table->enum('tipo', ['concierto', 'banda']);
+            $table->string('titulo')->nullable();
+            $table->foreignId('concierto_id')->nullable()->constrained('conciertos')->nullOnDelete();
+            $table->foreignId('portada_id')->nullable()->constrained('multimedia')->nullOnDelete();
             $table->timestamps();
         });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('tipos_productos');
+        Schema::dropIfExists('galerias');
     }
 };

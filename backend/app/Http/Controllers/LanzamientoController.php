@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Lanzamiento;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\LanzamientoRequest;
 use App\Http\Resources\LanzamientoResource;
+use App\Models\Lanzamiento;
+use App\Models\Multimedia;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class LanzamientoController extends Controller
 {
@@ -40,17 +41,17 @@ class LanzamientoController extends Controller
      * )
      */
     public function index(Request $request)
-{
-    $query = Lanzamiento::query()
-        ->with([
-            'canciones' => fn ($q) => $q
-                ->orderBy('track_number')
-                ->select('id', 'lanzamiento_id', 'titulo', 'duracion', 'track_number')
-        ])
-        ->orderByDesc('fecha_lanzamiento');
+    {
+        $query = Lanzamiento::query()
+            ->with([
+                'canciones' => fn($q) => $q
+                    ->orderBy('track_number')
+                    ->select('id', 'lanzamiento_id', 'titulo', 'duracion', 'track_number')
+            ])
+            ->orderByDesc('fecha_lanzamiento');
 
-    return LanzamientoResource::collection($query->get());
-}
+        return LanzamientoResource::collection($query->get());
+    }
 
     /**
      * @OA\Get(
@@ -106,7 +107,7 @@ class LanzamientoController extends Controller
      *         @OA\Property(property="compra_url", type="string", nullable=true),
      *         @OA\Property(property="audio_url", type="string", nullable=true),
      *         @OA\Property(property="video_url", type="string", nullable=true),
-     *         @OA\Property(property="imagen", type="string", format="binary", nullable=true),
+     *         @OA\Property(property="portada", type="string", format="binary", nullable=true),
      *         @OA\Property(
      *           property="canciones",
      *           description="JSON string. Ej: [{\"titulo\":\"Intro\",\"duracion\":83,\"track\":1}]",
@@ -136,7 +137,7 @@ class LanzamientoController extends Controller
             $data['slug'] = Str::slug($data['titulo']);
         }
 
-        unset($data['imagen']);
+        unset($data['portada']);
 
         $canciones = $request->input('canciones');
 
@@ -149,9 +150,18 @@ class LanzamientoController extends Controller
         $lanzamiento = DB::transaction(function () use ($request, $data, $canciones) {
             $lanzamiento = Lanzamiento::create($data);
 
-            if ($request->hasFile('imagen')) {
-                $path = $request->file('imagen')->store('lanzamientos', 'public');
-                $lanzamiento->imagen = basename($path);
+            if ($request->hasFile('portada')) {
+                $path = $request->file('portada')->store('imagenes/lanzamientos', 'public');
+
+                $media = Multimedia::create([
+                    'archivo' => $path,
+                    'nombre_original' => $request->file('portada')->getClientOriginalName(),
+                    'tipo' => 'imagen',
+                    'mime_type' => $request->file('portada')->getMimeType(),
+                    'peso' => $request->file('portada')->getSize(),
+                ]);
+
+                $lanzamiento->portada_id = $media->id;
                 $lanzamiento->save();
             }
 
@@ -210,7 +220,7 @@ class LanzamientoController extends Controller
      *         @OA\Property(property="compra_url", type="string", nullable=true),
      *         @OA\Property(property="audio_url", type="string", nullable=true),
      *         @OA\Property(property="video_url", type="string", nullable=true),
-     *         @OA\Property(property="imagen", type="string", format="binary", nullable=true),
+     *         @OA\Property(property="portada", type="string", format="binary", nullable=true),
      *         @OA\Property(
      *           property="canciones",
      *           description="JSON string. Si trae id: actualiza. Si no trae id: crea. Las existentes no enviadas: se eliminan.",
@@ -245,7 +255,7 @@ class LanzamientoController extends Controller
             unset($data['slug']);
         }
 
-        unset($data['imagen']);
+        unset($data['portada']);
 
         $canciones = $request->input('canciones');
 
@@ -258,13 +268,31 @@ class LanzamientoController extends Controller
         $lanzamiento = DB::transaction(function () use ($request, $lanzamiento, $data, $canciones) {
             $lanzamiento->update($data);
 
-            if ($request->hasFile('imagen')) {
-                if (!empty($lanzamiento->imagen)) {
-                    Storage::disk('public')->delete('lanzamientos/' . $lanzamiento->imagen);
+            if ($request->boolean('remove_portada')) {
+                if ($lanzamiento->portada) {
+                    Storage::disk('public')->delete($lanzamiento->portada->archivo);
+                    $lanzamiento->portada->delete();
+                    $lanzamiento->portada_id = null;
+                }
+            }
+
+            if ($request->hasFile('portada')) {
+                if ($lanzamiento->portada) {
+                    Storage::disk('public')->delete($lanzamiento->portada->archivo);
+                    $lanzamiento->portada->delete();
                 }
 
-                $path = $request->file('imagen')->store('lanzamientos', 'public');
-                $lanzamiento->imagen = basename($path);
+                $path = $request->file('portada')->store('imagenes/lanzamientos', 'public');
+
+                $media = Multimedia::create([
+                    'archivo' => $path,
+                    'nombre_original' => $request->file('portada')->getClientOriginalName(),
+                    'tipo' => 'imagen',
+                    'mime_type' => $request->file('portada')->getMimeType(),
+                    'peso' => $request->file('portada')->getSize(),
+                ]);
+
+                $lanzamiento->portada_id = $media->id;
                 $lanzamiento->save();
             }
 
@@ -310,8 +338,9 @@ class LanzamientoController extends Controller
     {
         $lanzamiento = Lanzamiento::findOrFail($id);
 
-        if (!empty($lanzamiento->imagen)) {
-            Storage::disk('public')->delete('lanzamientos/' . $lanzamiento->imagen);
+        if ($lanzamiento->portada) {
+            Storage::disk('public')->delete($lanzamiento->portada->archivo);
+            $lanzamiento->portada->delete();
         }
 
         $lanzamiento->delete();

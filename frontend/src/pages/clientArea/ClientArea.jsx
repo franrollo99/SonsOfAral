@@ -636,7 +636,7 @@ function ClientArea() {
                         <div className="areaClienteLineName">{p.nombreProducto ?? p.nombre_producto ?? "-"}</div>
                         <div>{p.talla || "-"}</div>
                         <div className="text-end">{p.cantidad}</div>
-                        <div className="text-end">{formatMoney(p.precioUnitarioSnapshot ?? p.precio_unitario_snapshot)}</div>
+                        <div className="text-end">{formatMoney(p.precioUnitarioSnapshot ?? p.precio_unitario)}</div>
                         <div className="text-end">{formatMoney(p.subtotal)}</div>
                       </div>
                     ))

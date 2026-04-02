@@ -130,7 +130,7 @@ function ProductoDetalle() {
               <div className="productoDetalleImgBox">
                 <img
                   className="productoDetalleImg"
-                  src={producto.imagen ?? "/images/productos/camiseta01.png"}
+                  src={producto.imagen?.url}
                   alt={producto.nombre}
                 />
               </div>

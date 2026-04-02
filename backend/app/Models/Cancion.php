@@ -13,10 +13,16 @@ class Cancion extends Model
         'titulo',
         'duracion',
         'track_number',
+        'audio_id',
     ];
 
     public function lanzamiento()
     {
         return $this->belongsTo(Lanzamiento::class);
+    }
+
+    public function audio()
+    {
+        return $this->belongsTo(Multimedia::class, 'audio_id');
     }
 }

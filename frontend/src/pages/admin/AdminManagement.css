@@ -17,11 +17,6 @@
   font-weight: 750;
 }
 
-.adminMuted {
-  opacity: .75;
-  margin: 6px 0 0;
-}
-
 .adminError {
   margin: 12px 0 0;
   color: #ffb4b4;
@@ -83,7 +78,6 @@
 }
 
 .adminControlLabel {
-  font-size: 12px;
   opacity: .75;
 }
 
@@ -166,7 +160,7 @@
 .adminActions {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .adminActionBtn {
@@ -175,7 +169,6 @@
   background: rgba(255, 255, 255, .04);
   color: #fff;
   padding: 7px 10px;
-  font-size: 13px;
 }
 
 .adminActionBtn--danger {
@@ -211,7 +204,7 @@
 }
 
 /* ============ Create band (floating) ============ */
-.adminCreateBand{
+.adminCreateBand {
   position: sticky;
   bottom: 0;
   width: 100%;
@@ -220,20 +213,20 @@
   padding: 18px 0;
   display: flex;
   justify-content: center;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 5;
 }
 
-.adminCreateBandInner{
+.adminCreateBandInner {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.adminCreateBtn{
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.16);
+.adminCreateBtn {
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .16);
   color: var(--text);
   padding: 12px 26px;
   border-radius: 8px;
@@ -242,9 +235,10 @@
   box-shadow: none;
 }
 
-.adminCreateBtn:hover{
-  background: rgba(255,255,255,.08);
+.adminCreateBtn:hover {
+  background: rgba(255, 255, 255, .08);
 }
+
 /* ============ Modals ============ */
 .adminModalOverlay {
   position: fixed;
@@ -265,7 +259,7 @@
   background: rgba(0, 0, 0, .70);
   box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
   padding: 16px;
-  max-height:90vh;
+  max-height: 90vh;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, .22) transparent;
@@ -358,18 +352,18 @@
   }
 }
 
-.adminAfterFields{
+.adminAfterFields {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,.06);
+  border-top: 1px solid rgba(255, 255, 255, .06);
 }
 
-.adminSongsTitle{
+.adminSongsTitle {
   font-weight: 700;
   margin: 0 0 10px 0;
 }
 
-.adminSongRow{
+.adminSongRow {
   display: grid;
   grid-template-columns: 30px 1fr 140px 90px;
   gap: 10px;
@@ -377,28 +371,28 @@
   margin-bottom: 10px;
 }
 
-.adminSongTrack{
+.adminSongTrack {
   text-align: right;
   padding-bottom: 10px;
   padding-right: 10px;
 }
 
-.adminSongBtn{
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.16);
+.adminSongBtn {
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .16);
   color: var(--text);
   padding: 10px 14px;
   border-radius: 8px;
   font-weight: 600;
 }
 
-.adminSongField{
+.adminSongField {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.adminSongLabel{
+.adminSongLabel {
   font-size: 0.8rem;
   opacity: .7;
 }

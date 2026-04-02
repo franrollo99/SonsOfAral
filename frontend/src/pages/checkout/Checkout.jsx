@@ -51,7 +51,7 @@ export default function Checkout() {
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) return;
 
-                const u = data?.user ?? data?.data ?? data;
+                const u = data?.data?.user;
 
                 setForm((p) => ({
                     ...p,

@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('canciones', function (Blueprint $table) {
+        Schema::create('multimedia', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lanzamiento_id')->constrained('lanzamientos')->cascadeOnDelete();
-            $table->string('titulo', 255);
-            $table->unsignedSmallInteger('duracion');
-            $table->unsignedSmallInteger('track_number');
+            $table->string('archivo');
+            $table->string('nombre_original')->nullable();
+            $table->enum('tipo', ['imagen', 'audio']);
+            $table->string('mime_type', 100)->nullable(); // image/jpeg, audio/mp3, etc.
+            $table->unsignedBigInteger('peso')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('canciones');
+        Schema::dropIfExists('multimedia');
     }
 };

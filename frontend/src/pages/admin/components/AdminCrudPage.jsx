@@ -339,7 +339,7 @@ function AdminCrudPage({
                   {c.header}
                 </div>
               ))}
-              <div className="text-end">Acciones</div>
+              <div className="text-center">Acciones</div>
             </div>
 
             <div className="adminTableBody">

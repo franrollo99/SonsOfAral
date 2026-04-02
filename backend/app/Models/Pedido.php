@@ -55,9 +55,9 @@ class Pedido extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function productos()
+    public function lineasPedido()
     {
-        return $this->hasMany(PedidoProducto::class, 'pedido_id');
+        return $this->hasMany(LineaPedido::class, 'pedido_id');
     }
 
     public function calcularTotal(): void

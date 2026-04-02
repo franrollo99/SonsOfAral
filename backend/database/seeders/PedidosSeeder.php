@@ -3,12 +3,15 @@
 namespace Database\Seeders;
 
 use App\Models\Pedido;
-use App\Models\PedidoProducto;
+use App\Models\LineaPedido;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class PedidosSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $productos = DB::table('productos')
@@ -24,7 +27,6 @@ class PedidosSeeder extends Seeder
 
         $userIds = [2, 3];
 
-        // Datos de envío fake (para no dejar nulls si ahora son required)
         $direcciones = [
             ['nombre_envio' => 'Laura Martínez', 'direccion' => 'Calle Metal 12, 3ºA', 'municipio' => 'Santander', 'provincia' => 'Cantabria', 'cp' => '39001'],
             ['nombre_envio' => 'Fran Rodríguez', 'direccion' => 'Av. Sons of Aral 7', 'municipio' => 'Torrelavega', 'provincia' => 'Cantabria', 'cp' => '39300'],
@@ -34,7 +36,6 @@ class PedidosSeeder extends Seeder
             $envio = $direcciones[$idx % count($direcciones)];
 
             foreach ($estados as $estado) {
-                // Puedes variar el envío si quieres (0 o 5)
                 $gastosEnvio = 5.00;
 
                 $pedido = Pedido::create([
@@ -42,10 +43,8 @@ class PedidosSeeder extends Seeder
                     'codigo_pedido' => $this->generateCodigoPedido(),
                     'estado'        => $estado,
                     'precio_total'  => 0,
-
-                    // NUEVOS CAMPOS
                     'nombre_envio'  => $envio['nombre_envio'],
-                    'telefono'      => null, // como quieres: NO rellenar por defecto
+                    'telefono'      => null,
                     'direccion'     => $envio['direccion'],
                     'municipio'     => $envio['municipio'],
                     'provincia'     => $envio['provincia'],
@@ -67,18 +66,16 @@ class PedidosSeeder extends Seeder
                     $subtotal = round($cantidad * $precio, 2);
                     $total += $subtotal;
 
-                    PedidoProducto::create([
-                        'pedido_id'                => $pedido->id,
-                        'producto_id'              => $prod->id,
-                        'nombre_producto'          => $prod->nombre,
-                        'talla'                    => $talla,
-                        'cantidad'                 => $cantidad,
-                        'precio_unitario_snapshot' => $precio,
-                        'subtotal'                 => $subtotal,
+                    LineaPedido::create([
+                        'pedido_id' => $pedido->id,
+                        'nombre_producto' => $prod->nombre,
+                        'talla' => $talla,
+                        'cantidad' => $cantidad,
+                        'precio_unitario' => $precio,
+                        'subtotal' => $subtotal,
                     ]);
                 }
 
-                // Total final incluye gastos de envío
                 $pedido->update([
                     'precio_total' => round($total + (float) $pedido->gastos_envio, 2),
                 ]);

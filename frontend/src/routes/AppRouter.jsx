@@ -17,7 +17,6 @@ import ConcertsManagement from "../pages/admin/adminManagement/ConcertsManagemen
 import ReleasesManagement from "../pages/admin/adminManagement/ReleasesManagement";
 import SongsManagement from "../pages/admin/adminManagement/SongsManagement";
 import ProductsManagement from "../pages/admin/adminManagement/ProductsManagement";
-import ProductTypesManagement from "../pages/admin/adminManagement/ProductTypesManagement";
 import UsersManagement from "../pages/admin/adminManagement/UsersManagement";
 import OrdersManagement from "../pages/admin/adminManagement/OrdersManagement";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -49,7 +48,6 @@ export function AppRouter() {
         <Route path="/area-admin/lanzamientos" element={<ReleasesManagement />} />
         <Route path="/area-admin/canciones" element={<SongsManagement />} />
         <Route path="/area-admin/productos" element={<ProductsManagement />} />
-        <Route path="/area-admin/categorias" element={<ProductTypesManagement />} />
         <Route path="/area-admin/usuarios" element={<UsersManagement />} />
         <Route path="/area-admin/pedidos" element={<OrdersManagement />} />
         <Route path="/privacidad" element={<Privacidad />} />

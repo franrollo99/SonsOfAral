@@ -4,33 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PedidoProducto extends Model
+class LineaPedido extends Model
 {
-    protected $table = 'pedido_productos';
+    protected $table = 'lineas_pedido';
 
     protected $fillable = [
         'pedido_id',
-        'producto_id',
         'nombre_producto',
         'talla',
         'cantidad',
-        'precio_unitario_snapshot',
+        'precio_unitario',
         'subtotal',
     ];
 
     protected $casts = [
         'cantidad' => 'integer',
-        'precio_unitario_snapshot' => 'float',
+        'precio_unitario' => 'float',
         'subtotal' => 'float',
     ];
 
     public function pedido()
     {
         return $this->belongsTo(Pedido::class);
-    }
-
-    public function producto()
-    {
-        return $this->belongsTo(Producto::class);
     }
 }

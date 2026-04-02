@@ -17,6 +17,11 @@ class Concierto extends Model
         'precio_entrada',
         'entrada_anticipada',
         'enlace_entrada_anticipada',
-        'imagen',
+        'cartel_id',
     ];
+
+    public function cartel()
+    {
+        return $this->belongsTo(Multimedia::class, 'cartel_id');
+    }
 }

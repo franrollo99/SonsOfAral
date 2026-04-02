@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import "./Home.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -50,12 +49,7 @@ function pickNextConcert(conciertos) {
 
   const parsed = conciertos
     .map((c) => {
-      const rawDate =
-        c?.fecha ||
-        c?.fechaConcierto ||
-        c?.fecha_concierto ||
-        c?.fecha_inicio ||
-        c?.fechaInicio;
+      const rawDate = c?.fecha;
 
       const d = rawDate ? new Date(rawDate) : null;
       if (!d || Number.isNaN(d.getTime())) return { ...c, __date: null };
@@ -81,7 +75,7 @@ function pickLatestAlbum(lanzamientos) {
     })
     .sort((a, b) => b.__t - a.__t);
 
-  return albums[0] || null;
+  return albums[0];
 }
 
 export default function Home() {
@@ -130,25 +124,14 @@ export default function Home() {
     };
 
     const fetchShop = async () => {
-      const [prodRes, tiposRes] = await Promise.all([
-        fetch(`${API_URL}/productos`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        }),
-        fetch(`${API_URL}/tipos-productos`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        }),
-      ]);
+      const prodRes = await fetch(`${API_URL}/productos`, {
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      });
 
       if (prodRes.ok) {
         const json = await prodRes.json().catch(() => ({}));
         writeCache(LS_KEYS.productos, extractData(json));
-      }
-
-      if (tiposRes.ok) {
-        const json = await tiposRes.json().catch(() => ({}));
-        writeCache(LS_KEYS.tipos, extractData(json));
       }
     };
 
@@ -175,20 +158,12 @@ export default function Home() {
   const latestAlbum = useMemo(() => pickLatestAlbum(lanzamientosRaw), [lanzamientosRaw]);
 
   const posterUrl =
-    nextConcert?.cartelUrl ||
-    nextConcert?.cartel_url ||
-    nextConcert?.cartel ||
-    nextConcert?.imagenUrl ||
-    nextConcert?.imagen_url ||
-    nextConcert?.imagen ||
+    nextConcert?.cartel?.url ||
     null;
 
-  const posterAlt =
-    nextConcert?.titulo ||
-    nextConcert?.nombre ||
-    "Cartel del próximo concierto";
+  const posterAlt = "Cartel del próximo concierto";
 
-  const latestAlbumCover = latestAlbum?.imagen ?? "/images/lanzamientos/ForgottenTimes.png";
+  const latestAlbumCover = latestAlbum?.imagen;
 
   useEffect(() => {
     function onKeyDown(e) {

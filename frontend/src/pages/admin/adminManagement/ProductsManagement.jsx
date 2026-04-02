@@ -1,18 +1,31 @@
 const API_URL = import.meta.env.VITE_API_URL;
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
 
-const TIPOS_PATH = "/tipos-productos";
-
 const ALL_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+
+const TIPO_OPTIONS = [
+  { value: "", label: "— Selecciona un tipo —", disabled: true },
+  { value: "ropa", label: "Ropa" },
+  { value: "disco", label: "Disco" },
+  { value: "accesorio", label: "Accesorio" },
+];
 
 const money = (v) => {
   const n = typeof v === "number" ? v : Number(v);
   if (Number.isNaN(n)) return "-";
   return n.toFixed(2) + " €";
 };
+
 const yesNo = (v) => (String(v) === "1" || v === 1 || v === true ? "Sí" : "No");
+
+const formatTipo = (tipo) => {
+  if (tipo === "ropa") return "Ropa";
+  if (tipo === "disco") return "Disco";
+  if (tipo === "accesorio") return "Accesorio";
+  return tipo || "-";
+};
 
 const emptyProducto = {
   id: null,
@@ -22,14 +35,15 @@ const emptyProducto = {
   precio: "",
   slug: "",
   activo: "1",
-  tipo_producto_id: "",
+  tipo_producto: "",
+  tiene_talla: 0,
   imagen: null,
+  imagenUrlActual: "",
+  imagenNombreActual: "",
+  removeImagen: false,
 };
 
 function ProductsManagement() {
-  const [tipos, setTipos] = useState([]);
-  const [loadingTipos, setLoadingTipos] = useState(false);
-
   const token = useMemo(() => localStorage.getItem("token"), []);
   const authHeaders = useMemo(
     () => ({
@@ -39,56 +53,8 @@ function ProductsManagement() {
     [token]
   );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        setLoadingTipos(true);
-
-        const res = await fetch(`${API_URL}${TIPOS_PATH}`, {
-          method: "GET",
-          headers: authHeaders,
-        });
-
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(json?.message || "No se pudieron cargar los tipos de producto");
-
-        const items = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
-        if (!cancelled) setTipos(items);
-      } catch (e) {
-        console.error(e);
-        if (!cancelled) setTipos([]);
-      } finally {
-        if (!cancelled) setLoadingTipos(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authHeaders]);
-
-  const tipoOptions = useMemo(() => {
-    return [
-      { value: "", label: "— Selecciona un tipo —", disabled: true },
-      ...tipos.map((t) => ({
-        value: String(t.id),
-        label: t.nombre,
-      })),
-    ];
-  }, [tipos]);
-
-  const ropaTipoId = useMemo(() => {
-    const ropa = tipos.find(
-      (t) => String(t?.nombre || "").toLowerCase() === "ropa"
-    );
-    return ropa ? String(ropa.id) : null;
-  }, [tipos]);
-
-  const isRopaSelected = (form) =>
-    ropaTipoId && String(form?.tipo_producto_id) === String(ropaTipoId);
-
+  const hasSizes = (form) =>
+    String(form?.tiene_talla) === "1" || form?.tiene_talla === 1 || form?.tiene_talla === true;
 
   return (
     <AdminCrudPage
@@ -100,45 +66,65 @@ function ProductsManagement() {
       deletePath={(id) => `/productos/${id}`}
       requireAdmin
       emptyForm={emptyProducto}
-      searchKeys={["id", "nombre", "tallas_disponibles", "precio", "slug", "activo"]}
+      searchKeys={[
+        "id",
+        "nombre",
+        "tipo_producto",
+        "tallas_disponibles",
+        "precio",
+        "slug",
+        "activo",
+        "tiene_talla",
+      ]}
       columns={[
         { key: "id", header: "ID", className: "adminMono" },
         { key: "nombre", header: "Nombre" },
         {
-          key: "tipo",
+          key: "tipo_producto",
           header: "Tipo",
-          render: (_, row) => row?.tipo?.nombre ?? "-",
+          render: (v) => formatTipo(v),
         },
-        { key: "precio", header: "Precio", render: (v, row) => row?.precio_formateado ?? money(v) },
+        {
+          key: "precio",
+          header: "Precio",
+          render: (v, row) => row?.precio_formateado ?? money(v),
+        },
         { key: "activo", header: "Activo", render: (v) => yesNo(v) },
-        { key: "slug", header: "Slug", className: "adminTruncate", title: (v) => v || "" },
         {
           key: "tallas_disponibles",
           header: "Tallas",
           className: "adminTruncate",
-          render: (v) => (Array.isArray(v) ? v.join(",") : v ? String(v) : "-"),
-          title: (v) => (Array.isArray(v) ? v.join(",") : v ? String(v) : ""),
+          render: (v, row) =>
+            row?.tiene_talla
+              ? Array.isArray(v) && v.length > 0
+                ? v.join(", ")
+                : "-"
+              : "-",
+          title: (v, row) =>
+            row?.tiene_talla && Array.isArray(v) ? v.join(", ") : "",
         },
       ]}
       columnsGridCss={`
         grid-template-columns:
-          300px
+          1fr
           130px
-          90px
-          80px
-          220px
+          110px
           100px
-          170px;
-        min-width: 1100px;
+          150px
+          120px
       `}
       formFields={[
         { name: "nombre", label: "Nombre", type: "text", full: true },
         {
-          name: "tipo_producto_id",
+          name: "tipo_producto",
           label: "Tipo",
           type: "select",
-          options: tipoOptions,
-          help: loadingTipos ? "Cargando tipos..." : "",
+          options: TIPO_OPTIONS,
+        },
+        {
+          name: "tiene_talla",
+          label: "Tiene talla",
+          type: "checkbox",
         },
         { name: "precio", label: "Precio (€)", type: "number", step: "0.01" },
         {
@@ -156,6 +142,9 @@ function ProductsManagement() {
           type: "file",
           full: true,
           accept: "image/png,image/jpeg,image/webp",
+          currentUrlKey: "imagenUrlActual",
+          currentNameKey: "imagenNombreActual",
+          removeFlagKey: "removeImagen",
         },
         {
           name: "tallas_disponibles",
@@ -163,11 +152,22 @@ function ProductsManagement() {
           type: "sizes",
           full: true,
           sizes: ALL_SIZES,
-          help: "Selecciona las tallas disponibles.",
-          showWhen: (form) => isRopaSelected(form),
+          showWhen: (form) => hasSizes(form),
         },
         { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 5 },
       ]}
+      mapRowToForm={(base, row) => ({
+        ...base,
+        ...(row || {}),
+        tiene_talla:
+          row?.tiene_talla === true || row?.tiene_talla === 1 || String(row?.tiene_talla) === "1" ? 1 : 0,
+        activo: String(row?.activo) === "0" ? "0" : "1",
+        tallas_disponibles: Array.isArray(row?.tallas_disponibles) ? row.tallas_disponibles : [],
+        imagen: null,
+        imagenUrlActual: row?.imagen?.url || "",
+        imagenNombreActual: row?.imagen?.nombre_original || "",
+        removeImagen: false,
+      })}
       buildPayload={(f) => {
         const fd = new FormData();
 
@@ -176,20 +176,26 @@ function ProductsManagement() {
         fd.append("precio", f.precio === "" ? "0" : String(Number(f.precio)));
         fd.append("slug", f.slug || "");
         fd.append("activo", String(f.activo) === "1" || f.activo === true ? "1" : "0");
-        fd.append("tipo_producto_id", f.tipo_producto_id === "" ? "" : String(Number(f.tipo_producto_id)));
+        fd.append("tipo_producto", f.tipo_producto || "");
+        fd.append("remove_imagen", f.removeImagen ? "1" : "0");
+        if (f.imagen instanceof File) fd.append("imagen", f.imagen);
+        fd.append("tiene_talla",
+          String(f.tiene_talla) === "1" || f.tiene_talla === 1 || f.tiene_talla === true ? "1" : "0"
+        );
 
-        const tallas = (ropaTipoId && String(f?.tipo_producto_id) === String(ropaTipoId))
-          ? (Array.isArray(f.tallas_disponibles) ? f.tallas_disponibles : [])
-          : [];
+        const tallas =
+          String(f.tiene_talla) === "1" || f.tiene_talla === 1 || f.tiene_talla === true
+            ? Array.isArray(f.tallas_disponibles)
+              ? f.tallas_disponibles
+              : []
+            : [];
 
         tallas.forEach((t) => fd.append("tallas_disponibles[]", t));
 
-        if (f.imagen instanceof File) {
-          fd.append("imagen", f.imagen);
-        }
 
         return fd;
       }}
+      requestHeaders={authHeaders}
     />
   );
 }

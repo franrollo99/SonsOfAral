@@ -27,6 +27,11 @@ class CancionResource extends JsonResource
                 $this->duracion % 60
             ),
             'trackNumber' => $this->track_number,
+            'audio' => $this->audio ? [
+                'id' => $this->audio->id,
+                'url' => $this->audio->url,
+                'nombre_original' => $this->audio->nombre_original,
+            ] : null,
         ];
     }
 }

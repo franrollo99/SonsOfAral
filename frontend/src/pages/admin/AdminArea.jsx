@@ -66,9 +66,7 @@ function AdminArea() {
         method: "POST",
         headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       });
-    } catch {
-      // da igual
-    } finally {
+    } catch { } finally {
       localStorage.removeItem("token");
       navigate("/login", { replace: true });
     }
@@ -79,7 +77,6 @@ function AdminArea() {
     { title: "Lanzamientos", desc: "Gestionar lanzamientos.", to: "lanzamientos" },
     { title: "Canciones", desc: "Visualizar detalles de canciones.", to: "canciones" },
     { title: "Productos", desc: "Gestionar productos .", to: "productos" },
-    { title: "Tipos de productos", desc: "Gestionar tipos de productos.", to: "categorias" },
     { title: "Pedidos", desc: "Ver detalles de pedidos y cambiar estados.", to: "pedidos" },
     { title: "Usuarios", desc: "Listado de usuarios y visualizacion de información.", to: "usuarios" },
   ];

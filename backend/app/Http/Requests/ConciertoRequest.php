@@ -17,7 +17,8 @@ class ConciertoRequest extends FormRequest
             'precio_entrada' => ['nullable', 'numeric', 'min:0'],
             'entrada_anticipada' => ['required', 'boolean'],
             'enlace_entrada_anticipada' => ['nullable', 'string'],
-            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_cartel' => ['nullable', 'boolean'],
+            'cartel' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 
@@ -39,9 +40,9 @@ class ConciertoRequest extends FormRequest
             'entrada_anticipada.required' => 'Debes indicar si existe entrada anticipada.',
             'entrada_anticipada.boolean' => 'El campo entrada anticipada debe ser verdadero o falso.',
             'enlace_entrada_anticipada.string' => 'El enlace de la entrada anticipada debe ser un texto.',
-            'imagen.image' => 'El archivo debe ser una imagen.',
-            'imagen.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
-            'imagen.max'   => 'La imagen no puede superar los 2 MB.',
+            'cartel.image' => 'El archivo debe ser una imagen.',
+            'cartel.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
+            'cartel.max'   => 'La imagen no puede superar los 2 MB.',
         ];
     }
 

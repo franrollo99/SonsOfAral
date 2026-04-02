@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pedido_productos', function (Blueprint $table) {
+        Schema::create('lineas_pedido', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pedido_id')->constrained('pedidos')->cascadeOnDelete();
-            $table->foreignId('producto_id')->nullable()->constrained('productos')->nullOnDelete();
             $table->string('nombre_producto', 180);
             $table->string('talla', 20)->nullable();
             $table->unsignedInteger('cantidad');
-            $table->decimal('precio_unitario_snapshot', 10, 2);
+            $table->decimal('precio_unitario', 10, 2);
             $table->decimal('subtotal', 10, 2);
             $table->timestamps();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pedido_productos');
+        Schema::dropIfExists('lineas_pedido');
     }
 };

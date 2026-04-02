@@ -53,7 +53,10 @@ function Register() {
         throw new Error(data?.message || "No se pudo registrar.");
       }
 
-      navigate("/register-success", { replace: true });
+      navigate("/register-success", {
+        replace: true,
+        state: { fromRegister: true },
+      });
     } catch (err) {
       setError(err.message || "Error al registrarse");
     } finally {

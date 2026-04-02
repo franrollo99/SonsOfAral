@@ -13,7 +13,7 @@ class Lanzamiento extends Model
         'tipo',
         'fecha_lanzamiento',
         'descripcion',
-        'imagen',
+        'portada_id',
         'compra_url',
         'audio_url',
         'video_url',
@@ -22,5 +22,10 @@ class Lanzamiento extends Model
     public function canciones()
     {
         return $this->hasMany(Cancion::class);
+    }
+
+    public function portada()
+    {
+        return $this->belongsTo(Multimedia::class, 'portada_id');
     }
 }

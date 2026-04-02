@@ -68,7 +68,6 @@ function Musica() {
 
         const data = await res.json().catch(() => ({}));
         const raw = Array.isArray(data?.data) ? data.data : [];
-
         writeCache(LS_KEY, raw);
         setLanzamientos(normalizeOrdered(raw));
       } catch (e) {
@@ -147,7 +146,7 @@ function Musica() {
                 tabIndex={0}
               >
                 <div className="lanzamientoPortada">
-                  <img src={lanzamiento.imagen ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamiento.titulo}`} loading="lazy" />
+                  <img src={lanzamiento.portada?.url} alt={`Portada ${lanzamiento.titulo}`} loading="lazy" />
                 </div>
 
                 <div className="lanzamientoDatos">
@@ -172,7 +171,7 @@ function Musica() {
             <div className="modalGrid">
               <aside className="modalLeft d-flex flex-column gap-3">
                 <div className="cover">
-                  <img src={lanzamientoSeleccionado.imagen ?? "/images/lanzamientos/ForgottenTimes.png"} alt={`Portada ${lanzamientoSeleccionado.titulo}`} />
+                  <img src={lanzamientoSeleccionado.portada?.url} alt={`Portada ${lanzamientoSeleccionado.titulo}`} />
                 </div>
 
                 <div className="leftMeta d-flex flex-column gap-3">

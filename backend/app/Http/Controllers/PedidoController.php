@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pedido;
 use App\Models\Producto;
 use Illuminate\Http\Request;
-use App\Models\PedidoProducto;
+use App\Models\LineaPedido;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PedidoResource;
@@ -33,28 +33,26 @@ class PedidoController extends Controller
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="codigo_pedido", type="string", example="SOA-2026-0001"),
      *                     @OA\Property(property="estado", type="string", example="pendiente"),
-     *                     @OA\Property(property="precio_total", type="number", example=44.97),
+     *                     @OA\Property(property="precio_total", type="number", format="float", example=44.97),
      *                     @OA\Property(property="created_at", type="string", example="2026-02-28T20:57:00.000000Z"),
      *                     @OA\Property(property="nombre_envio", type="string", example="Fran Pérez"),
      *                     @OA\Property(property="direccion", type="string", example="Calle X 12"),
      *                     @OA\Property(property="municipio", type="string", example="Torrelavega"),
      *                     @OA\Property(property="provincia", type="string", example="Cantabria"),
      *                     @OA\Property(property="cp", type="string", example="39300"),
-     *                     @OA\Property(property="gastos_envio", type="number", example=4.99),
+     *                     @OA\Property(property="gastos_envio", type="number", format="float", example=4.99),
      *                     @OA\Property(property="metodo_pago", type="string", example="tarjeta"),
      *                     @OA\Property(
-     *                         property="productos",
+     *                         property="lineasPedido",
      *                         type="array",
      *                         @OA\Items(
      *                             type="object",
      *                             @OA\Property(property="id", type="integer", example=10),
      *                             @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
-     *                             @OA\Property(property="precio", type="number", example=19.99),
-     *                             @OA\Property(property="nombre_producto", type="string", nullable=true, example="Camiseta SoA"),
      *                             @OA\Property(property="talla", type="string", nullable=true, example="L"),
      *                             @OA\Property(property="cantidad", type="integer", example=2),
-     *                             @OA\Property(property="precio_unitario_snapshot", type="number", example=19.99),
-     *                             @OA\Property(property="subtotal", type="number", example=39.98)
+     *                             @OA\Property(property="precio_unitario", type="number", format="float", example=19.99),
+     *                             @OA\Property(property="subtotal", type="number", format="float", example=39.98)
      *                         )
      *                     )
      *                 )
@@ -75,7 +73,7 @@ class PedidoController extends Controller
         $rol = $user->role ?? $user->rol ?? null;
         $isAdmin = in_array($rol, ['admin', 'ADMIN', 'Administrador'], true);
 
-        $query = Pedido::query()->with('productos');
+        $query = Pedido::query()->with('lineasPedido');
 
         if (!$isAdmin) {
             $query->where('user_id', $user->id);
@@ -109,16 +107,28 @@ class PedidoController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="codigo_pedido", type="string", example="SOA-2026-0001"),
      *                 @OA\Property(property="estado", type="string", example="pendiente"),
-     *                 @OA\Property(property="precio_total", type="number", example=44.97),
+     *                 @OA\Property(property="precio_total", type="number", format="float", example=44.97),
      *                 @OA\Property(property="created_at", type="string", example="2026-02-28T20:57:00.000000Z"),
      *                 @OA\Property(property="nombre_envio", type="string", example="Fran Pérez"),
      *                 @OA\Property(property="direccion", type="string", example="Calle X 12"),
      *                 @OA\Property(property="municipio", type="string", example="Torrelavega"),
      *                 @OA\Property(property="provincia", type="string", example="Cantabria"),
      *                 @OA\Property(property="cp", type="string", example="39300"),
-     *                 @OA\Property(property="gastos_envio", type="number", example=4.99),
+     *                 @OA\Property(property="gastos_envio", type="number", format="float", example=4.99),
      *                 @OA\Property(property="metodo_pago", type="string", example="tarjeta"),
-     *                 @OA\Property(property="productos", type="array", @OA\Items(type="object"))
+     *                 @OA\Property(
+     *                 property="lineasPedido",
+     *                 type="array",
+     *                 @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=10),
+     *                         @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
+     *                         @OA\Property(property="talla", type="string", nullable=true, example="L"),
+     *                         @OA\Property(property="cantidad", type="integer", example=2),
+     *                         @OA\Property(property="precio_unitario", type="number", format="float", example=19.99),
+     *                         @OA\Property(property="subtotal", type="number", format="float", example=39.98)
+     *                     )
+     *                 )
      *             )
      *         )
      *     ),
@@ -150,7 +160,7 @@ class PedidoController extends Controller
             abort(403, 'No tienes permisos para ver este pedido.');
         }
 
-        $pedido->load('productos');
+        $pedido->load('lineasPedido');
 
         return new PedidoResource($pedido);
     }
@@ -173,7 +183,7 @@ class PedidoController extends Controller
      *             @OA\Property(property="provincia", type="string", example="Cantabria"),
      *             @OA\Property(property="cp", type="string", example="39300"),
      *             @OA\Property(property="metodo_pago", type="string", enum={"tarjeta","contra_reembolso"}, example="tarjeta"),
-     *             @OA\Property(property="gastos_envio", type="number", example=4.99),
+     *             @OA\Property(property="gastos_envio", type="number", format="float", example=4.99),
      *             @OA\Property(
      *                 property="items",
      *                 type="array",
@@ -247,13 +257,12 @@ class PedidoController extends Controller
                 $lineSubtotal = $precioUnit * $qty;
                 $subtotal += $lineSubtotal;
 
-                PedidoProducto::create([
+                LineaPedido::create([
                     'pedido_id'                => $pedido->id,
-                    'producto_id'              => $producto->id,
                     'nombre_producto'          => $producto->nombre,
                     'talla'                    => $it['talla'] ?? null,
                     'cantidad'                 => $qty,
-                    'precio_unitario_snapshot' => $precioUnit,
+                    'precio_unitario' => $precioUnit,
                     'subtotal'                 => $lineSubtotal,
                 ]);
             }
@@ -261,7 +270,7 @@ class PedidoController extends Controller
             $pedido->precio_total = $subtotal + (float) $pedido->gastos_envio;
             $pedido->save();
 
-            $pedido->load('productos');
+            $pedido->load('lineasPedido');
 
             return (new PedidoResource($pedido))
                 ->response()
@@ -343,7 +352,7 @@ class PedidoController extends Controller
         $pedido->estado = $data['estado'];
         $pedido->save();
 
-        $pedido->load('productos');
+        $pedido->load('lineasPedido');
 
         return new PedidoResource($pedido);
     }

@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
-            $table->foreignId('tipo_producto_id')->constrained('tipos_productos')->cascadeOnUpdate()->restrictOnDelete();
+            $table->enum('tipo_producto', ['ropa', 'disco', 'accesorio']);
+            $table->boolean('tiene_talla')->default(false);
             $table->json('tallas_disponibles')->nullable();
             $table->decimal('precio', 10, 2);
             $table->string('slug', 180)->unique();
-            $table->string('imagen', 255)->nullable();
+            $table->foreignId('imagen_id')->nullable()->constrained('multimedia')->nullOnDelete();
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });

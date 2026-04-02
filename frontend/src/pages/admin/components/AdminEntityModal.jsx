@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useRef } from "react";
 import "../AdminManagement.css";
 
 function normalizeArrayValue(v) {
@@ -66,24 +68,131 @@ function Field({ field, form, setForm }) {
   };
 
   if (type === "file") {
+    const currentUrl = field.currentUrlKey ? form?.[field.currentUrlKey] : null;
+    const currentName = field.currentNameKey ? form?.[field.currentNameKey] : null;
+    const removeFlag = field.removeFlagKey ? !!form?.[field.removeFlagKey] : false;
+    const selectedFile = form?.[name] instanceof File ? form[name] : null;
+    const fileInputRef = useRef(null);
+
+    const previewUrl = selectedFile
+      ? URL.createObjectURL(selectedFile)
+      : !removeFlag
+        ? currentUrl
+        : null;
+
+    const shownName = selectedFile
+      ? selectedFile.name
+      : !removeFlag
+        ? currentName
+        : null;
+
+    const clearSelectedNewFile = () => {
+      setForm((p) => ({
+        ...p,
+        [name]: null,
+      }));
+    };
+
+    const removeCurrentlyShownFile = () => {
+      if (selectedFile) {
+        setForm((p) => ({
+          ...p,
+          [name]: null,
+        }));
+        return;
+      }
+
+      if (field.removeFlagKey && currentUrl) {
+        setForm((p) => ({
+          ...p,
+          [name]: null,
+          [field.removeFlagKey]: true,
+        }));
+      }
+    };
+
     return (
       <div className={`adminFormField ${full ? "adminFormFieldFull" : ""}`}>
         <label className="adminControlLabel">{label}</label>
 
         <input
-          className="adminInput"
+          ref={fileInputRef}
           type="file"
           accept={field.accept || "image/png,image/jpeg,image/webp"}
+          disabled={isDisabled}
+          style={{ display: "none" }}
           onChange={(e) => {
             const file = e.target.files?.[0] || null;
-            onChange(file);
+
+            setForm((p) => ({
+              ...p,
+              [name]: file,
+              ...(field.removeFlagKey ? { [field.removeFlagKey]: false } : {}),
+            }));
+
+            e.target.value = "";
           }}
         />
 
+        <button
+          type="button"
+          className="adminActionBtn text-start px-3"
+          disabled={isDisabled}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {previewUrl ? "Cambiar imagen" : "Seleccionar imagen"}
+        </button>
+
+        {shownName ? (
+          <p className="adminMuted" style={{ display: "block", marginTop: 8 }}>
+            Archivo mostrado: {shownName}
+          </p>
+        ) : null}
+
+        {previewUrl ? (
+          <div style={{ marginTop: 10 }}>
+            <img
+              src={previewUrl}
+              alt=""
+              style={{
+                display: "block",
+                width: "100%",
+                maxWidth: 260,
+                borderRadius: 10,
+                objectFit: "cover",
+              }}
+            />
+
+            <div className="d-flex gap-2 mt-2">
+              {!selectedFile && currentUrl ? (
+                <button
+                  type="button"
+                  className="adminActionBtn adminActionBtn--danger"
+                  onClick={removeCurrentlyShownFile}
+                  disabled={isDisabled}
+                >
+                  Eliminar imagen
+                </button>
+              ) : null}
+
+              {selectedFile && currentUrl ? (
+                <button
+                  type="button"
+                  className="adminActionBtn"
+                  onClick={clearSelectedNewFile}
+                  disabled={isDisabled}
+                >
+                  Descartar imagen nueva
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         {help ? (
-          <small className="adminMuted">
+          <p className="adminMuted">
             {typeof help === "function" ? help(form) : help}
-          </small>
+          </p>
         ) : null}
       </div>
     );
@@ -227,17 +336,6 @@ function Field({ field, form, setForm }) {
             </table>
           </div>
         </div>
-      ) : type === "file" ? (
-        <input
-          className="adminInput"
-          type="file"
-          accept={field.accept || "image/png,image/jpeg,image/webp"}
-          disabled={isDisabled}
-          onChange={(e) => {
-            const file = e.target.files?.[0] || null;
-            onChange(file);
-          }}
-        />
       ) : (
         <input
           {...commonProps}
@@ -250,9 +348,9 @@ function Field({ field, form, setForm }) {
       )}
 
       {typeof help === "function" ? (
-        <small className="adminMuted">{help(form)}</small>
+        <p className="adminMuted">{help(form)}</p>
       ) : help ? (
-        <small className="adminMuted">{help}</small>
+        <p className="adminMuted">{help}</p>
       ) : null}
     </div>
   );
@@ -273,6 +371,19 @@ function AdminEntityModal({
   saveText = "Guardar",
   afterFields,
 }) {
+  useEffect(() => {
+    if (!open) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (

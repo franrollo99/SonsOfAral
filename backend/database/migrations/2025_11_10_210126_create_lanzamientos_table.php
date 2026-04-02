@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('titulo', 200);
             $table->date('fecha_lanzamiento')->nullable();
             $table->text('descripcion')->nullable();
-            $table->string('imagen', 255)->nullable();
+            $table->foreignId('portada_id')->nullable()->constrained('multimedia')->nullOnDelete();
             $table->string('compra_url', 255)->nullable();
             $table->string('audio_url', 255)->nullable();
             $table->string('video_url', 255)->nullable();

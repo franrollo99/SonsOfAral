@@ -13,7 +13,6 @@ const ORDER_OPTIONS = [
 
 const LS_KEYS = {
   productos: "productos",
-  tipos: "tipos-productos",
 };
 
 const TTL_MS = 5 * 60 * 1000;
@@ -41,9 +40,19 @@ function isFresh(ts) {
   return typeof ts === "number" && Date.now() - ts < TTL_MS;
 }
 
+function extractData(json) {
+  return Array.isArray(json) ? json : (json?.data ?? []);
+}
+
+function formatTipoLabel(tipo) {
+  if (tipo === "ropa") return "Ropa";
+  if (tipo === "disco") return "Discos";
+  if (tipo === "accesorio") return "Accesorios";
+  return tipo;
+}
+
 function Tienda() {
   const [productosAll, setProductosAll] = useState([]);
-  const [tiposAll, setTiposAll] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [tipoSeleccionado, setTipoSeleccionado] = useState(null);
@@ -51,90 +60,67 @@ function Tienda() {
 
   useEffect(() => {
     const cachedProd = readCache(LS_KEYS.productos);
-    const cachedTipos = readCache(LS_KEYS.tipos);
+    const hasFreshCache = Array.isArray(cachedProd?.data) && isFresh(cachedProd.ts);
 
-    const hasAnyCache = Boolean(cachedProd?.data || cachedTipos?.data);
+    if (Array.isArray(cachedProd?.data)) {
+      setProductosAll(cachedProd.data);
+    }
 
-    if (Array.isArray(cachedProd?.data)) setProductosAll(cachedProd.data);
-    if (Array.isArray(cachedTipos?.data)) setTiposAll(cachedTipos.data);
-
-    setLoading(!hasAnyCache);
+    setLoading(!hasFreshCache);
 
     const controller = new AbortController();
 
     const loadFresh = async () => {
       try {
-        const [prodData, tiposData] = await Promise.all([
-          fetch(`${API_URL}/productos`, {
-            headers: { Accept: "application/json" },
-            signal: controller.signal,
-          }).then(async (r) => {
-            if (!r.ok) throw new Error(`HTTP ${r.status} (productos)`);
-            const json = await r.json();
-            return Array.isArray(json) ? json : (json?.data ?? []);
-          }),
-          fetch(`${API_URL}/tipos-productos`, {
-            headers: { Accept: "application/json" },
-            signal: controller.signal,
-          }).then(async (r) => {
-            if (!r.ok) throw new Error(`HTTP ${r.status} (tipos)`);
-            const json = await r.json();
-            return Array.isArray(json) ? json : (json?.data ?? []);
-          }),
-        ]);
+        const res = await fetch(`${API_URL}/productos`, {
+          headers: { Accept: "application/json" },
+          signal: controller.signal,
+        });
 
-        setProductosAll(prodData);
-        setTiposAll(tiposData);
+        if (!res.ok) throw new Error(`HTTP ${res.status} (productos)`);
 
-        writeCache(LS_KEYS.productos, prodData);
-        writeCache(LS_KEYS.tipos, tiposData);
+        const json = await res.json().catch(() => ({}));
+        const data = extractData(json);
+
+        setProductosAll(data);
+        writeCache(LS_KEYS.productos, data);
       } catch (e) {
-        if (e?.name !== "AbortError") console.error("Error cargando tienda:", e);
+        if (e?.name !== "AbortError") {
+          console.error("Error cargando tienda:", e);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    loadFresh();
+    if (!hasFreshCache) {
+      loadFresh();
+    }
 
     return () => controller.abort();
   }, []);
 
-  const countByTipo = useMemo(() => {
+  const tiposVisibles = useMemo(() => {
     const map = new Map();
+
     for (const p of productosAll) {
-      const id = p?.tipo?.id ?? p?.tipo_producto_id;
-      if (id != null) map.set(id, (map.get(id) || 0) + 1);
+      const tipo = p?.tipo_producto;
+      if (!tipo) continue;
+      map.set(tipo, (map.get(tipo) || 0) + 1);
     }
-    return map;
+
+    return [...map.entries()].map(([tipo, count]) => ({
+      id: tipo,
+      nombre: formatTipoLabel(tipo),
+      count,
+    }));
   }, [productosAll]);
 
-  const tiposVisibles = useMemo(() => {
-    const list = (Array.isArray(tiposAll) ? tiposAll : [])
-      .map((t) => ({
-        id: t.id,
-        nombre: t.nombre ?? t.name ?? `Tipo ${t.id}`,
-        count: countByTipo.get(t.id) || 0,
-      }))
-      .filter((t) => t.count > 0);
-
-    return list;
-  }, [tiposAll, countByTipo]);
-
-  useEffect(() => {
-    if (tipoSeleccionado === null) return;
-    const ok = tiposVisibles.some((t) => t.id === tipoSeleccionado);
-    if (!ok) setTipoSeleccionado(null);
-  }, [tipoSeleccionado, tiposVisibles]);
-
   const productos = useMemo(() => {
-    let list = productosAll;
+    let list = [...productosAll];
 
     if (tipoSeleccionado !== null) {
-      list = list.filter((p) => {
-        const id = p?.tipo?.id ?? p?.tipo_producto_id;
-        return id === tipoSeleccionado;
-      });
+      list = list.filter((p) => p?.tipo_producto === tipoSeleccionado);
     }
 
     const getTime = (p) => {
@@ -148,18 +134,16 @@ function Tienda() {
       return Number.isFinite(n) ? n : 0;
     };
 
-    const sorted = [...list];
+    if (order === "newest") list.sort((a, b) => getTime(b) - getTime(a));
+    if (order === "oldest") list.sort((a, b) => getTime(a) - getTime(b));
+    if (order === "price_asc") list.sort((a, b) => getPrice(a) - getPrice(b));
+    if (order === "price_desc") list.sort((a, b) => getPrice(b) - getPrice(a));
 
-    if (order === "newest") sorted.sort((a, b) => getTime(b) - getTime(a));
-    if (order === "oldest") sorted.sort((a, b) => getTime(a) - getTime(b));
-    if (order === "price_asc") sorted.sort((a, b) => getPrice(a) - getPrice(b));
-    if (order === "price_desc") sorted.sort((a, b) => getPrice(b) - getPrice(a));
-
-    return sorted;
+    return list;
   }, [productosAll, tipoSeleccionado, order]);
 
   const totalItems = productos.length;
-  const mobileTipoValue = tipoSeleccionado === null ? "all" : String(tipoSeleccionado);
+  const mobileTipoValue = tipoSeleccionado === null ? "all" : tipoSeleccionado;
 
   return (
     <section className="container tiendaContainer">
@@ -174,7 +158,6 @@ function Tienda() {
                 onClick={() => setTipoSeleccionado(null)}
               >
                 Todos
-                <span className="tiendaCatCount">{productosAll.length}</span>
               </button>
             </li>
 
@@ -208,7 +191,9 @@ function Tienda() {
                 onChange={(e) => setOrder(e.target.value)}
               >
                 {ORDER_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -228,12 +213,12 @@ function Tienda() {
                   value={mobileTipoValue}
                   onChange={(e) => {
                     const v = e.target.value;
-                    setTipoSeleccionado(v === "all" ? null : Number(v));
+                    setTipoSeleccionado(v === "all" ? null : v);
                   }}
                 >
-                  <option value="all">Todos ({productosAll.length})</option>
+                  <option value="all">Todos</option>
                   {tiposVisibles.map((t) => (
-                    <option key={t.id} value={String(t.id)}>
+                    <option key={t.id} value={t.id}>
                       {t.nombre} ({t.count})
                     </option>
                   ))}
@@ -249,7 +234,9 @@ function Tienda() {
                   onChange={(e) => setOrder(e.target.value)}
                 >
                   {ORDER_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -273,7 +260,7 @@ function Tienda() {
                       <div className="tiendaImgWrap">
                         <img
                           className="tiendaImg"
-                          src={p.imagen ?? "/images/productos/camiseta01.png"}
+                          src={p.imagen?.url}
                           alt={p.nombre}
                           loading="lazy"
                         />

@@ -19,8 +19,8 @@ class ConciertoResource extends JsonResource
             'fecha' => (string) $this->fecha,
             'fecha_formateada' => $this->fecha
                 ? Carbon::parse($this->fecha)
-                    ->locale('es')
-                    ->translatedFormat('d \d\e F, Y')
+                ->locale('es')
+                ->translatedFormat('d \d\e F, Y')
                 : null,
             'provincia' => $this->provincia,
             'municipio' => $this->municipio,
@@ -29,7 +29,11 @@ class ConciertoResource extends JsonResource
             'precioEntrada' => $this->precio_entrada,
             'entradaAnticipada' => (bool) $this->entrada_anticipada,
             'enlaceEntradaAnticipada' => $this->enlace_entrada_anticipada,
-            'imagen' =>  $this->imagen ? asset('storage/conciertos/' . $this->imagen) : null,
+            'cartel' => $this->cartel ? [
+                'id' => $this->cartel->id,
+                'url' => $this->cartel->url,
+                'nombre_original' => $this->cartel->nombre_original,
+            ] : null,
         ];
     }
 }

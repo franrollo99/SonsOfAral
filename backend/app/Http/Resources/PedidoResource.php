@@ -28,8 +28,8 @@ class PedidoResource extends JsonResource
             'cp'            => $this->cp,
             'gastos_envio'  => (float) $this->gastos_envio,
             'metodo_pago'   => $this->metodo_pago,
-            'productos'     => PedidoProductoResource::collection(
-                $this->whenLoaded('productos')
+            'productos'     => LineaPedidoResource::collection(
+                $this->whenLoaded('lineasPedido')
             ),
         ];
     }

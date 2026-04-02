@@ -2527,7 +2527,7 @@
                                                                     "type": "integer",
                                                                     "example": 2
                                                                 },
-                                                                "precio_unitario_snapshot": {
+                                                                "precio_unitario": {
                                                                     "type": "number",
                                                                     "example": 19.99
                                                                 },

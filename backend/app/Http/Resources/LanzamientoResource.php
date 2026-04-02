@@ -32,7 +32,11 @@ class LanzamientoResource extends JsonResource
             'compraUrl' => $this->compra_url,
             'audioUrl' => $this->audio_url,
             'videoUrl' => $this->video_url,
-            'imagen' =>  $this->imagen ? asset('storage/lanzamientos/' . $this->imagen) : null,
+            'portada' => $this->portada ? [
+                'id' => $this->portada->id,
+                'url' => $this->portada->url,
+                'nombre_original' => $this->portada->nombre_original,
+            ] : null,
         ];
     }
 }
