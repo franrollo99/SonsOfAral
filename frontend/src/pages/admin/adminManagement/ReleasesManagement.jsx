@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
 
@@ -22,7 +22,18 @@ const emptyLanzamiento = {
   portadaUrlActual: "",
   portadaNombreActual: "",
   removePortada: false,
-  cancionesDraft: [{ _k: "base", titulo: "", duracionMin: "", duracionSeg: "", audio: null }],
+  cancionesDraft: [
+    {
+      _k: "base",
+      titulo: "",
+      duracionMin: "",
+      duracionSeg: "",
+      audio: null,
+      audioUrlActual: "",
+      audioNombreActual: "",
+      removeAudio: false,
+    },
+  ],
 };
 
 const toSeconds = (min, sec) => {
@@ -38,6 +49,134 @@ const fromSeconds = (total) => {
   if (!Number.isFinite(t) || t <= 0) return { duracionMin: "", duracionSeg: "" };
   return { duracionMin: String(Math.floor(t / 60)), duracionSeg: String(t % 60) };
 };
+
+function SongAudioField({ song, index, setForm }) {
+  const inputRef = useRef(null);
+
+  const selectedFile = song?.audio instanceof File ? song.audio : null;
+  const currentUrl = !song?.removeAudio ? song?.audioUrlActual || "" : "";
+  const currentName = !song?.removeAudio ? song?.audioNombreActual || "" : "";
+
+  const shownName = selectedFile ? selectedFile.name : currentName;
+  const hasVisibleAudio = !!selectedFile || !!currentUrl;
+
+  const updateSong = (updater) => {
+    setForm((p) => ({
+      ...p,
+      cancionesDraft: (p.cancionesDraft || []).map((x, i) =>
+        i === index ? { ...x, ...updater(x) } : x
+      ),
+    }));
+  };
+
+  const onFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+
+    updateSong(() => ({
+      audio: file,
+      removeAudio: false,
+    }));
+
+    e.target.value = "";
+  };
+
+  const removeShownAudio = () => {
+    if (selectedFile) {
+      updateSong((x) => ({
+        audio: null,
+        removeAudio: !!x.audioUrlActual,
+      }));
+      return;
+    }
+
+    if (currentUrl) {
+      updateSong(() => ({
+        audio: null,
+        removeAudio: true,
+      }));
+    }
+  };
+
+  const discardNewAudio = () => {
+    updateSong(() => ({
+      audio: null,
+      removeAudio: false,
+    }));
+  };
+
+  return (
+    <div className="adminSongAudioBlock d-flex flex-column gap-2">
+      <label className="adminSongLabel">Audio</label>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/ogg,audio/mp4,audio/x-m4a,.mp3,.wav,.ogg,.m4a"
+        style={{ display: "none" }}
+        onChange={onFileChange}
+      />
+
+      <div className="d-flex align-items-center gap-3 flex-wrap">
+        <button
+          type="button"
+          className="adminActionBtn text-start px-3"
+          onClick={() => inputRef.current?.click()}
+        >
+          {hasVisibleAudio ? "Cambiar audio" : "Seleccionar audio"}
+        </button>
+
+        {shownName ? (
+          <span className="adminMuted adminSongFileName">
+            Archivo mostrado: {shownName}
+          </span>
+        ) : null}
+      </div>
+
+      {hasVisibleAudio ? (
+        <div>
+          <audio
+            controls
+            preload="metadata"
+            src={selectedFile ? URL.createObjectURL(selectedFile) : currentUrl}
+            style={{ width: "85%" }}
+          />
+        </div>
+      ) : null}
+
+      <div className="d-flex gap-2 flex-wrap">
+        {!selectedFile && currentUrl ? (
+          <button
+            type="button"
+            className="adminActionBtn adminActionBtn--danger"
+            onClick={removeShownAudio}
+          >
+            Quitar audio
+          </button>
+        ) : null}
+
+        {selectedFile && currentUrl ? (
+          <button
+            type="button"
+            className="adminActionBtn"
+            onClick={discardNewAudio}
+          >
+            Descartar audio nuevo
+          </button>
+        ) : null}
+
+        {selectedFile && !currentUrl ? (
+          <button
+            type="button"
+            className="adminActionBtn adminActionBtn--danger"
+            onClick={removeShownAudio}
+          >
+            Quitar audio
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function ReleasesManagement() {
   const [form, setForm] = useState(emptyLanzamiento);
@@ -91,10 +230,25 @@ function ReleasesManagement() {
                 _k: String(s.id ?? crypto?.randomUUID?.() ?? Date.now() + Math.random()),
                 titulo: s.titulo ?? "",
                 ...fromSeconds(s.duracion ?? 0),
+                audio: null,
+                audioUrlActual: s.audio?.url || "",
+                audioNombreActual: s.audio?.nombre_original || "",
+                removeAudio: false,
               }))
             : base.cancionesDraft && base.cancionesDraft.length
               ? base.cancionesDraft
-              : [{ _k: "base", titulo: "", duracion: "" }];
+              : [
+                {
+                  _k: "base",
+                  titulo: "",
+                  duracionMin: "",
+                  duracionSeg: "",
+                  audio: null,
+                  audioUrlActual: "",
+                  audioNombreActual: "",
+                  removeAudio: false,
+                },
+              ];
 
         return {
           ...base,
@@ -139,7 +293,10 @@ function ReleasesManagement() {
         { name: "titulo", label: "Título", type: "text", full: true },
         { name: "fechaLanzamiento", label: "Fecha lanzamiento", type: "date" },
         {
-          name: "portada", label: "Portada", type: "file", full: true,
+          name: "portada",
+          label: "Portada",
+          type: "file",
+          full: true,
           accept: "image/png,image/jpeg,image/webp",
           currentUrlKey: "portadaUrlActual",
           currentNameKey: "portadaNombreActual",
@@ -154,71 +311,79 @@ function ReleasesManagement() {
         <div>
           <h4 className="adminSongsTitle">Canciones</h4>
 
-          <div className="d-flex flex-column gap-2">
+          <div className="d-flex flex-column gap-3">
             {(form.cancionesDraft || []).map((s, i) => (
-              <div key={s._k ?? i} className="adminSongRow">
+              <div key={s._k ?? i} className="adminSongItem">
                 <div className="adminSongTrack">{i + 1}</div>
 
-                <div className="adminSongField">
-                  <label className="adminSongLabel">Nombre</label>
-                  <input
-                    className="adminInput"
-                    type="text"
-                    value={s.titulo ?? ""}
-                    onChange={(e) => {
-                      const titulo = e.target.value;
-                      setForm((p) => ({
-                        ...p,
-                        cancionesDraft: (p.cancionesDraft || []).map((x, idx) =>
-                          idx === i ? { ...x, titulo } : x
-                        ),
-                      }));
-                    }}
-                  />
-                </div>
+                <div className="adminSongContent">
+                  <div className="d-flex align-items-end gap-3 flex-wrap">
+                    <div className="adminSongField flex-grow-1">
+                      <label className="adminSongLabel">Nombre</label>
+                      <input
+                        className="adminInput"
+                        type="text"
+                        value={s.titulo ?? ""}
+                        onChange={(e) => {
+                          const titulo = e.target.value;
+                          setForm((p) => ({
+                            ...p,
+                            cancionesDraft: (p.cancionesDraft || []).map((x, idx) =>
+                              idx === i ? { ...x, titulo } : x
+                            ),
+                          }));
+                        }}
+                      />
+                    </div>
 
-                <div className="adminSongField">
-                  <label className="adminSongLabel">Duración</label>
+                    <div className="adminSongField adminSongDurationField">
+                      <label className="adminSongLabel">Duración</label>
 
-                  <div className="d-flex align-items-center gap-2">
-                    <input
-                      type="number"
-                      className="adminInput adminSongTimeInput"
-                      value={s.duracionMin ?? ""}
-                      onChange={(e) =>
-                        handleDurationChange(setForm, i, "duracionMin", e.target.value, 99)
-                      }
-                    />
+                      <div className="d-flex align-items-center gap-2">
+                        <input
+                          type="number"
+                          className="adminInput adminSongTimeInput"
+                          value={s.duracionMin ?? ""}
+                          onChange={(e) =>
+                            handleDurationChange(setForm, i, "duracionMin", e.target.value, 99)
+                          }
+                        />
 
-                    <span className="adminSongTimeSep">:</span>
+                        <span className="adminSongTimeSep">:</span>
 
-                    <input
-                      type="number"
-                      className="adminInput adminSongTimeInput"
-                      value={s.duracionSeg ?? ""}
-                      onChange={(e) =>
-                        handleDurationChange(setForm, i, "duracionSeg", e.target.value, 59)
-                      }
-                    />
+                        <input
+                          type="number"
+                          className="adminInput adminSongTimeInput"
+                          value={s.duracionSeg ?? ""}
+                          onChange={(e) =>
+                            handleDurationChange(setForm, i, "duracionSeg", e.target.value, 59)
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {i > 0 ? (
+                      <button
+                        className="adminSongBtn btn-red adminSongRemoveBtn"
+                        type="button"
+                        onClick={() =>
+                          setForm((p) => ({
+                            ...p,
+                            cancionesDraft: (p.cancionesDraft || []).filter((_, idx) => idx !== i),
+                          }))
+                        }
+                      >
+                        Quitar
+                      </button>
+                    ) : (
+                      <div className="adminSongRemovePlaceholder" />
+                    )}
+                  </div>
+
+                  <div className="mt-3">
+                    <SongAudioField song={s} index={i} setForm={setForm} />
                   </div>
                 </div>
-
-                {i > 0 ? (
-                  <button
-                    className="adminSongBtn"
-                    type="button"
-                    onClick={() =>
-                      setForm((p) => ({
-                        ...p,
-                        cancionesDraft: (p.cancionesDraft || []).filter((_, idx) => idx !== i),
-                      }))
-                    }
-                  >
-                    Quitar
-                  </button>
-                ) : (
-                  <span />
-                )}
               </div>
             ))}
           </div>
@@ -232,7 +397,16 @@ function ReleasesManagement() {
                   ...p,
                   cancionesDraft: [
                     ...(p.cancionesDraft || []),
-                    { _k: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()), titulo: "", duracionMin: "", duracionSeg: "" }
+                    {
+                      _k: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+                      titulo: "",
+                      duracionMin: "",
+                      duracionSeg: "",
+                      audio: null,
+                      audioUrlActual: "",
+                      audioNombreActual: "",
+                      removeAudio: false,
+                    },
                   ],
                 }))
               }
@@ -242,7 +416,6 @@ function ReleasesManagement() {
           </div>
         </div>
       )}
-
       buildPayload={(f) => {
         const fd = new FormData();
         fd.append("tipo", f.tipo);
@@ -253,23 +426,36 @@ function ReleasesManagement() {
         fd.append("audio_url", f.audioUrl || "");
         fd.append("video_url", f.videoUrl || "");
         fd.append("remove_portada", f.removePortada ? "1" : "0");
+
         if (f.portada instanceof File) fd.append("portada", f.portada);
 
-        const cancionesNorm = (f.cancionesDraft || []).map((x) => ({
-          id: x.id ?? null,
-          titulo: (x.titulo ?? "").trim(),
-          duracion: toSeconds(x.duracionMin, x.duracionSeg),
-          audio: x.audio || null,
-        }));
+        const cancionesNorm = (f.cancionesDraft || []).map((x, i) => {
+          let audioKey = null;
+
+          if (x.audio instanceof File) {
+            audioKey = `audio_${i}`;
+            fd.append(audioKey, x.audio);
+          }
+
+          return {
+            id: x.id ?? null,
+            titulo: (x.titulo ?? "").trim(),
+            duracion: toSeconds(x.duracionMin, x.duracionSeg),
+            remove_audio: x.removeAudio ? 1 : 0,
+            audio_key: audioKey,
+          };
+        });
 
         const primeraOk = cancionesNorm[0] && cancionesNorm[0].titulo && cancionesNorm[0].duracion;
         if (!primeraOk) throw new Error("Debes añadir al menos 1 canción (nombre y duración).");
 
-        fd.append("canciones", JSON.stringify(
-          cancionesNorm
-            .filter((x) => x.titulo && x.duracion)
-            .map((x, i) => ({ ...x, track: i + 1 }))
-        )
+        fd.append(
+          "canciones",
+          JSON.stringify(
+            cancionesNorm
+              .filter((x) => x.titulo && x.duracion)
+              .map((x, i) => ({ ...x, track: i + 1 }))
+          )
         );
 
         return fd;

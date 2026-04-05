@@ -45,8 +45,9 @@ class LanzamientoController extends Controller
         $query = Lanzamiento::query()
             ->with([
                 'canciones' => fn($q) => $q
+                    ->with('audio')
                     ->orderBy('track_number')
-                    ->select('id', 'lanzamiento_id', 'titulo', 'duracion', 'track_number')
+                    ->select('id', 'lanzamiento_id', 'titulo', 'duracion', 'track_number', 'audio_id')
             ])
             ->orderByDesc('fecha_lanzamiento');
 
@@ -81,7 +82,7 @@ class LanzamientoController extends Controller
         $lanzamiento = Lanzamiento::findOrFail($id);
 
         $lanzamiento->load([
-            'canciones' => fn($q) => $q->orderBy('track_number')
+            'canciones' => fn($q) => $q->with('audio')->orderBy('track_number')
         ]);
 
         return new LanzamientoResource($lanzamiento);
@@ -170,24 +171,40 @@ class LanzamientoController extends Controller
                     $titulo = trim((string)($c['titulo'] ?? ''));
                     $duracion = (int)($c['duracion'] ?? 0);
                     $track = (int)($c['track'] ?? 0);
+                    $audioKey = $c['audio_key'] ?? null;
 
                     if ($titulo === '' || $duracion <= 0) {
                         continue;
                     }
 
-                    $lanzamiento->canciones()->create([
+                    $song = $lanzamiento->canciones()->create([
                         'titulo' => $titulo,
                         'duracion' => $duracion,
                         'track_number' => $track > 0 ? $track : null,
                     ]);
+
+                    if ($audioKey && $request->hasFile($audioKey)) {
+                        $file = $request->file($audioKey);
+                        $path = $file->store('audios/canciones', 'public');
+
+                        $media = Multimedia::create([
+                            'archivo' => $path,
+                            'nombre_original' => $file->getClientOriginalName(),
+                            'tipo' => 'audio',
+                            'mime_type' => $file->getMimeType(),
+                            'peso' => $file->getSize(),
+                        ]);
+
+                        $song->audio_id = $media->id;
+                        $song->save();
+                    }
                 }
             }
 
             return $lanzamiento;
         });
 
-        $lanzamiento->load(['canciones' => fn($q) => $q->orderBy('track_number')]);
-
+        $lanzamiento->load(['canciones' => fn($q) => $q->with('audio')->orderBy('track_number')]);
         return (new LanzamientoResource($lanzamiento))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
@@ -297,13 +314,13 @@ class LanzamientoController extends Controller
             }
 
             if ($canciones !== null) {
-                $this->syncCanciones($lanzamiento, $canciones);
+                $this->syncCanciones($lanzamiento, $canciones, $request);
             }
 
             return $lanzamiento;
         });
 
-        $lanzamiento->load(['canciones' => fn($q) => $q->orderBy('track_number')]);
+        $lanzamiento->load(['canciones' => fn($q) => $q->with('audio')->orderBy('track_number')]);
 
         return new LanzamientoResource($lanzamiento);
     }
@@ -348,9 +365,9 @@ class LanzamientoController extends Controller
         return response()->json(['message' => 'OK']);
     }
 
-    private function syncCanciones(Lanzamiento $lanzamiento, array $canciones): void
+    private function syncCanciones(Lanzamiento $lanzamiento, array $canciones, Request $request): void
     {
-        $existingIds = $lanzamiento->canciones()->pluck('id')->all();
+        $existingSongs = $lanzamiento->canciones()->get()->keyBy('id');
         $keepIds = [];
 
         foreach ($canciones as $c) {
@@ -362,6 +379,8 @@ class LanzamientoController extends Controller
             $duracion = (int)($c['duracion'] ?? 0);
             $track = (int)($c['track'] ?? 0);
             $id = $c['id'] ?? null;
+            $audioKey = $c['audio_key'] ?? null;
+            $removeAudio = (int)($c['remove_audio'] ?? 0) === 1;
 
             if ($titulo === '' || $duracion <= 0) {
                 continue;
@@ -375,18 +394,77 @@ class LanzamientoController extends Controller
 
             if ($id) {
                 $song = $lanzamiento->canciones()->whereKey($id)->first();
-                if ($song) {
-                    $song->update($payload);
-                    $keepIds[] = $song->id;
+
+                if (!$song) {
+                    continue;
                 }
+
+                $song->update($payload);
+
+                if ($removeAudio && $song->audio) {
+                    Storage::disk('public')->delete($song->audio->archivo);
+                    $song->audio->delete();
+                    $song->audio_id = null;
+                    $song->save();
+                }
+
+                if ($audioKey && $request->hasFile($audioKey)) {
+                    if ($song->audio) {
+                        Storage::disk('public')->delete($song->audio->archivo);
+                        $song->audio->delete();
+                    }
+
+                    $file = $request->file($audioKey);
+                    $path = $file->store('audios/canciones', 'public');
+
+                    $media = Multimedia::create([
+                        'archivo' => $path,
+                        'nombre_original' => $file->getClientOriginalName(),
+                        'tipo' => 'audio',
+                        'mime_type' => $file->getMimeType(),
+                        'peso' => $file->getSize(),
+                    ]);
+
+                    $song->audio_id = $media->id;
+                    $song->save();
+                }
+
+                $keepIds[] = $song->id;
             } else {
-                $new = $lanzamiento->canciones()->create($payload);
-                $keepIds[] = $new->id;
+                $song = $lanzamiento->canciones()->create($payload);
+
+                if ($audioKey && $request->hasFile($audioKey)) {
+                    $file = $request->file($audioKey);
+                    $path = $file->store('audios/canciones', 'public');
+
+                    $media = Multimedia::create([
+                        'archivo' => $path,
+                        'nombre_original' => $file->getClientOriginalName(),
+                        'tipo' => 'audio',
+                        'mime_type' => $file->getMimeType(),
+                        'peso' => $file->getSize(),
+                    ]);
+
+                    $song->audio_id = $media->id;
+                    $song->save();
+                }
+
+                $keepIds[] = $song->id;
             }
         }
 
-        $toDelete = array_diff($existingIds, $keepIds);
+        $toDelete = array_diff($existingSongs->keys()->all(), $keepIds);
+
         if (!empty($toDelete)) {
+            $songsToDelete = $lanzamiento->canciones()->whereIn('id', $toDelete)->get();
+
+            foreach ($songsToDelete as $song) {
+                if ($song->audio) {
+                    Storage::disk('public')->delete($song->audio->archivo);
+                    $song->audio->delete();
+                }
+            }
+
             $lanzamiento->canciones()->whereIn('id', $toDelete)->delete();
         }
     }

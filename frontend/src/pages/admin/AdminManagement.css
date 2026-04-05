@@ -176,7 +176,6 @@
   background: rgba(255, 120, 120, .08);
 }
 
-/* ============ Pager ============ */
 .adminPager {
   display: flex;
   gap: 10px;
@@ -203,7 +202,6 @@
   font-size: 13px;
 }
 
-/* ============ Create band (floating) ============ */
 .adminCreateBand {
   position: sticky;
   bottom: 0;
@@ -239,7 +237,6 @@
   background: rgba(255, 255, 255, .08);
 }
 
-/* ============ Modals ============ */
 .adminModalOverlay {
   position: fixed;
   inset: 0;
@@ -292,10 +289,19 @@
 }
 
 .adminModalFooter {
+  position: sticky;
+  bottom: -16px;
+  margin-top: 16px;
+  padding-top: 12px;
+  z-index: 5;
+}
+
+.adminModalFooterInner {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 10px;
-  margin-top: 14px;
+  padding: 12px 0;
+  background: black;
 }
 
 .adminFormGrid {
@@ -345,7 +351,6 @@
   }
 }
 
-/* Responsive: scroll horizontal en tablas grandes */
 @media (max-width: 992px) {
   .adminTableWrap {
     overflow-x: auto;
@@ -371,10 +376,23 @@
   margin-bottom: 10px;
 }
 
+.adminSongItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
 .adminSongTrack {
+  width: 24px;
+  flex: 0 0 24px;
   text-align: right;
-  padding-bottom: 10px;
-  padding-right: 10px;
+  padding-top: 36px;
+}
+
+.adminSongContent {
+  flex: 1;
+  min-width: 0;
 }
 
 .adminSongBtn {
@@ -390,9 +408,57 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .adminSongLabel {
   font-size: 0.8rem;
   opacity: .7;
+}
+
+.adminSongDurationField {
+  flex: 0 0 auto;
+}
+
+.adminSongTimeInput {
+  width: 52px;
+  text-align: center;
+}
+
+.adminSongTimeSep {
+  font-weight: 700;
+  opacity: .8;
+}
+
+.adminSongRemoveBtn {
+  align-self: end;
+}
+
+.adminSongRemovePlaceholder {
+  width: 90px;
+  flex: 0 0 90px;
+}
+
+.adminSongAudioBlock {
+  width: 100%;
+}
+
+.adminSongFileName {
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .adminSongItem {
+    gap: 10px;
+  }
+
+  .adminSongTrack {
+    width: 18px;
+    flex-basis: 18px;
+    padding-top: 34px;
+  }
+
+  .adminSongRemovePlaceholder {
+    display: none;
+  }
 }

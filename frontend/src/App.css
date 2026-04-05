@@ -21,7 +21,6 @@ section {
 .btn {
   border-radius: 999px;
   padding: 0.75rem 1.7rem;
-  /* border: 1px solid transparent; */
   text-decoration: none;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -46,6 +45,11 @@ section {
 .btn-secondary:hover {
   border-color: var(--text);
   color: var(--text);
+}
+
+.btn-red {
+  border-color: rgba(255, 120, 120, .25);
+  background: rgba(255, 120, 120, .1);
 }
 
 .section {

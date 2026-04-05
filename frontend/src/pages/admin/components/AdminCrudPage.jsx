@@ -45,24 +45,20 @@ function AdminCrudPage({
   const [error, setError] = useState("");
   const [rows, setRows] = useState([]);
 
-  // UI
   const [q, setQ] = useState("");
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(1);
 
-  // delete modal
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [toDelete, setToDelete] = useState(null);
 
-  // editor modal
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorLoading, setEditorLoading] = useState(false);
   const [editorError, setEditorError] = useState("");
   const [editorOk, setEditorOk] = useState("");
   const [form, setForm] = useState(emptyForm);
 
-  // ========= Load + auth =========
   useEffect(() => {
     const run = async () => {
       setError("");
@@ -115,7 +111,6 @@ function AdminCrudPage({
     run();
   }, [authHeaders, listPath, navigate, requireAdmin, title, token]);
 
-  // ========= Search + pagination =========
   const filtered = useMemo(() => {
     const needle = normalize(q).trim();
     if (!needle) return rows;
@@ -140,7 +135,6 @@ function AdminCrudPage({
 
   const goTo = (p) => setPage(Math.min(Math.max(1, p), totalPages));
 
-  // ========= Delete flow =========
   const onDeleteClick = (row) => {
     if (!canDelete) return;
     setToDelete(row);
@@ -175,7 +169,6 @@ function AdminCrudPage({
     }
   };
 
-  // ========= Editor flow =========
   const openCreate = () => {
     if (!canCreate) return;
     setEditorError("");
@@ -261,7 +254,6 @@ function AdminCrudPage({
     }
   };
 
-  // ========= Render =========
   if (loading) {
     return (
       <section className="container adminPageWrap">

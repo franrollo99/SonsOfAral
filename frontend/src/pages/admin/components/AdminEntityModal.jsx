@@ -305,11 +305,7 @@ function Field({ field, form, setForm }) {
               <tbody>
                 {(Array.isArray(form?.[name]) ? form?.[name] : []).map((ln, idx) => {
                   const producto =
-                    ln?.producto?.nombre ??
-                    ln?.producto_nombre ??
-                    ln?.nombre ??
-                    ln?.producto ??
-                    "-";
+                    ln?.nombre_producto ?? "-";
 
                   const qty = Number(ln?.cantidad ?? ln?.qty ?? 0) || 0;
                   const price = Number(ln?.precio ?? ln?.precio_unitario ?? ln?.price ?? 0) || 0;
@@ -410,14 +406,17 @@ function AdminEntityModal({
         </div>
 
         <div className="adminModalFooter">
-          <button className="adminBtn" type="button" onClick={onClose} disabled={loading}>
-            Volver
-          </button>
-          {showSave && (
-            <button className="adminBtn" type="button" onClick={onSave} disabled={loading}>
-              {loading ? "Guardando..." : saveText}
+          <div className="adminModalFooterInner">
+            <button className="adminBtn" type="button" onClick={onClose} disabled={loading}>
+              Volver
             </button>
-          )}
+
+            {showSave && (
+              <button className="adminBtn" type="button" onClick={onSave} disabled={loading}>
+                {loading ? "Guardando..." : saveText}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
