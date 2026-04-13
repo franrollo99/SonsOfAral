@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
+import { compressImageIfNeeded } from "../../../utils/compressImage";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const date = (iso) => {
   if (!iso) return "-";
@@ -50,8 +53,9 @@ const fromSeconds = (total) => {
   return { duracionMin: String(Math.floor(t / 60)), duracionSeg: String(t % 60) };
 };
 
-function SongAudioField({ song, index, setForm }) {
+function SongAudioField({ song, index, setForm, playingAudioRef }) {
   const inputRef = useRef(null);
+  const audioRef = useRef(null);
 
   const selectedFile = song?.audio instanceof File ? song.audio : null;
   const currentUrl = !song?.removeAudio ? song?.audioUrlActual || "" : "";
@@ -81,6 +85,11 @@ function SongAudioField({ song, index, setForm }) {
   };
 
   const removeShownAudio = () => {
+    if (audioRef.current && playingAudioRef.current === audioRef.current) {
+      audioRef.current.pause();
+      playingAudioRef.current = null;
+    }
+
     if (selectedFile) {
       updateSong((x) => ({
         audio: null,
@@ -98,10 +107,32 @@ function SongAudioField({ song, index, setForm }) {
   };
 
   const discardNewAudio = () => {
+    if (audioRef.current && playingAudioRef.current === audioRef.current) {
+      audioRef.current.pause();
+      playingAudioRef.current = null;
+    }
+
     updateSong(() => ({
       audio: null,
       removeAudio: false,
     }));
+  };
+
+  const handlePlay = () => {
+    if (
+      playingAudioRef.current &&
+      playingAudioRef.current !== audioRef.current
+    ) {
+      playingAudioRef.current.pause();
+    }
+
+    playingAudioRef.current = audioRef.current;
+  };
+
+  const handlePauseOrEnd = () => {
+    if (playingAudioRef.current === audioRef.current) {
+      playingAudioRef.current = null;
+    }
   };
 
   return (
@@ -111,7 +142,7 @@ function SongAudioField({ song, index, setForm }) {
       <input
         ref={inputRef}
         type="file"
-        accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/ogg,audio/mp4,audio/x-m4a,.mp3,.wav,.ogg,.m4a"
+        accept="audio/mpeg,.mp3"
         style={{ display: "none" }}
         onChange={onFileChange}
       />
@@ -135,10 +166,14 @@ function SongAudioField({ song, index, setForm }) {
       {hasVisibleAudio ? (
         <div>
           <audio
+            ref={audioRef}
             controls
             preload="metadata"
             src={selectedFile ? URL.createObjectURL(selectedFile) : currentUrl}
             style={{ width: "85%" }}
+            onPlay={handlePlay}
+            onPause={handlePauseOrEnd}
+            onEnded={handlePauseOrEnd}
           />
         </div>
       ) : null}
@@ -180,6 +215,7 @@ function SongAudioField({ song, index, setForm }) {
 
 function ReleasesManagement() {
   const [form, setForm] = useState(emptyLanzamiento);
+  const playingAudioRef = useRef(null);
 
   const handleDurationChange = (setFormFn, index, field, value, max) => {
     if (value === "") {
@@ -231,7 +267,7 @@ function ReleasesManagement() {
                 titulo: s.titulo ?? "",
                 ...fromSeconds(s.duracion ?? 0),
                 audio: null,
-                audioUrlActual: s.audio?.url || "",
+                audioUrlActual: s?.audio?.id ? `${API_URL}/canciones/${s.id}/audio` : "",
                 audioNombreActual: s.audio?.nombre_original || "",
                 removeAudio: false,
               }))
@@ -287,6 +323,7 @@ function ReleasesManagement() {
           type: "select",
           options: [
             { value: "album", label: "album" },
+            { value: "EP", label: "EP" },
             { value: "single", label: "single" },
           ],
         },
@@ -381,7 +418,12 @@ function ReleasesManagement() {
                   </div>
 
                   <div className="mt-3">
-                    <SongAudioField song={s} index={i} setForm={setForm} />
+                    <SongAudioField
+                      song={s}
+                      index={i}
+                      setForm={setForm}
+                      playingAudioRef={playingAudioRef}
+                    />
                   </div>
                 </div>
               </div>
@@ -416,7 +458,7 @@ function ReleasesManagement() {
           </div>
         </div>
       )}
-      buildPayload={(f) => {
+      buildPayload={async (f) => {
         const fd = new FormData();
         fd.append("tipo", f.tipo);
         fd.append("titulo", f.titulo);
@@ -427,7 +469,10 @@ function ReleasesManagement() {
         fd.append("video_url", f.videoUrl || "");
         fd.append("remove_portada", f.removePortada ? "1" : "0");
 
-        if (f.portada instanceof File) fd.append("portada", f.portada);
+        if (f.portada instanceof File) {
+          const compressed = await compressImageIfNeeded(f.portada);
+          fd.append("portada", compressed);
+        }
 
         const cancionesNorm = (f.cancionesDraft || []).map((x, i) => {
           let audioKey = null;

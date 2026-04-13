@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./Music.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -21,7 +21,7 @@ function readCache(key) {
 function writeCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch {}
+  } catch { }
 }
 
 function normalizeOrdered(raw) {
@@ -40,6 +40,12 @@ function Musica() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [lanzamientoSeleccionado, setLanzamientoSeleccionado] = useState(null);
+
+  const audioRef = useRef(null);
+  const [activeTrackId, setActiveTrackId] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   const compraUrl = (lanzamientoSeleccionado?.compraUrl || "").trim();
   const audioUrl = (lanzamientoSeleccionado?.audioUrl || "").trim();
@@ -101,6 +107,7 @@ function Musica() {
   };
 
   const cerrarModal = () => {
+    stopAudio();
     setModalOpen(false);
     setLanzamientoSeleccionado(null);
   };
@@ -108,9 +115,136 @@ function Musica() {
   const lanzamientosFiltrados = useMemo(() => {
     const f = (filtro ?? "all").toLowerCase();
     if (f === "all") return lanzamientos;
-    const tipoBuscado = f === "albums" ? "album" : f === "singles" ? "single" : f;
+    const tipoBuscado = f === "all" ? "all" : f;
     return lanzamientos.filter((l) => (l?.tipo ?? "").toLowerCase() === tipoBuscado);
   }, [lanzamientos, filtro]);
+
+  const formatTime = (secs) => {
+    const n = Number(secs) || 0;
+    const m = Math.floor(n / 60);
+    const s = Math.floor(n % 60);
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const stopAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.src.startsWith("blob:")) {
+      URL.revokeObjectURL(audio.src);
+    }
+
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+
+    setIsPlaying(false);
+    setActiveTrackId(null);
+    setCurrentTime(0);
+    setDuration(0);
+  };
+
+  const toggleTrack = (track) => {
+    const url = `${API_URL}/canciones/${track.id}/audio`;
+    const id = track?.id;
+
+    if (!url || !id) return;
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (activeTrackId === id) {
+      if (audio.paused) {
+        audio.play().then(() => setIsPlaying(true)).catch(() => { });
+      } else {
+        audio.pause();
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const cargarYReproducir = async () => {
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        audio.src = blobUrl;
+        audio.load();
+
+        await audio.play();
+
+        setActiveTrackId(id);
+        setIsPlaying(true);
+      } catch (e) { }
+    };
+
+    cargarYReproducir();
+  };
+
+  const onSeekTrack = (value) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = Number(value) || 0;
+    setCurrentTime(audio.currentTime);
+  };
+
+  useEffect(() => {
+    if (!modalOpen) return;
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onLoadedMetadata = () => {
+      setDuration(audio.duration || 0);
+    };
+
+    const onTimeUpdate = () => {
+      setCurrentTime(audio.currentTime || 0);
+      setDuration(audio.duration || 0);
+    };
+
+    const onEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setActiveTrackId(null);
+      if (audio.duration) setDuration(audio.duration);
+    };
+
+    const onPause = () => setIsPlaying(false);
+    const onPlay = () => setIsPlaying(true);
+
+    audio.addEventListener("loadedmetadata", onLoadedMetadata);
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("play", onPlay);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", onLoadedMetadata);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("play", onPlay);
+    };
+  }, [modalOpen]);
+
+  const filtrosVisibles = useMemo(() => {
+    const tipos = new Set();
+
+    for (const lanzamiento of lanzamientos) {
+      const tipo = String(lanzamiento?.tipo || "").toLowerCase();
+      if (tipo) tipos.add(tipo);
+    }
+
+    const items = [{ value: "all", label: "Todos" }];
+
+    if (tipos.has("album")) items.push({ value: "album", label: "Album" });
+    if (tipos.has("ep")) items.push({ value: "ep", label: "EP" });
+    if (tipos.has("single")) items.push({ value: "single", label: "Single" });
+
+    return items;
+  }, [lanzamientos]);
 
   return (
     <section>
@@ -118,15 +252,16 @@ function Musica() {
         <h1>Explorar lanzamientos</h1>
 
         <div className="d-flex flex-wrap justify-content-end gap-2">
-          <button className={`filtroMusica ${filtro == "all" ? "isActive" : ""}`} onClick={() => setFiltro("all")} type="button">
-            Todos
-          </button>
-          <button className={`filtroMusica ${filtro == "albums" ? "isActive" : ""}`} onClick={() => setFiltro("albums")} type="button">
-            Albums
-          </button>
-          <button className={`filtroMusica ${filtro == "singles" ? "isActive" : ""}`} onClick={() => setFiltro("singles")} type="button">
-            Singles
-          </button>
+          {filtrosVisibles.map((item) => (
+            <button
+              key={item.value}
+              className={`filtroMusica ${filtro === item.value ? "isActive" : ""}`}
+              onClick={() => setFiltro(item.value)}
+              type="button"
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </div>
       <hr />
@@ -146,7 +281,17 @@ function Musica() {
                 tabIndex={0}
               >
                 <div className="lanzamientoPortada">
-                  <img src={lanzamiento.portada?.url} alt={`Portada ${lanzamiento.titulo}`} loading="lazy" />
+                  <img
+                    src={lanzamiento.portada?.url}
+                    srcSet={
+                      lanzamiento.portada?.urlSm
+                        ? `${lanzamiento.portada.urlSm} 500w, ${lanzamiento.portada.url} 1400w`
+                        : undefined
+                    }
+                    sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 25vw"
+                    alt={`Portada ${lanzamiento.titulo}`}
+                    loading="lazy"
+                  />
                 </div>
 
                 <div className="lanzamientoDatos">
@@ -168,10 +313,15 @@ function Musica() {
               <img src="/images/close.svg" alt="" />
             </button>
 
+            <audio ref={audioRef} preload="auto" style={{ display: "none" }} />
+
             <div className="modalGrid">
               <aside className="modalLeft d-flex flex-column gap-3">
                 <div className="cover">
-                  <img src={lanzamientoSeleccionado.portada?.url} alt={`Portada ${lanzamientoSeleccionado.titulo}`} />
+                  <img
+                    src={lanzamientoSeleccionado.portada?.url}
+                    alt={`Portada ${lanzamientoSeleccionado.titulo}`}
+                  />
                 </div>
 
                 <div className="leftMeta d-flex flex-column gap-3">
@@ -220,12 +370,58 @@ function Musica() {
                   <hr className="divider" />
                   <div className="tracklist">
                     <ol>
-                      {(lanzamientoSeleccionado.canciones ?? []).map((c, idx) => (
-                        <li key={c.id ?? idx} className="trackRow">
-                          <span className="trackName">{c.titulo}</span>
-                          <span className="trackTime">{c.duracion_formateada ?? c.duracionFormateada ?? ""}</span>
-                        </li>
-                      ))}
+                      {(lanzamientoSeleccionado.canciones ?? []).map((c, idx) => {
+                        const hasAudio = !!c?.audio?.url;
+                        const isActive = activeTrackId === c?.id;
+                        const shownTime = isActive
+                          ? `${formatTime(currentTime)} / ${formatTime(duration || c?.duracion || 0)}`
+                          : c?.duracion_formateada ?? c?.duracionFormateada ?? "";
+
+                        return (
+                          <li
+                            key={c.id ?? idx}
+                            className={`trackRow ${isActive ? "isActive" : ""}`}
+                          >
+                            <div className="trackLead">
+                              <span className="trackIndex">{idx + 1}</span>
+                            </div>
+
+                            <div className="trackMain">
+                              <div className="trackTop">
+                                <span className="trackName">{c.titulo}</span>
+                                <span className="trackTime">{shownTime}</span>
+                              </div>
+
+                              {hasAudio && (
+                                <div className="trackPlayerRow">
+                                  <button
+                                    type="button"
+                                    className={`trackPlayBtn ${isActive && isPlaying ? "isPlaying" : ""}`}
+                                    onClick={() => toggleTrack(c)}
+                                    aria-label={isActive && isPlaying ? "Pausar canción" : "Reproducir canción"}
+                                  >
+                                    {isActive && isPlaying ? "❚❚" : "▶"}
+                                  </button>
+
+                                  {isActive ? (
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max={Math.max(duration || c?.duracion || 0, 1)}
+                                      step="0.1"
+                                      value={Math.min(currentTime, duration || c?.duracion || 0)}
+                                      onChange={(e) => onSeekTrack(e.target.value)}
+                                      className="trackProgress"
+                                    />
+                                  ) : (
+                                    <div className="trackProgress trackProgressPlaceholder" />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ol>
 
                     {(!lanzamientoSeleccionado.canciones || lanzamientoSeleccionado.canciones.length === 0) && (

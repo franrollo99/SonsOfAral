@@ -13,7 +13,7 @@ class CancionRequest extends FormRequest
             'duracion' => ['required', 'integer', 'min:1',],
             'track_number' => ['nullable', 'integer', 'min:1',],
             'lanzamiento_id' => ['required', 'exists:lanzamientos,id',],
-            'audio' => ['nullable', 'file', 'mimes:mp3,wav,ogg'],
+            'audio' => ['nullable', 'file', 'mimes:mp3'],
         ];
     }
 

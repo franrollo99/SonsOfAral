@@ -25,22 +25,22 @@ class Galeria extends Model
         return $this->belongsTo(Multimedia::class, 'portada_id');
     }
 
-    public function multimedia()
+    public function archivos()
     {
-        return $this->hasMany(Multimedia::class);
+        return $this->hasMany(Multimedia::class, 'galeria_id');
     }
 
     public function imagenes()
     {
-        return $this->hasMany(Multimedia::class)->where('tipo', 'imagen');
+        return $this->hasMany(Multimedia::class, 'galeria_id')->where('tipo', 'imagen');
     }
 
     public function getNombreAttribute()
     {
         if ($this->tipo === 'concierto' && $this->concierto) {
-            return $this->concierto->lugar . ' - ' . $this->concierto->fecha;
+            return $this->concierto->lugar . ' · ' . $this->concierto->fecha;
         }
 
-        return $this->titulo;
+        return $this->titulo ?? 'Galería';
     }
 }

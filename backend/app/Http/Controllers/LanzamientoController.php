@@ -5,39 +5,30 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LanzamientoRequest;
 use App\Http\Resources\LanzamientoResource;
 use App\Models\Lanzamiento;
-use App\Models\Multimedia;
+use App\Services\LanzamientoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class LanzamientoController extends Controller
 {
     /**
-     * @OA\Tag(
-     *   name="Lanzamientos"
-     * )
-     */
-
-    /**
      * @OA\Get(
-     *   path="/api/lanzamientos",
-     *   operationId="lanzamientosIndex",
-     *   summary="Listar lanzamientos",
-     *   tags={"Lanzamientos"},
-     *   @OA\Response(
-     *     response=200,
-     *     description="OK",
-     *     @OA\JsonContent(
-     *       type="object",
-     *       @OA\Property(
-     *         property="data",
-     *         type="array",
-     *         @OA\Items(ref="#/components/schemas/Lanzamiento")
-     *       )
+     *     path="/api/lanzamientos",
+     *     operationId="lanzamientosIndex",
+     *     tags={"Lanzamientos"},
+     *     summary="Obtener todos los lanzamientos",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de lanzamientos",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Lanzamiento")
+     *             )
+     *         )
      *     )
-     *   )
      * )
      */
     public function index(Request $request)
@@ -56,25 +47,25 @@ class LanzamientoController extends Controller
 
     /**
      * @OA\Get(
-     *   path="/api/lanzamientos/{id}",
-     *   operationId="lanzamientosShow",
-     *   summary="Ver un lanzamiento",
-     *   tags={"Lanzamientos"},
-     *   @OA\Parameter(
-     *     name="id",
-     *     in="path",
-     *     required=true,
-     *     @OA\Schema(type="integer")
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="OK",
-     *     @OA\JsonContent(
-     *       type="object",
-     *       @OA\Property(property="data", ref="#/components/schemas/Lanzamiento")
-     *     )
-     *   ),
-     *   @OA\Response(response=404, description="Not Found")
+     *     path="/api/lanzamientos/{id}",
+     *     operationId="lanzamientosShow",
+     *     tags={"Lanzamientos"},
+     *     summary="Obtener un lanzamiento por ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lanzamiento encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", ref="#/components/schemas/Lanzamiento")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Lanzamiento no encontrado")
      * )
      */
     public function show(int $id)
@@ -90,121 +81,24 @@ class LanzamientoController extends Controller
 
     /**
      * @OA\Post(
-     *   path="/api/lanzamientos",
-     *   operationId="lanzamientosStore",
-     *   summary="Crear lanzamiento (admin)",
-     *   tags={"Lanzamientos"},
-     *   security={{"bearerAuth":{}}},
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *       mediaType="multipart/form-data",
-     *       @OA\Schema(
-     *         type="object",
-     *         @OA\Property(property="titulo", type="string"),
-     *         @OA\Property(property="tipo", type="string", nullable=true),
-     *         @OA\Property(property="fecha_lanzamiento", type="string", format="date", nullable=true),
-     *         @OA\Property(property="descripcion", type="string", nullable=true),
-     *         @OA\Property(property="compra_url", type="string", nullable=true),
-     *         @OA\Property(property="audio_url", type="string", nullable=true),
-     *         @OA\Property(property="video_url", type="string", nullable=true),
-     *         @OA\Property(property="portada", type="string", format="binary", nullable=true),
-     *         @OA\Property(
-     *           property="canciones",
-     *           description="JSON string. Ej: [{\"titulo\":\"Intro\",\"duracion\":83,\"track\":1}]",
-     *           @OA\Schema(type="string")
-     *         )
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(
-     *     response=201,
-     *     description="Created",
-     *     @OA\JsonContent(
-     *       type="object",
-     *       @OA\Property(property="data", ref="#/components/schemas/Lanzamiento")
-     *     )
-     *   ),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     *   @OA\Response(response=403, description="Forbidden"),
-     *   @OA\Response(response=422, description="Validation Error")
+     *     path="/api/lanzamientos",
+     *     operationId="lanzamientosStore",
+     *     tags={"Lanzamientos"},
+     *     summary="Crear un lanzamiento",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=201, description="Lanzamiento creado"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="Sin permisos"),
+     *     @OA\Response(response=422, description="Error de validación")
      * )
      */
-    public function store(LanzamientoRequest $request)
+    public function store(LanzamientoRequest $request, LanzamientoService $lanzamientoService)
     {
-        $data = $request->validated();
+        $lanzamiento = $lanzamientoService->create(
+            $request->validated(),
+            $request
+        );
 
-        if (!isset($data['slug']) && isset($data['titulo'])) {
-            $data['slug'] = Str::slug($data['titulo']);
-        }
-
-        unset($data['portada']);
-
-        $canciones = $request->input('canciones');
-
-        if (is_string($canciones)) {
-            $canciones = json_decode($canciones, true);
-        }
-
-        $canciones = is_array($canciones) ? $canciones : [];
-
-        $lanzamiento = DB::transaction(function () use ($request, $data, $canciones) {
-            $lanzamiento = Lanzamiento::create($data);
-
-            if ($request->hasFile('portada')) {
-                $path = $request->file('portada')->store('imagenes/lanzamientos', 'public');
-
-                $media = Multimedia::create([
-                    'archivo' => $path,
-                    'nombre_original' => $request->file('portada')->getClientOriginalName(),
-                    'tipo' => 'imagen',
-                    'mime_type' => $request->file('portada')->getMimeType(),
-                    'peso' => $request->file('portada')->getSize(),
-                ]);
-
-                $lanzamiento->portada_id = $media->id;
-                $lanzamiento->save();
-            }
-
-            if (!empty($canciones)) {
-                foreach ($canciones as $c) {
-                    $titulo = trim((string)($c['titulo'] ?? ''));
-                    $duracion = (int)($c['duracion'] ?? 0);
-                    $track = (int)($c['track'] ?? 0);
-                    $audioKey = $c['audio_key'] ?? null;
-
-                    if ($titulo === '' || $duracion <= 0) {
-                        continue;
-                    }
-
-                    $song = $lanzamiento->canciones()->create([
-                        'titulo' => $titulo,
-                        'duracion' => $duracion,
-                        'track_number' => $track > 0 ? $track : null,
-                    ]);
-
-                    if ($audioKey && $request->hasFile($audioKey)) {
-                        $file = $request->file($audioKey);
-                        $path = $file->store('audios/canciones', 'public');
-
-                        $media = Multimedia::create([
-                            'archivo' => $path,
-                            'nombre_original' => $file->getClientOriginalName(),
-                            'tipo' => 'audio',
-                            'mime_type' => $file->getMimeType(),
-                            'peso' => $file->getSize(),
-                        ]);
-
-                        $song->audio_id = $media->id;
-                        $song->save();
-                    }
-                }
-            }
-
-            return $lanzamiento;
-        });
-
-        $lanzamiento->load(['canciones' => fn($q) => $q->with('audio')->orderBy('track_number')]);
         return (new LanzamientoResource($lanzamiento))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
@@ -212,260 +106,69 @@ class LanzamientoController extends Controller
 
     /**
      * @OA\Post(
-     *   path="/api/lanzamientos/{id}",
-     *   operationId="lanzamientosUpdate",
-     *   summary="Actualizar lanzamiento (admin)",
-     *   tags={"Lanzamientos"},
-     *   security={{"bearerAuth":{}}},
-     *   @OA\Parameter(
-     *     name="id",
-     *     in="path",
-     *     required=true,
-     *     @OA\Schema(type="integer")
-     *   ),
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *       mediaType="multipart/form-data",
-     *       @OA\Schema(
-     *         type="object",
-     *         @OA\Property(property="_method", type="string", example="PUT"),
-     *         @OA\Property(property="titulo", type="string"),
-     *         @OA\Property(property="tipo", type="string", nullable=true),
-     *         @OA\Property(property="fecha_lanzamiento", type="string", format="date", nullable=true),
-     *         @OA\Property(property="descripcion", type="string", nullable=true),
-     *         @OA\Property(property="compra_url", type="string", nullable=true),
-     *         @OA\Property(property="audio_url", type="string", nullable=true),
-     *         @OA\Property(property="video_url", type="string", nullable=true),
-     *         @OA\Property(property="portada", type="string", format="binary", nullable=true),
-     *         @OA\Property(
-     *           property="canciones",
-     *           description="JSON string. Si trae id: actualiza. Si no trae id: crea. Las existentes no enviadas: se eliminan.",
-     *           @OA\Schema(type="string")
-     *         )
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="OK",
-     *     @OA\JsonContent(
-     *       type="object",
-     *       @OA\Property(property="data", ref="#/components/schemas/Lanzamiento")
-     *     )
-     *   ),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     *   @OA\Response(response=403, description="Forbidden"),
-     *   @OA\Response(response=404, description="Not Found"),
-     *   @OA\Response(response=422, description="Validation Error")
+     *     path="/api/lanzamientos/{id}",
+     *     operationId="lanzamientosUpdate",
+     *     tags={"Lanzamientos"},
+     *     summary="Actualizar un lanzamiento",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(response=200, description="Lanzamiento actualizado"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="Sin permisos"),
+     *     @OA\Response(response=404, description="Lanzamiento no encontrado"),
+     *     @OA\Response(response=422, description="Error de validación")
      * )
      */
-    public function update(LanzamientoRequest $request, int $id)
+    public function update(LanzamientoRequest $request, int $id, LanzamientoService $lanzamientoService)
     {
         $lanzamiento = Lanzamiento::findOrFail($id);
 
-        $data = $request->validated();
-
-        if (isset($data['titulo']) && $data['titulo'] !== $lanzamiento->titulo) {
-            $data['slug'] = Str::slug($data['titulo']);
-        } else {
-            unset($data['slug']);
-        }
-
-        unset($data['portada']);
-
-        $canciones = $request->input('canciones');
-
-        if (is_string($canciones)) {
-            $canciones = json_decode($canciones, true);
-        }
-
-        $canciones = is_array($canciones) ? $canciones : [];
-
-        $lanzamiento = DB::transaction(function () use ($request, $lanzamiento, $data, $canciones) {
-            $lanzamiento->update($data);
-
-            if ($request->boolean('remove_portada')) {
-                if ($lanzamiento->portada) {
-                    Storage::disk('public')->delete($lanzamiento->portada->archivo);
-                    $lanzamiento->portada->delete();
-                    $lanzamiento->portada_id = null;
-                }
-            }
-
-            if ($request->hasFile('portada')) {
-                if ($lanzamiento->portada) {
-                    Storage::disk('public')->delete($lanzamiento->portada->archivo);
-                    $lanzamiento->portada->delete();
-                }
-
-                $path = $request->file('portada')->store('imagenes/lanzamientos', 'public');
-
-                $media = Multimedia::create([
-                    'archivo' => $path,
-                    'nombre_original' => $request->file('portada')->getClientOriginalName(),
-                    'tipo' => 'imagen',
-                    'mime_type' => $request->file('portada')->getMimeType(),
-                    'peso' => $request->file('portada')->getSize(),
-                ]);
-
-                $lanzamiento->portada_id = $media->id;
-                $lanzamiento->save();
-            }
-
-            if ($canciones !== null) {
-                $this->syncCanciones($lanzamiento, $canciones, $request);
-            }
-
-            return $lanzamiento;
-        });
-
-        $lanzamiento->load(['canciones' => fn($q) => $q->with('audio')->orderBy('track_number')]);
+        $lanzamiento = $lanzamientoService->update(
+            $lanzamiento,
+            $request->validated(),
+            $request
+        );
 
         return new LanzamientoResource($lanzamiento);
     }
 
     /**
      * @OA\Delete(
-     *   path="/api/lanzamientos/{id}",
-     *   operationId="lanzamientosDestroy",
-     *   summary="Eliminar lanzamiento (admin)",
-     *   tags={"Lanzamientos"},
-     *   security={{"bearerAuth":{}}},
-     *   @OA\Parameter(
-     *     name="id",
-     *     in="path",
-     *     required=true,
-     *     @OA\Schema(type="integer")
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="OK",
-     *     @OA\JsonContent(
-     *       type="object",
-     *       @OA\Property(property="message", type="string", example="OK")
-     *     )
-     *   ),
-     *   @OA\Response(response=401, description="Unauthorized"),
-     *   @OA\Response(response=403, description="Forbidden"),
-     *   @OA\Response(response=404, description="Not Found")
+     *     path="/api/lanzamientos/{id}",
+     *     operationId="lanzamientosDestroy",
+     *     tags={"Lanzamientos"},
+     *     summary="Eliminar un lanzamiento",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lanzamiento eliminado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="OK")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="Sin permisos"),
+     *     @OA\Response(response=404, description="Lanzamiento no encontrado")
      * )
      */
-    public function destroy(int $id)
+    public function destroy(int $id, LanzamientoService $lanzamientoService)
     {
         $lanzamiento = Lanzamiento::findOrFail($id);
 
-        if ($lanzamiento->portada) {
-            Storage::disk('public')->delete($lanzamiento->portada->archivo);
-            $lanzamiento->portada->delete();
-        }
-
-        $lanzamiento->delete();
+        $lanzamientoService->delete($lanzamiento);
 
         return response()->json(['message' => 'OK']);
-    }
-
-    private function syncCanciones(Lanzamiento $lanzamiento, array $canciones, Request $request): void
-    {
-        $existingSongs = $lanzamiento->canciones()->get()->keyBy('id');
-        $keepIds = [];
-
-        foreach ($canciones as $c) {
-            if (!is_array($c)) {
-                continue;
-            }
-
-            $titulo = trim((string)($c['titulo'] ?? ''));
-            $duracion = (int)($c['duracion'] ?? 0);
-            $track = (int)($c['track'] ?? 0);
-            $id = $c['id'] ?? null;
-            $audioKey = $c['audio_key'] ?? null;
-            $removeAudio = (int)($c['remove_audio'] ?? 0) === 1;
-
-            if ($titulo === '' || $duracion <= 0) {
-                continue;
-            }
-
-            $payload = [
-                'titulo' => $titulo,
-                'duracion' => $duracion,
-                'track_number' => $track > 0 ? $track : null,
-            ];
-
-            if ($id) {
-                $song = $lanzamiento->canciones()->whereKey($id)->first();
-
-                if (!$song) {
-                    continue;
-                }
-
-                $song->update($payload);
-
-                if ($removeAudio && $song->audio) {
-                    Storage::disk('public')->delete($song->audio->archivo);
-                    $song->audio->delete();
-                    $song->audio_id = null;
-                    $song->save();
-                }
-
-                if ($audioKey && $request->hasFile($audioKey)) {
-                    if ($song->audio) {
-                        Storage::disk('public')->delete($song->audio->archivo);
-                        $song->audio->delete();
-                    }
-
-                    $file = $request->file($audioKey);
-                    $path = $file->store('audios/canciones', 'public');
-
-                    $media = Multimedia::create([
-                        'archivo' => $path,
-                        'nombre_original' => $file->getClientOriginalName(),
-                        'tipo' => 'audio',
-                        'mime_type' => $file->getMimeType(),
-                        'peso' => $file->getSize(),
-                    ]);
-
-                    $song->audio_id = $media->id;
-                    $song->save();
-                }
-
-                $keepIds[] = $song->id;
-            } else {
-                $song = $lanzamiento->canciones()->create($payload);
-
-                if ($audioKey && $request->hasFile($audioKey)) {
-                    $file = $request->file($audioKey);
-                    $path = $file->store('audios/canciones', 'public');
-
-                    $media = Multimedia::create([
-                        'archivo' => $path,
-                        'nombre_original' => $file->getClientOriginalName(),
-                        'tipo' => 'audio',
-                        'mime_type' => $file->getMimeType(),
-                        'peso' => $file->getSize(),
-                    ]);
-
-                    $song->audio_id = $media->id;
-                    $song->save();
-                }
-
-                $keepIds[] = $song->id;
-            }
-        }
-
-        $toDelete = array_diff($existingSongs->keys()->all(), $keepIds);
-
-        if (!empty($toDelete)) {
-            $songsToDelete = $lanzamiento->canciones()->whereIn('id', $toDelete)->get();
-
-            foreach ($songsToDelete as $song) {
-                if ($song->audio) {
-                    Storage::disk('public')->delete($song->audio->archivo);
-                    $song->audio->delete();
-                }
-            }
-
-            $lanzamiento->canciones()->whereIn('id', $toDelete)->delete();
-        }
     }
 }

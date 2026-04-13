@@ -261,6 +261,12 @@ function Tienda() {
                         <img
                           className="tiendaImg"
                           src={p.imagen?.url}
+                          srcSet={
+                            p.imagen?.urlSm
+                              ? `${p.imagen.urlSm} 500w, ${p.imagen.url} 1400w`
+                              : undefined
+                          }
+                          sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 33vw"
                           alt={p.nombre}
                           loading="lazy"
                         />

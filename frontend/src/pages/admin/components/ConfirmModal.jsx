@@ -42,11 +42,11 @@ function ConfirmModal({
           </p>
         </div>
 
-        <div className="adminModalFooter">
+        <div className="d-flex gap-3">
           <button className="adminBtn" type="button" onClick={onCancel} disabled={loading}>
             {cancelText}
           </button>
-          <button className="adminBtn" type="button" onClick={onConfirm} disabled={loading}>
+          <button className="adminBtn adminActionBtn--danger" type="button" onClick={onConfirm} disabled={loading}>
             {loading ? "Procesando..." : confirmText}
           </button>
         </div>

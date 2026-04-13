@@ -28,6 +28,7 @@ class ProductoResource extends JsonResource
             'imagen' => $this->imagen ? [
                 'id' => $this->imagen->id,
                 'url' => $this->imagen->url,
+                'urlSm' => $this->imagen->url_sm,
                 'nombre_original' => $this->imagen->nombre_original,
             ] : null,
         ];

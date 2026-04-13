@@ -41,9 +41,10 @@ class PedidoController extends Controller
      *                     @OA\Property(property="provincia", type="string", example="Cantabria"),
      *                     @OA\Property(property="cp", type="string", example="39300"),
      *                     @OA\Property(property="gastos_envio", type="number", format="float", example=4.99),
+     *                     @OA\Property(property="telefono", type="string", nullable=true, example="600111222"),
      *                     @OA\Property(property="metodo_pago", type="string", example="tarjeta"),
      *                     @OA\Property(
-     *                         property="lineasPedido",
+     *                         property="productos",
      *                         type="array",
      *                         @OA\Items(
      *                             type="object",
@@ -115,18 +116,19 @@ class PedidoController extends Controller
      *                 @OA\Property(property="provincia", type="string", example="Cantabria"),
      *                 @OA\Property(property="cp", type="string", example="39300"),
      *                 @OA\Property(property="gastos_envio", type="number", format="float", example=4.99),
+     *                 @OA\Property(property="telefono", type="string", nullable=true, example="600111222"),
      *                 @OA\Property(property="metodo_pago", type="string", example="tarjeta"),
      *                 @OA\Property(
-     *                 property="lineasPedido",
-     *                 type="array",
-     *                 @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=10),
-     *                         @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
-     *                         @OA\Property(property="talla", type="string", nullable=true, example="L"),
-     *                         @OA\Property(property="cantidad", type="integer", example=2),
-     *                         @OA\Property(property="precio_unitario", type="number", format="float", example=19.99),
-     *                         @OA\Property(property="subtotal", type="number", format="float", example=39.98)
+     *                      property="productos",
+     *                      type="array",
+     *                      @OA\Items(
+     *                          type="object",
+     *                          @OA\Property(property="id", type="integer", example=10),
+     *                          @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
+     *                          @OA\Property(property="talla", type="string", nullable=true, example="L"),
+     *                          @OA\Property(property="cantidad", type="integer", example=2),
+     *                          @OA\Property(property="precio_unitario", type="number", format="float", example=19.99),
+     *                          @OA\Property(property="subtotal", type="number", format="float", example=39.98)
      *                     )
      *                 )
      *             )

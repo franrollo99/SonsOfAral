@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ConciertoRequest;
 use App\Http\Resources\ConciertoResource;
 use App\Models\Concierto;
-use App\Models\Multimedia;
+use App\Services\MultimediaService;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class ConciertoController extends Controller
 {
@@ -17,29 +16,31 @@ class ConciertoController extends Controller
      *     operationId="conciertosIndex",
      *     tags={"Conciertos"},
      *     summary="Obtener todos los conciertos",
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", example="latest")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sin_galeria",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="all",
+     *         in="query",
+     *         required=false,
+     *         description="Si es true, devuelve todos los conciertos. Si no, solo los actuales y futuros.",
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Lista de conciertos",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="fecha", type="string", format="date", example="2026-02-28"),
-     *                     @OA\Property(property="fecha_formateada", type="string", nullable=true, example="28 de febrero, 2026"),
-     *                     @OA\Property(property="provincia", type="string", nullable=true, example="Cantabria"),
-     *                     @OA\Property(property="municipio", type="string", nullable=true, example="Torrelavega"),
-     *                     @OA\Property(property="lugar", type="string", example="Teatro Principal"),
-     *                     @OA\Property(property="descripcion", type="string", nullable=true, example="Concierto presentación"),
-     *                     @OA\Property(property="precioEntrada", type="number", nullable=true, example=12.5),
-     *                     @OA\Property(property="entradaAnticipada", type="boolean", example=true),
-     *                     @OA\Property(property="enlaceEntradaAnticipada", type="string", nullable=true, example="https://..."),
-     *                     @OA\Property(property="imagen", type="string", nullable=true, example="http://localhost/storage/conciertos/cover.webp")
-     *                 )
-     *             )
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Concierto"))
      *         )
      *     )
      * )
@@ -47,8 +48,27 @@ class ConciertoController extends Controller
     public function index()
     {
         $sort = request('sort');
+        $all = request()->boolean('all');
+        $sinGaleria = request()->boolean('sin_galeria');
+        $galeriaActualId = request('galeria_actual_id');
 
         $query = Concierto::query();
+
+        if (!$all) {
+            $query->whereDate('fecha', '>=', now()->toDateString());
+        }
+
+        if ($sinGaleria) {
+            $query->where(function ($q) use ($galeriaActualId) {
+                $q->whereDoesntHave('galeria');
+
+                if ($galeriaActualId) {
+                    $q->orWhereHas('galeria', function ($sub) use ($galeriaActualId) {
+                        $sub->where('id', $galeriaActualId);
+                    });
+                }
+            });
+        }
 
         if ($sort === 'latest') {
             $query->orderBy('fecha', 'desc');
@@ -56,9 +76,7 @@ class ConciertoController extends Controller
             $query->orderBy('fecha', 'asc');
         }
 
-        $conciertos = $query->get();
-
-        return ConciertoResource::collection($conciertos);
+        return ConciertoResource::collection($query->get());
     }
 
     /**
@@ -71,44 +89,23 @@ class ConciertoController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID del concierto",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Concierto encontrado",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="fecha", type="string", format="date", example="2026-02-28"),
-     *                 @OA\Property(property="fecha_formateada", type="string", nullable=true, example="28 de febrero, 2026"),
-     *                 @OA\Property(property="provincia", type="string", nullable=true, example="Cantabria"),
-     *                 @OA\Property(property="municipio", type="string", nullable=true, example="Torrelavega"),
-     *                 @OA\Property(property="lugar", type="string", example="Teatro Principal"),
-     *                 @OA\Property(property="descripcion", type="string", nullable=true, example="Concierto presentación"),
-     *                 @OA\Property(property="precioEntrada", type="number", nullable=true, example=12.5),
-     *                 @OA\Property(property="entradaAnticipada", type="boolean", example=true),
-     *                 @OA\Property(property="enlaceEntradaAnticipada", type="string", nullable=true, example="https://..."),
-     *                 @OA\Property(property="imagen", type="string", nullable=true, example="http://localhost/storage/conciertos/cover.webp")
-     *             )
+     *             @OA\Property(property="data", ref="#/components/schemas/Concierto")
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Concierto no encontrado",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Concierto] 999")
-     *         )
-     *     )
+     *     @OA\Response(response=404, description="No encontrado")
      * )
      */
     public function show(int $id)
     {
         $concierto = Concierto::findOrFail($id);
+
         return new ConciertoResource($concierto);
     }
 
@@ -125,62 +122,46 @@ class ConciertoController extends Controller
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 required={"fecha","lugar","entrada_anticipada"},
-     *                 @OA\Property(property="fecha", type="string", format="date", example="2026-02-28"),
-     *                 @OA\Property(property="provincia", type="string", nullable=true, example="Cantabria"),
-     *                 @OA\Property(property="municipio", type="string", nullable=true, example="Torrelavega"),
-     *                 @OA\Property(property="lugar", type="string", example="Teatro Principal"),
-     *                 @OA\Property(property="descripcion", type="string", nullable=true, example="Concierto presentación"),
-     *                 @OA\Property(property="precio_entrada", type="number", nullable=true, example=12.5),
-     *                 @OA\Property(property="entrada_anticipada", type="boolean", example=true),
-     *                 @OA\Property(property="enlace_entrada_anticipada", type="string", nullable=true, example="https://..."),
-     *                 @OA\Property(property="imagen", type="string", format="binary", nullable=true)
+     *                 @OA\Property(property="fecha", type="string", format="date"),
+     *                 @OA\Property(property="provincia", type="string"),
+     *                 @OA\Property(property="municipio", type="string"),
+     *                 @OA\Property(property="lugar", type="string"),
+     *                 @OA\Property(property="descripcion", type="string"),
+     *                 @OA\Property(property="precio_entrada", type="number"),
+     *                 @OA\Property(property="entrada_anticipada", type="boolean"),
+     *                 @OA\Property(property="enlace_entrada_anticipada", type="string"),
+     *                 @OA\Property(property="cartel", type="string", format="binary")
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Concierto creado"),
-     *     @OA\Response(response=401, description="No autenticado", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Unauthenticated."))),
-     *     @OA\Response(response=403, description="Sin permisos", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="This action is unauthorized."))),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Error de validación",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     )
+     *     @OA\Response(response=201, description="Creado"),
+     *     @OA\Response(response=422, description="Error de validación")
      * )
      */
-    public function store(ConciertoRequest $request)
+    public function store(ConciertoRequest $request, MultimediaService $multimediaService)
     {
         $data = $request->validated();
-
         unset($data['cartel']);
 
         $concierto = Concierto::create($data);
 
         if ($request->hasFile('cartel')) {
-            $path = $request->file('cartel')->store('imagenes/conciertos', 'public');
-
-            $media = \App\Models\Multimedia::create([
-                'archivo' => $path,
-                'nombre_original' => $request->file('cartel')->getClientOriginalName(),
-                'tipo' => 'imagen',
-                'mime_type' => $request->file('cartel')->getMimeType(),
-                'peso' => $request->file('cartel')->getSize(),
-            ]);
+            $media = $multimediaService->storeImage(
+                $request->file('cartel'),
+                'imagenes/conciertos'
+            );
 
             $concierto->cartel_id = $media->id;
             $concierto->save();
         }
 
-        return (new ConciertoResource($concierto))
+        return (new ConciertoResource($concierto->fresh('cartel')))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      *     path="/api/conciertos/{id}",
      *     operationId="conciertosUpdate",
      *     tags={"Conciertos"},
@@ -190,35 +171,14 @@ class ConciertoController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID del concierto",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer")
      *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 required={"fecha","lugar","entrada_anticipada"},
-     *                 @OA\Property(property="fecha", type="string", format="date", example="2026-02-28"),
-     *                 @OA\Property(property="provincia", type="string", nullable=true, example="Cantabria"),
-     *                 @OA\Property(property="municipio", type="string", nullable=true, example="Torrelavega"),
-     *                 @OA\Property(property="lugar", type="string", example="Teatro Principal"),
-     *                 @OA\Property(property="descripcion", type="string", nullable=true),
-     *                 @OA\Property(property="precio_entrada", type="number", nullable=true, example=12.5),
-     *                 @OA\Property(property="entrada_anticipada", type="boolean", example=true),
-     *                 @OA\Property(property="enlace_entrada_anticipada", type="string", nullable=true, example="https://..."),
-     *                 @OA\Property(property="imagen", type="string", format="binary", nullable=true)
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Concierto actualizado"),
-     *     @OA\Response(response=401, description="No autenticado", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Unauthenticated."))),
-     *     @OA\Response(response=403, description="Sin permisos", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="This action is unauthorized."))),
-     *     @OA\Response(response=404, description="Concierto no encontrado", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Concierto] 999"))),
-     *     @OA\Response(response=422, description="Error de validación", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="The given data was invalid."), @OA\Property(property="errors", type="object")))
+     *     @OA\Response(response=200, description="Actualizado"),
+     *     @OA\Response(response=404, description="No encontrado"),
+     *     @OA\Response(response=422, description="Error de validación")
      * )
      */
-    public function update(ConciertoRequest $request, int $id)
+    public function update(ConciertoRequest $request, int $id, MultimediaService $multimediaService)
     {
         $concierto = Concierto::findOrFail($id);
 
@@ -227,36 +187,18 @@ class ConciertoController extends Controller
 
         $concierto->update($data);
 
-        if ($request->boolean('remove_cartel') && $concierto->cartel) {
-            Storage::disk('public')->delete($concierto->cartel->archivo);
-            $concierto->cartel->delete();
-            $concierto->cartel_id = null;
-            $concierto->save();
-        }
-
         if ($request->hasFile('cartel')) {
-            if ($concierto->cartel) {
-                Storage::disk('public')->delete($concierto->cartel->archivo);
-                $concierto->cartel->delete();
-            }
-
-            $path = $request->file('cartel')->store('imagenes/conciertos', 'public');
-
-            $media = Multimedia::create([
-                'archivo' => $path,
-                'nombre_original' => $request->file('cartel')->getClientOriginalName(),
-                'tipo' => 'imagen',
-                'mime_type' => $request->file('cartel')->getMimeType(),
-                'peso' => $request->file('cartel')->getSize(),
-            ]);
+            $media = $multimediaService->replaceImage(
+                $concierto->cartel,
+                $request->file('cartel'),
+                'imagenes/conciertos'
+            );
 
             $concierto->cartel_id = $media->id;
             $concierto->save();
         }
 
-        $concierto->load('cartel');
-
-        return new ConciertoResource($concierto);
+        return new ConciertoResource($concierto->fresh('cartel'));
     }
 
     /**
@@ -270,27 +212,17 @@ class ConciertoController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID del concierto",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer")
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Concierto eliminado",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="OK"))
-     *     ),
-     *     @OA\Response(response=401, description="No autenticado", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Unauthenticated."))),
-     *     @OA\Response(response=403, description="Sin permisos", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="This action is unauthorized."))),
-     *     @OA\Response(response=404, description="Concierto no encontrado", @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Concierto] 999")))
+     *     @OA\Response(response=200, description="OK"),
+     *     @OA\Response(response=404, description="No encontrado")
      * )
      */
-    public function destroy(int $id)
+    public function destroy(int $id, MultimediaService $multimediaService)
     {
         $concierto = Concierto::findOrFail($id);
 
-        if ($concierto->cartel) {
-            Storage::disk('public')->delete($concierto->cartel->archivo);
-            $concierto->cartel->delete();
-        }
+        $multimediaService->delete($concierto->cartel);
 
         $concierto->delete();
 

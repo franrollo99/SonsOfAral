@@ -26,6 +26,8 @@ function AdminCrudPage({
   backTo = "/area-admin",
   modalAfterFields,
   mapRowToForm,
+  onSaveSuccess,
+  onDeleteSuccess,
 }) {
   const navigate = useNavigate();
   const token = useMemo(() => localStorage.getItem("token"), []);
@@ -162,6 +164,11 @@ function AdminCrudPage({
       if (!res.ok) throw new Error(data?.message || `No se pudo borrar el ${entityName}.`);
 
       setRows((prev) => prev.filter((r) => r.id !== toDelete.id));
+
+      if (typeof onDeleteSuccess === "function") {
+        onDeleteSuccess(toDelete);
+      }
+
       closeConfirm();
     } catch (e) {
       alert(e.message || "Error borrando.");
@@ -209,7 +216,7 @@ function AdminCrudPage({
 
       const url = isEdit ? `${API_URL}${updatePath(form.id)}` : `${API_URL}${createPath}`;
 
-      const payload = buildPayload(form);
+      const payload = await buildPayload(form);
       const isFD = payload instanceof FormData;
 
       let method = isEdit ? "PUT" : "POST";
@@ -243,6 +250,10 @@ function AdminCrudPage({
         setRows((prev) => prev.map((r) => (r.id === form.id ? saved : r)));
       } else {
         setRows((prev) => [saved, ...prev]);
+      }
+
+      if (typeof onSaveSuccess === "function") {
+        onSaveSuccess(saved);
       }
 
       setEditorOk(isEdit ? `${title.slice(0, -1)} actualizado.` : `${title.slice(0, -1)} creado.`);

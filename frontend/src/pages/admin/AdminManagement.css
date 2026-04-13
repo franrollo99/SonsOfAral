@@ -341,7 +341,7 @@
 }
 
 .adminSizeBtn.isOn {
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: lightgreen;
   background: rgba(255, 255, 255, 0.16);
 }
 
@@ -360,7 +360,6 @@
 .adminAfterFields {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, .06);
 }
 
 .adminSongsTitle {
@@ -447,6 +446,62 @@
   word-break: break-word;
 }
 
+.galleryAdminGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.galleryAdminCard {
+  position: relative;
+  width: 100%;
+  border: 1px solid white;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+}
+
+.galleryAdminCard.isSelected {
+  border: 2px solid red;
+}
+
+.galleryAdminCard.isCover {
+  box-shadow: 0 0 0 1px #dc3545 inset;
+}
+
+.galleryAdminImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.galleryAdminBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #dc3545;
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.galleryAdminCoverImage {
+  display: block;
+  max-width: 300px;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+@media (max-width: 991px) {
+  .galleryAdminGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
   .adminSongItem {
     gap: 10px;
@@ -460,5 +515,11 @@
 
   .adminSongRemovePlaceholder {
     display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .galleryAdminGrid {
+    grid-template-columns: 1fr;
   }
 }

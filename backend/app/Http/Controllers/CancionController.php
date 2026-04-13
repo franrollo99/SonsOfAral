@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CancionRequest;
 use App\Http\Resources\CancionResource;
 use App\Models\Cancion;
-use App\Models\Multimedia;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class CancionController extends Controller
 {
@@ -18,117 +14,15 @@ class CancionController extends Controller
      *     tags={"Canciones"},
      *     @OA\Response(
      *         response=200,
-     *         description="Lista de canciones",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="lanzamientoId", type="integer", example=10),
-     *                     @OA\Property(property="lanzamiento", type="string", nullable=true, example="Nombre del lanzamiento"),
-     *                     @OA\Property(property="titulo", type="string", example="Mi canción"),
-     *                     @OA\Property(property="duracion", type="integer", description="Duración en segundos", example=225),
-     *                     @OA\Property(property="duracionFormateada", type="string", example="03:45"),
-     *                     @OA\Property(property="trackNumber", type="integer", nullable=true, example=1)
-     *                 )
-     *             )
-     *         )
+     *         description="Lista de canciones"
      *     )
      * )
      */
     public function index()
     {
         $canciones = Cancion::with(['lanzamiento', 'audio'])->get();
+
         return CancionResource::collection($canciones);
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/api/canciones",
-     *     summary="Crear una canción",
-     *     tags={"Canciones"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             required={"titulo","duracion","lanzamiento_id"},
-     *             @OA\Property(property="titulo", type="string", example="Mi canción"),
-     *             @OA\Property(property="duracion", type="integer", example=225),
-     *             @OA\Property(property="track_number", type="integer", nullable=true, example=1),
-     *             @OA\Property(property="lanzamiento_id", type="integer", example=10)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Canción creada",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="lanzamientoId", type="integer", example=10),
-     *                 @OA\Property(property="lanzamiento", type="string", nullable=true, example="Nombre del lanzamiento"),
-     *                 @OA\Property(property="titulo", type="string", example="Mi canción"),
-     *                 @OA\Property(property="duracion", type="integer", example=225),
-     *                 @OA\Property(property="duracionFormateada", type="string", example="03:45"),
-     *                 @OA\Property(property="trackNumber", type="integer", nullable=true, example=1)
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="No autenticado",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Unauthenticated."))
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Sin permisos",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="This action is unauthorized."))
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Error de validación",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 example={"titulo":{"El título de la canción es obligatorio."},"lanzamiento_id":{"El lanzamiento asociado no existe."}}
-     *             )
-     *         )
-     *     )
-     * )
-     */
-    public function store(CancionRequest $request)
-    {
-        $cancion = Cancion::create($request->validated());
-
-        if ($request->hasFile('audio')) {
-            $path = $request->file('audio')->store('audio/canciones', 'public');
-
-            $media = Multimedia::create([
-                'archivo' => $path,
-                'nombre_original' => $request->file('audio')->getClientOriginalName(),
-                'tipo' => 'audio',
-                'mime_type' => $request->file('audio')->getMimeType(),
-                'peso' => $request->file('audio')->getSize(),
-            ]);
-
-            $cancion->audio_id = $media->id;
-            $cancion->save();
-        }
-
-        $cancion->load(['lanzamiento', 'audio']);
-
-        return (new CancionResource($cancion))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
@@ -140,189 +34,67 @@ class CancionController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID de la canción",
      *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Información de la canción",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="lanzamientoId", type="integer", example=10),
-     *                 @OA\Property(property="lanzamiento", type="string", nullable=true, example="Nombre del lanzamiento"),
-     *                 @OA\Property(property="titulo", type="string", example="Mi canción"),
-     *                 @OA\Property(property="duracion", type="integer", description="Duración en segundos", example=225),
-     *                 @OA\Property(property="duracionFormateada", type="string", example="03:45"),
-     *                 @OA\Property(property="trackNumber", type="integer", nullable=true, example=1)
-     *             )
-     *         )
+     *         description="Información de la canción"
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Canción no encontrada",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Cancion] 999")
-     *         )
+     *         description="Canción no encontrada"
      *     )
      * )
      */
     public function show(int $id)
     {
         $cancion = Cancion::with(['lanzamiento', 'audio'])->findOrFail($id);
+
         return new CancionResource($cancion);
     }
 
     /**
-     * @OA\Put(
-     *     path="/api/canciones/{id}",
-     *     summary="Actualizar una canción",
+     * @OA\Get(
+     *     path="/api/canciones/{id}/audio",
+     *     summary="Obtener audio de una canción",
      *     tags={"Canciones"},
-     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID de la canción",
      *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             required={"titulo","duracion","lanzamiento_id"},
-     *             @OA\Property(property="titulo", type="string", example="Mi canción editada"),
-     *             @OA\Property(property="duracion", type="integer", example=240),
-     *             @OA\Property(property="track_number", type="integer", nullable=true, example=2),
-     *             @OA\Property(property="lanzamiento_id", type="integer", example=10)
-     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Canción actualizada",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="lanzamientoId", type="integer", example=10),
-     *                 @OA\Property(property="lanzamiento", type="string", nullable=true, example="Nombre del lanzamiento"),
-     *                 @OA\Property(property="titulo", type="string", example="Mi canción editada"),
-     *                 @OA\Property(property="duracion", type="integer", example=240),
-     *                 @OA\Property(property="duracionFormateada", type="string", example="04:00"),
-     *                 @OA\Property(property="trackNumber", type="integer", nullable=true, example=2)
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="No autenticado",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Unauthenticated."))
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Sin permisos",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="This action is unauthorized."))
+     *         description="Audio de la canción"
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Canción no encontrada",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Cancion] 999"))
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Error de validación",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 example={"titulo":{"El título de la canción es obligatorio."},"duracion":{"La duración debe ser mayor que 0."}}
-     *             )
-     *         )
+     *         description="Audio no encontrado"
      *     )
      * )
      */
-    public function update(CancionRequest $request, int $id)
-{
-    $cancion = Cancion::findOrFail($id);
+    public function audio(int $id)
+    {
+        $cancion = Cancion::with('audio')->findOrFail($id);
 
-    $cancion->update($request->validated());
-
-    if ($request->hasFile('audio')) {
-        if ($cancion->audio) {
-            Storage::disk('public')->delete($cancion->audio->archivo);
-            $cancion->audio->delete();
+        if (!$cancion->audio) {
+            abort(404, 'La canción no tiene audio');
         }
 
-        $path = $request->file('audio')->store('audio/canciones', 'public');
+        $path = storage_path(
+            'app/public/' .
+                $cancion->audio->directorio . '/' .
+                $cancion->audio->archivo
+        );
 
-        $media = Multimedia::create([
-            'archivo' => $path,
-            'nombre_original' => $request->file('audio')->getClientOriginalName(),
-            'tipo' => 'audio',
-            'mime_type' => $request->file('audio')->getMimeType(),
-            'peso' => $request->file('audio')->getSize(),
+        if (!file_exists($path)) {
+            abort(404, 'Archivo no encontrado');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => $cancion->audio->mime_type ?? 'audio/mpeg',
+            'Access-Control-Allow-Origin' => '*',
         ]);
-
-        $cancion->audio_id = $media->id;
-        $cancion->save();
-    }
-
-    $cancion->load(['lanzamiento', 'audio']);
-
-    return new CancionResource($cancion);
-}
-
-    /**
-     * @OA\Delete(
-     *     path="/api/canciones/{id}",
-     *     summary="Eliminar una canción",
-     *     tags={"Canciones"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID de la canción",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Canción eliminada",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="OK")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="No autenticado",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Unauthenticated."))
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Sin permisos",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="This action is unauthorized."))
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Canción no encontrada",
-     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Cancion] 999"))
-     *     )
-     * )
-     */
-    public function destroy(int $id)
-    {
-        $cancion = Cancion::findOrFail($id);
-        $cancion->delete();
-
-        return response()->json(['message' => 'OK']);
     }
 }

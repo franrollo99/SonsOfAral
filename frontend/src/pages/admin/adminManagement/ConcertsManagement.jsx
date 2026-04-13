@@ -1,4 +1,5 @@
 import AdminCrudPage from "../components/AdminCrudPage";
+import { compressImageIfNeeded } from "../../../utils/compressImage";
 import "../AdminManagement.css";
 
 const money = (v) => {
@@ -37,7 +38,7 @@ function ConcertsManagement() {
     <AdminCrudPage
       title="Conciertos"
       entityName="concierto"
-      listPath="/conciertos?sort=latest"
+      listPath="/conciertos?sort=latest&all=1"
       createPath="/conciertos"
       updatePath={(id) => `/conciertos/${id}`}
       deletePath={(id) => `/conciertos/${id}`}
@@ -120,7 +121,7 @@ function ConcertsManagement() {
               : "Activa “Entrada anticipada” para habilitar el enlace.",
         }
       ]}
-      buildPayload={(form) => {
+      buildPayload={async (form) => {
         const anticipada = String(form.entradaAnticipada) === "true";
 
         const fd = new FormData();
@@ -135,7 +136,8 @@ function ConcertsManagement() {
         fd.append("remove_cartel", form.removeCartel ? "1" : "0");
 
         if (form.cartel instanceof File) {
-          fd.append("cartel", form.cartel);
+          const compressed = await compressImageIfNeeded(form.cartel);
+          fd.append("cartel", compressed);
         }
 
         return fd;

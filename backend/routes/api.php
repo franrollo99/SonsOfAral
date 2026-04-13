@@ -1,15 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CancionController;
 use App\Http\Controllers\ConciertoController;
+use App\Http\Controllers\GaleriaController;
 use App\Http\Controllers\LanzamientoController;
-use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -19,7 +20,10 @@ Route::post('/auth/reset-password',  [AuthController::class, 'resetPassword']);
 Route::apiResource('lanzamientos', LanzamientoController::class)->only(['index', 'show']);
 Route::apiResource('canciones', CancionController::class)->only(['index', 'show']);
 Route::apiResource('conciertos', ConciertoController::class)->only(['index', 'show']);
+Route::apiResource('galerias', GaleriaController::class);
 Route::apiResource('productos', ProductoController::class)->only(['index', 'show']);
+
+Route::get('/canciones/{id}/audio', [CancionController::class, 'audio']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -40,10 +44,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/lanzamientos', [LanzamientoController::class, 'store']);
     Route::put('/lanzamientos/{id}', [LanzamientoController::class, 'update']);
     Route::delete('/lanzamientos/{id}', [LanzamientoController::class, 'destroy']);
-
-    Route::post('/canciones', [CancionController::class, 'store']);
-    Route::put('/canciones/{id}', [CancionController::class, 'update']);
-    Route::delete('/canciones/{id}', [CancionController::class, 'destroy']);
 
     Route::post('/productos', [ProductoController::class, 'store']);
     Route::put('/productos/{producto}', [ProductoController::class, 'update']);
@@ -77,6 +77,4 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
 
     $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
     return redirect()->away($frontendUrl . '/login?verified=1');
-
 })->middleware('signed')->name('verification.verify');
-

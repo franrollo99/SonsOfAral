@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductoRequest;
 use App\Http\Resources\ProductoResource;
-use App\Models\Multimedia;
 use App\Models\Producto;
+use App\Services\MultimediaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductoController extends Controller
@@ -43,23 +42,23 @@ class ProductoController extends Controller
      *                 property="data",
      *                 type="array",
      *                 @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
-     *                 @OA\Property(property="descripcion", type="string", nullable=true),
-     *                 @OA\Property(property="tipo_producto", type="string", example="ropa"),
-     *                 @OA\Property(property="tiene_talla", type="boolean", example=true),
-     *                 @OA\Property(
-     *                      property="tallas_disponibles",
-     *                      type="array",
-     *                      nullable=true,
-     *                      @OA\Items(type="string", example="M")
-     *                 ),
-     *                 @OA\Property(property="precio", type="number", format="float", example=19.99),
-     *                 @OA\Property(property="precio_formateado", type="string", example="19,99 €"),
-     *                 @OA\Property(property="slug", type="string", example="camiseta-soa"),
-     *                 @OA\Property(property="activo", type="integer", example=1),
-     *                 @OA\Property(property="imagen", type="string", nullable=true, example="http://localhost/storage/productos/camiseta.webp")
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="nombre", type="string", example="Camiseta SoA"),
+     *                     @OA\Property(property="descripcion", type="string", nullable=true),
+     *                     @OA\Property(property="tipo_producto", type="string", example="ropa"),
+     *                     @OA\Property(property="tiene_talla", type="boolean", example=true),
+     *                     @OA\Property(
+     *                         property="tallas_disponibles",
+     *                         type="array",
+     *                         nullable=true,
+     *                         @OA\Items(type="string", example="M")
+     *                     ),
+     *                     @OA\Property(property="precio", type="number", format="float", example=19.99),
+     *                     @OA\Property(property="precio_formateado", type="string", example="19,99 €"),
+     *                     @OA\Property(property="slug", type="string", example="camiseta-soa"),
+     *                     @OA\Property(property="activo", type="integer", example=1),
+     *                     @OA\Property(property="imagen", type="string", nullable=true, example="http://localhost/storage/productos/camiseta.webp")
      *                 )
      *             )
      *         )
@@ -107,14 +106,16 @@ class ProductoController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Producto encontrado",
-     *         @OA\JsonContent(type="object",
+     *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="data", type="object")
      *         )
      *     ),
      *     @OA\Response(
      *         response=404,
      *         description="Producto no encontrado",
-     *         @OA\JsonContent(type="object",
+     *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Producto] 999")
      *         )
      *     )
@@ -138,7 +139,7 @@ class ProductoController extends Controller
      *     @OA\Response(response=422, description="Error de validación")
      * )
      */
-    public function store(ProductoRequest $request)
+    public function store(ProductoRequest $request, MultimediaService $multimediaService)
     {
         $data = $request->validated();
         $data['slug'] = Str::slug($data['nombre']);
@@ -152,15 +153,10 @@ class ProductoController extends Controller
         $producto = Producto::create($data);
 
         if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('imagenes/productos', 'public');
-
-            $media = Multimedia::create([
-                'archivo' => $path,
-                'nombre_original' => $request->file('imagen')->getClientOriginalName(),
-                'tipo' => 'imagen',
-                'mime_type' => $request->file('imagen')->getMimeType(),
-                'peso' => $request->file('imagen')->getSize(),
-            ]);
+            $media = $multimediaService->storeImage(
+                $request->file('imagen'),
+                'imagenes/productos'
+            );
 
             $producto->imagen_id = $media->id;
             $producto->save();
@@ -191,7 +187,7 @@ class ProductoController extends Controller
      *     @OA\Response(response=422, description="Error de validación")
      * )
      */
-    public function update(ProductoRequest $request, Producto $producto)
+    public function update(ProductoRequest $request, Producto $producto, MultimediaService $multimediaService)
     {
         $data = $request->validated();
 
@@ -210,34 +206,23 @@ class ProductoController extends Controller
         $producto->update($data);
 
         if ($request->boolean('remove_imagen')) {
-            if ($producto->imagen) {
-                Storage::disk('public')->delete($producto->imagen->archivo);
-                $producto->imagen->delete();
-                $producto->imagen_id = null;
-            }
+            $multimediaService->delete($producto->imagen);
+            $producto->imagen_id = null;
+            $producto->save();
         }
 
         if ($request->hasFile('imagen')) {
-            if ($producto->imagen) {
-                Storage::disk('public')->delete($producto->imagen->archivo);
-                $producto->imagen->delete();
-            }
-
-            $path = $request->file('imagen')->store('imagenes/productos', 'public');
-
-            $media = Multimedia::create([
-                'archivo' => $path,
-                'nombre_original' => $request->file('imagen')->getClientOriginalName(),
-                'tipo' => 'imagen',
-                'mime_type' => $request->file('imagen')->getMimeType(),
-                'peso' => $request->file('imagen')->getSize(),
-            ]);
+            $media = $multimediaService->replaceImage(
+                $producto->imagen,
+                $request->file('imagen'),
+                'imagenes/productos'
+            );
 
             $producto->imagen_id = $media->id;
             $producto->save();
         }
 
-        return new ProductoResource($producto);
+        return new ProductoResource($producto->fresh('imagen'));
     }
 
     /**
@@ -259,12 +244,9 @@ class ProductoController extends Controller
      *     @OA\Response(response=404, description="Producto no encontrado")
      * )
      */
-    public function destroy(Producto $producto)
+    public function destroy(Producto $producto, MultimediaService $multimediaService)
     {
-        if ($producto->imagen) {
-            Storage::disk('public')->delete($producto->imagen->archivo);
-            $producto->imagen->delete();
-        }
+        $multimediaService->delete($producto->imagen);
 
         $producto->delete();
 

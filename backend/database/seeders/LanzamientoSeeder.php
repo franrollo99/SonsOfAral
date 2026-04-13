@@ -35,7 +35,7 @@ class LanzamientoSeeder extends Seeder
         // Álbum 2
         $album2Id = DB::table('lanzamientos')->insertGetId([
             'titulo' => 'Ashes and Rebirth',
-            'tipo' => 'Album',
+            'tipo' => 'EP',
             'fecha_lanzamiento' => '2024-03-08',
             'descripcion' => 'Una nueva etapa con sonidos más melódicos y oscuros.',
             'created_at' => now(),

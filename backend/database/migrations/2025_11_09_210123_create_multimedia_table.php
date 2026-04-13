@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('multimedia', function (Blueprint $table) {
             $table->id();
             $table->string('archivo');
+            $table->string('directorio');
             $table->string('nombre_original')->nullable();
             $table->enum('tipo', ['imagen', 'audio']);
-            $table->string('mime_type', 100)->nullable(); // image/jpeg, audio/mp3, etc.
+            $table->string('mime_type', 100)->nullable();
             $table->unsignedBigInteger('peso')->nullable();
             $table->timestamps();
         });

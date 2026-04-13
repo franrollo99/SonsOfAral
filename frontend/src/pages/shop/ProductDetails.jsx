@@ -29,36 +29,36 @@ function ProductoDetalle() {
   }, [producto]);
 
   useEffect(() => {
-  if (state?.producto) return;
+    if (state?.producto) return;
 
-  const load = async () => {
-    try {
-      setLoading(true);
+    const load = async () => {
+      try {
+        setLoading(true);
 
-      const params = new URLSearchParams();
-      params.set("order", "newest");
+        const params = new URLSearchParams();
+        params.set("order", "newest");
 
-      const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
-        headers: { Accept: "application/json" },
-      });
+        const res = await fetch(`${API_URL}/productos?${params.toString()}`, {
+          headers: { Accept: "application/json" },
+        });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const json = await res.json();
-      const lista = Array.isArray(json) ? json : json?.data ?? [];
+        const json = await res.json();
+        const lista = Array.isArray(json) ? json : json?.data ?? [];
 
-      const found = lista.find((p) => p.slug === slug) ?? null;
-      setProducto(found);
-    } catch (e) {
-      console.error("Error cargando producto:", e);
-      setProducto(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const found = lista.find((p) => p.slug === slug) ?? null;
+        setProducto(found);
+      } catch (e) {
+        console.error("Error cargando producto:", e);
+        setProducto(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  load();
-}, [slug, state?.producto]);
+    load();
+  }, [slug, state?.producto]);
 
   useEffect(() => {
     setQty(1);
@@ -131,6 +131,12 @@ function ProductoDetalle() {
                 <img
                   className="productoDetalleImg"
                   src={producto.imagen?.url}
+                  srcSet={
+                    producto.imagen?.urlSm
+                      ? `${producto.imagen.urlSm} 500w, ${producto.imagen.url} 1400w`
+                      : undefined
+                  }
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   alt={producto.nombre}
                 />
               </div>

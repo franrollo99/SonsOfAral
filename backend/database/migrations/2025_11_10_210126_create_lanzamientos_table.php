@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('lanzamientos', function (Blueprint $table) {
             $table->id();
-            $table->enum('tipo', ['album', 'single']);
+            $table->enum('tipo', ['album', 'EP', 'single']);
             $table->string('titulo', 200);
             $table->date('fecha_lanzamiento')->nullable();
             $table->text('descripcion')->nullable();

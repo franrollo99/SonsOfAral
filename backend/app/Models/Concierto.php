@@ -24,4 +24,9 @@ class Concierto extends Model
     {
         return $this->belongsTo(Multimedia::class, 'cartel_id');
     }
+
+    public function galeria()
+    {
+        return $this->hasOne(Galeria::class, 'concierto_id');
+    }
 }

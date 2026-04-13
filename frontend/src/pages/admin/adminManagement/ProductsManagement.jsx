@@ -1,5 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useMemo } from "react";
+import { compressImageIfNeeded } from "../../../utils/compressImage";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
 
@@ -168,7 +168,7 @@ function ProductsManagement() {
         imagenNombreActual: row?.imagen?.nombre_original || "",
         removeImagen: false,
       })}
-      buildPayload={(f) => {
+      buildPayload={async (f) => {
         const fd = new FormData();
 
         fd.append("nombre", f.nombre || "");
@@ -178,8 +178,14 @@ function ProductsManagement() {
         fd.append("activo", String(f.activo) === "1" || f.activo === true ? "1" : "0");
         fd.append("tipo_producto", f.tipo_producto || "");
         fd.append("remove_imagen", f.removeImagen ? "1" : "0");
-        if (f.imagen instanceof File) fd.append("imagen", f.imagen);
-        fd.append("tiene_talla",
+
+        if (f.imagen instanceof File) {
+          const compressed = await compressImageIfNeeded(f.imagen);
+          fd.append("imagen", compressed);
+        }
+
+        fd.append(
+          "tiene_talla",
           String(f.tiene_talla) === "1" || f.tiene_talla === 1 || f.tiene_talla === true ? "1" : "0"
         );
 
@@ -191,7 +197,6 @@ function ProductsManagement() {
             : [];
 
         tallas.forEach((t) => fd.append("tallas_disponibles[]", t));
-
 
         return fd;
       }}

@@ -10,7 +10,6 @@ function AdminArea() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const run = async () => {
@@ -76,6 +75,7 @@ function AdminArea() {
     { title: "Conciertos", desc: "Gestionar conciertos.", to: "conciertos" },
     { title: "Lanzamientos", desc: "Gestionar lanzamientos.", to: "lanzamientos" },
     { title: "Canciones", desc: "Visualizar detalles de canciones.", to: "canciones" },
+    { title: "Galerías", desc: "Gestionar galerías de imágenes.", to: "galerias" },
     { title: "Productos", desc: "Gestionar productos .", to: "productos" },
     { title: "Pedidos", desc: "Ver detalles de pedidos y cambiar estados.", to: "pedidos" },
     { title: "Usuarios", desc: "Listado de usuarios y visualizacion de información.", to: "usuarios" },
@@ -112,9 +112,6 @@ function AdminArea() {
         <div className="d-flex align-items-center justify-content-between gap-3">
           <div>
             <h1 className="adminTitle">Panel de gestión</h1>
-            <p className="adminMuted">
-              Sesión: {user?.nombre ? `${user.nombre} ${user.apellidos || ""}` : "Admin"}
-            </p>
           </div>
 
           <button className="adminLinkBtn" type="button" onClick={onLogout}>

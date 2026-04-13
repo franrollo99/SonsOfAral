@@ -18,7 +18,7 @@ class ConciertoRequest extends FormRequest
             'entrada_anticipada' => ['required', 'boolean'],
             'enlace_entrada_anticipada' => ['nullable', 'string'],
             'remove_cartel' => ['nullable', 'boolean'],
-            'cartel' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'cartel' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
         ];
     }
 

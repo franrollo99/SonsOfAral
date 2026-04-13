@@ -13,8 +13,7 @@
 }
 
 .adminMuted {
-  margin: 6px 0 0;
-  opacity: .75;
+  color: var(--muted);
 }
 
 .adminError {

@@ -10,11 +10,11 @@ class LanzamientoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tipo' => ['required', 'string', Rule::in(['album', 'single', 'ep'])],
+            'tipo' => ['required', 'string', Rule::in(['album', 'single', 'EP'])],
             'titulo' => ['required', 'string', 'max:255'],
             'fecha_lanzamiento' => ['nullable', 'date'],
             'descripcion' => ['nullable', 'string'],
-            'portada' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'portada' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'compra_url' => ['nullable', 'string', 'max:255'],
             'audio_url'  => ['nullable', 'string', 'max:255'],
             'video_url'  => ['nullable', 'string', 'max:255'],

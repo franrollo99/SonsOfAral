@@ -157,13 +157,15 @@ export default function Home() {
   const nextConcert = useMemo(() => pickNextConcert(conciertosRaw), [conciertosRaw]);
   const latestAlbum = useMemo(() => pickLatestAlbum(lanzamientosRaw), [lanzamientosRaw]);
 
-  const posterUrl =
-    nextConcert?.cartel?.url ||
-    null;
+  const poster = nextConcert?.cartel || null;
+
+  const posterUrl = poster?.url || null;
+  const posterThumbUrl = poster?.urlSm || poster?.url || null;
+  const posterLightboxUrl = poster?.url || null;
 
   const posterAlt = "Cartel del próximo concierto";
 
-  const latestAlbumCover = latestAlbum?.imagen;
+  const latestAlbumCover = latestAlbum?.portada || null;
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -248,7 +250,13 @@ export default function Home() {
 
                 <div className="homeReleaseCover">
                   <img
-                    src={latestAlbumCover}
+                    src={latestAlbumCover?.url}
+                    srcSet={
+                      latestAlbumCover?.urlSm
+                        ? `${latestAlbumCover.urlSm} 500w, ${latestAlbumCover.url} 1400w`
+                        : undefined
+                    }
+                    sizes="(max-width: 768px) 100vw, 420px"
                     alt={`Portada ${latestAlbum?.titulo}`}
                     loading="lazy"
                   />
@@ -275,9 +283,15 @@ export default function Home() {
                   onClick={() => setIsPosterOpen(true)}
                   aria-label="Ver cartel en grande"
                 >
-                  <img className="homePosterImg" src={posterUrl} alt={posterAlt} loading="lazy" />
+                  <img
+                    className="homePosterImg"
+                    src={posterThumbUrl}
+                    srcSet={poster?.urlSm ? `${poster.urlSm} 500w, ${poster.url} 1400w` : undefined}
+                    sizes="(max-width: 768px) 100vw, 320px"
+                    alt={posterAlt}
+                    loading="lazy"
+                  />
                 </button>
-
                 <div className="d-flex flex-column gap-2 flex-grow-1 homeConcertInfo">
                   <h3 className="homeConcertTitle m-0">
                     {nextConcert?.lugar ?? nextConcert?.titulo ?? "Concierto"}
@@ -330,7 +344,7 @@ export default function Home() {
             <div className="homeLightboxInner d-flex align-items-center justify-content-center">
               <img
                 className="homeLightboxImg"
-                src={posterUrl}
+                src={posterLightboxUrl}
                 alt={posterAlt}
                 onClick={(e) => e.stopPropagation()}
               />

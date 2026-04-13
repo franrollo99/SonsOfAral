@@ -7,6 +7,8 @@ import Register from "../pages/auth/Register";
 import ClientArea from "../pages/clientArea/ClientArea";
 import Concerts from "../pages/concerts/Concerts";
 import Music from "../pages/music/Music";
+import Gallery from "../pages/gallery/Gallery";
+import GalleryDetail from "../pages/gallery/GalleryDetail";
 import Shop from "../pages/shop/Shop";
 import ProductDetails from "../pages/shop/ProductDetails";
 import Cart from "../pages/cart/Cart";
@@ -16,6 +18,7 @@ import AdminArea from "../pages/admin/AdminArea";
 import ConcertsManagement from "../pages/admin/adminManagement/ConcertsManagement";
 import ReleasesManagement from "../pages/admin/adminManagement/ReleasesManagement";
 import SongsManagement from "../pages/admin/adminManagement/SongsManagement";
+import GalleryManagement from "../pages/admin/adminManagement/GalleryManagement";
 import ProductsManagement from "../pages/admin/adminManagement/ProductsManagement";
 import UsersManagement from "../pages/admin/adminManagement/UsersManagement";
 import OrdersManagement from "../pages/admin/adminManagement/OrdersManagement";
@@ -35,6 +38,8 @@ export function AppRouter() {
         <Route path="/register-success" element={<RegisterSuccess />} />
         <Route path="/conciertos" element={<Concerts />} />
         <Route path="/musica" element={<Music />} />
+        <Route path="/galeria" element={<Gallery />} />
+        <Route path="/galeria/:id" element={<GalleryDetail />} />
         <Route path="/tienda" element={<Shop />} />
         <Route path="/tienda/:slug" element={<ProductDetails />} />
         <Route element={<ProtectedRoute />}>
@@ -47,6 +52,7 @@ export function AppRouter() {
         <Route path="/area-admin/conciertos" element={<ConcertsManagement />} />
         <Route path="/area-admin/lanzamientos" element={<ReleasesManagement />} />
         <Route path="/area-admin/canciones" element={<SongsManagement />} />
+        <Route path="/area-admin/galerias" element={<GalleryManagement />} />
         <Route path="/area-admin/productos" element={<ProductsManagement />} />
         <Route path="/area-admin/usuarios" element={<UsersManagement />} />
         <Route path="/area-admin/pedidos" element={<OrdersManagement />} />

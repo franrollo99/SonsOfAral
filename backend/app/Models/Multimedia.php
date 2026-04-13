@@ -10,6 +10,7 @@ class Multimedia extends Model
 
     protected $fillable = [
         'archivo',
+        'directorio',
         'nombre_original',
         'tipo',
         'mime_type',
@@ -26,8 +27,20 @@ class Multimedia extends Model
         return $this->belongsTo(Galeria::class);
     }
 
+    private function buildUrl($size)
+    {
+        return $this->directorio && $this->archivo
+            ? asset("storage/{$this->directorio}/{$size}/{$this->archivo}")
+            : null;
+    }
+
+    public function getUrlSmAttribute()
+    {
+        return $this->buildUrl('sm');
+    }
+
     public function getUrlAttribute()
     {
-        return $this->archivo ? asset('storage/' . $this->archivo) : null;
+        return $this->buildUrl('lg');
     }
 }

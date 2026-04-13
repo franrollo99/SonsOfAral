@@ -35,6 +35,7 @@ class LanzamientoResource extends JsonResource
             'portada' => $this->portada ? [
                 'id' => $this->portada->id,
                 'url' => $this->portada->url,
+                'urlSm' => $this->portada->url_sm,
                 'nombre_original' => $this->portada->nombre_original,
             ] : null,
         ];

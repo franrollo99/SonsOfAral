@@ -16,7 +16,7 @@ class LineaPedidoResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'nombre_producto' => $this->nombre_producto,
+            'nombre' => $this->nombre_producto,
             'talla' => $this->talla,
             'cantidad' => (int) $this->cantidad,
             'precio_unitario' => (float) $this->precio_unitario,

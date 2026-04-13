@@ -18,7 +18,7 @@ class ProductoRequest extends FormRequest
             'precio' => ['required', 'numeric', 'min:0'],
             'slug' => ['nullable', 'string', 'max:255'],
             'activo' => ['required', 'boolean'],
-            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
         ];
     }
 

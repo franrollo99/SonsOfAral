@@ -32,6 +32,7 @@ class ConciertoResource extends JsonResource
             'cartel' => $this->cartel ? [
                 'id' => $this->cartel->id,
                 'url' => $this->cartel->url,
+                'urlSm' => $this->cartel->url_sm,
                 'nombre_original' => $this->cartel->nombre_original,
             ] : null,
         ];

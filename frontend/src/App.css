@@ -72,3 +72,7 @@ section {
 .errorMessage {
   color: #ff6b6b;
 }
+
+select option{
+  background: var(--bg-alt);
+}

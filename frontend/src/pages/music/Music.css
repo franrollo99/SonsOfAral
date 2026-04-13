@@ -270,39 +270,120 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  counter-reset: track;
 }
 
 .trackRow {
-  counter-increment: track;
   display: grid;
-  grid-template-columns: 42px 1fr 72px;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 6px;
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 12px 6px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
-  font-size: 1.05rem;
 }
 
-.trackRow::before {
-  content: counter(track);
+.trackLead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.trackIndex {
   color: rgba(255, 255, 255, .65);
   font-weight: 700;
   letter-spacing: .02em;
+  width: 100%;
   text-align: center;
 }
 
-.trackName {
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.trackMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.trackTime {
-  text-align: right;
-  color: rgba(255, 255, 255, .70);
-  font-variant-numeric: tabular-nums;
+.trackTop {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+.trackPlayerRow {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.trackPlayBtn {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: .8rem;
+  line-height: 1;
+}
+
+.trackPlayBtn:hover {
+  opacity: .8;
+}
+
+.trackPlayBtn.isPlaying {
+  opacity: 1;
+}
+
+.trackProgress {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+  outline: none;
+  cursor: pointer;
+}
+
+.trackProgressPlaceholder {
+  pointer-events: none;
+}
+
+.trackProgress::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.trackProgress::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.trackProgress::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+}
+
+.trackRow.isActive {
+  background: rgba(255, 255, 255, .03);
 }
 
 @media (max-width: 1024px) {
@@ -322,7 +403,7 @@
 }
 
 @media (max-width: 768px) {
-  .lanzamientos{
+  .lanzamientos {
     padding: 0 14px;
   }
 
@@ -359,6 +440,39 @@
     padding-right: 0;
     flex: initial;
     scrollbar-gutter: auto;
+  }
+
+  .trackRow {
+    grid-template-columns: 30px 1fr;
+    gap: 10px;
+    padding: 12px 2px;
+  }
+
+  .trackPlayerRow {
+    grid-template-columns: 16px 1fr;
+    gap: 8px;
+  }
+
+  .trackPlayBtn {
+    width: 16px;
+    height: 16px;
+    font-size: .72rem;
+  }
+
+  .trackTop {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .trackTime {
+    text-align: left;
+    font-size: .92rem;
+  }
+
+  .trackPlayBtn {
+    width: 30px;
+    height: 30px;
+    font-size: .8rem;
   }
 
   .cover img {

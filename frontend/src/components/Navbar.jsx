@@ -48,6 +48,7 @@ function Navbar() {
         <Link to="/">Inicio</Link>
         <Link to="/conciertos">Conciertos</Link>
         <Link to="/musica">Música</Link>
+        <Link to="/galeria">Galería</Link>
         <Link to="/tienda">Tienda</Link>
       </nav>
 
@@ -78,6 +79,7 @@ function Navbar() {
             <Link className="mobileLink" to="/">Inicio</Link>
             <Link className="mobileLink" to="/conciertos">Conciertos</Link>
             <Link className="mobileLink" to="/musica">Música</Link>
+            <Link className="mobileLink" to="/galeria">Galería</Link>
             <Link className="mobileLink" to="/tienda">Tienda</Link>
           </nav>
 
