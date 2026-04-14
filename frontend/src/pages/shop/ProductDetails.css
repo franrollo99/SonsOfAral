@@ -1,5 +1,6 @@
 .productoDetalleContainer {
   background: var(--bg-alt);
+  box-shadow:var(--bg-shadow);
   padding: 28px;
   border-radius: 10px;
 }

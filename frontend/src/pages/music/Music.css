@@ -18,7 +18,7 @@
 
 .filtroMusica.isActive {
   background: var(--text);
-  color: var(--bg);
+  color: black;
   border-color: var(--text);
 }
 
