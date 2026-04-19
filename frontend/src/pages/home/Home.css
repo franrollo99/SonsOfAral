@@ -105,7 +105,6 @@
   object-fit: cover;
   display: block;
   border-radius: 14px;
-  filter: contrast(1.05) brightness(0.9);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 

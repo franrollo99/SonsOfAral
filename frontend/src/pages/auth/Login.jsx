@@ -104,7 +104,7 @@ function Login() {
             ¿Has olvidado la contraseña?
           </Link>
 
-          {error && <p className="userSessionError">{error}</p>}
+          {error && <p className="userSessionError errorMessage">{error}</p>}
 
           <button className="userSessionBtn" type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Iniciar Sesión"}

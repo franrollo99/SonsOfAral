@@ -70,19 +70,14 @@
 .tiendaSortSelect {
   min-width: 230px;
   border-radius: 3px;
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(20, 20, 20, 0.65);
+  background: #111;
+  border-color: #ffffff2e;
   color: var(--text);
 }
 
 .tiendaSortSelect:focus {
   box-shadow: none;
   border-color: rgba(255, 255, 255, 0.35);
-}
-
-.tiendaSortSelect option {
-  background: #111;
-  color: var(--text);
 }
 
 .tiendaTopbarMobile {

@@ -33,6 +33,7 @@
 }
 
 .descripcion {
+  color: var(--muted);
   font-size: 1.05rem;
 }
 

@@ -633,7 +633,7 @@ function ClientArea() {
                   ) : (
                     (selectedOrder.productos || []).map((p, idx) => (
                       <div className="areaClienteLineRow" key={p.id ?? idx}>
-                        <div className="areaClienteLineName">{p.nombreProducto ?? p.nombre_producto ?? "-"}</div>
+                        <div className="areaClienteLineName">{p.nombre ?? "-"}</div>
                         <div>{p.talla || "-"}</div>
                         <div className="text-end">{p.cantidad}</div>
                         <div className="text-end">{formatMoney(p.precioUnitarioSnapshot ?? p.precio_unitario)}</div>

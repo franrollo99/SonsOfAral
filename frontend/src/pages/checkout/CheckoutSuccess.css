@@ -1,6 +1,5 @@
 .successPage {
   padding: 24px;
-  background: var(--bg);
   color: var(--text);
   min-height: 70vh;
   display: grid;
