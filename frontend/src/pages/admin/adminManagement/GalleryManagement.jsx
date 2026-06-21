@@ -359,7 +359,7 @@ function GalleryManagement() {
                                 <label className="adminControlLabel">Concierto</label>
 
                                 <select
-                                    className="adminInput"
+                                    className="adminInput adminSelect"
                                     value={form?.conciertoId || ""}
                                     onChange={(e) =>
                                         setForm((prev) => ({

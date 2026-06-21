@@ -305,7 +305,7 @@ function Field({ field, form, setForm }) {
               <tbody>
                 {(Array.isArray(form?.[name]) ? form?.[name] : []).map((ln, idx) => {
                   const producto =
-                    ln?.nombre_producto ?? "-";
+                    ln?.nombre ?? "-";
 
                   const qty = Number(ln?.cantidad ?? ln?.qty ?? 0) || 0;
                   const price = Number(ln?.precio ?? ln?.precio_unitario ?? ln?.price ?? 0) || 0;
