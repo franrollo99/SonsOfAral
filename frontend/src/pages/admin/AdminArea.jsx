@@ -16,7 +16,7 @@ function AdminArea() {
       setError("");
 
       if (!token) {
-        navigate("/login", { replace: true });
+        navigate("/gestion/acceso", { replace: true });
         return;
       }
 
@@ -33,7 +33,7 @@ function AdminArea() {
 
         if (!meRes.ok) {
           localStorage.removeItem("token");
-          navigate("/login", { replace: true });
+          navigate("/gestion/acceso", { replace: true });
           return;
         }
 
@@ -41,7 +41,7 @@ function AdminArea() {
 
         if (!user) {
           localStorage.removeItem("token");
-          navigate("/login", { replace: true });
+          navigate("/gestion/acceso", { replace: true });
           return;
         }
 
@@ -65,9 +65,11 @@ function AdminArea() {
         method: "POST",
         headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
       });
-    } catch { } finally {
+    } catch {
+      // El cierre local continúa aunque la petición falle.
+    } finally {
       localStorage.removeItem("token");
-      navigate("/login", { replace: true });
+      navigate("/gestion/acceso", { replace: true });
     }
   };
 
@@ -76,8 +78,6 @@ function AdminArea() {
     { title: "Lanzamientos", desc: "Gestionar lanzamientos.", to: "lanzamientos" },
     { title: "Canciones", desc: "Visualizar detalles de canciones.", to: "canciones" },
     { title: "Galerías", desc: "Gestionar galerías de imágenes.", to: "galerias" },
-    { title: "Productos", desc: "Gestionar productos .", to: "productos" },
-    { title: "Pedidos", desc: "Ver detalles de pedidos y cambiar estados.", to: "pedidos" },
     { title: "Usuarios", desc: "Listado de usuarios y visualizacion de información.", to: "usuarios" },
   ];
 
@@ -98,7 +98,7 @@ function AdminArea() {
         <div className="adminCard">
           <h1 className="adminTitle">Área de administración</h1>
           <p className="adminError">{error}</p>
-          <button className="adminBtn" onClick={() => navigate("/login")}>
+          <button className="adminBtn" onClick={() => navigate("/gestion/acceso")}>
             Volver al login
           </button>
         </div>

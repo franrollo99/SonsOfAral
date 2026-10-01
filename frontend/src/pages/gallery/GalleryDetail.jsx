@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "./Gallery.css";
 
@@ -52,23 +52,23 @@ function GalleryDetail() {
     setLightboxIndex(index);
   };
 
-  const cerrarLightbox = () => {
+  const cerrarLightbox = useCallback(() => {
     setLightboxIndex(null);
-  };
+  }, []);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     setLightboxIndex((prev) => {
       if (prev === null || imagenes.length === 0) return null;
       return prev === 0 ? imagenes.length - 1 : prev - 1;
     });
-  };
+  }, [imagenes.length]);
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     setLightboxIndex((prev) => {
       if (prev === null || imagenes.length === 0) return null;
       return prev === imagenes.length - 1 ? 0 : prev + 1;
     });
-  };
+  }, [imagenes.length]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -88,7 +88,7 @@ function GalleryDetail() {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [lightboxIndex, imagenes.length]);
+  }, [cerrarLightbox, lightboxIndex, nextImage, prevImage]);
 
   return (
     <section>

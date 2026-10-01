@@ -14,30 +14,26 @@ function Privacidad() {
 
         <div className="legalBody d-flex flex-column gap-2">
           <p>
-            Este sitio web puede recoger datos personales mediante formularios de
-            registro, inicio de sesión y pedidos con la finalidad de simular el
-            funcionamiento de una plataforma dentro de un proyecto académico.
+            Este sitio web está destinado a informar sobre la actividad musical
+            de Sons of Aral. No dispone de registro público ni realiza ventas.
           </p>
 
           <h2>Datos que se pueden recoger</h2>
           <ul>
-            <li>Nombre y apellidos</li>
-            <li>Email</li>
-            <li>Dirección (provincia, municipio, dirección, código postal)</li>
-            <li>Información necesaria para la gestión de pedidos</li>
+            <li>Datos técnicos imprescindibles para el funcionamiento del sitio</li>
+            <li>Datos de contacto que se envíen voluntariamente por los canales indicados</li>
           </ul>
 
           <h2>Finalidad</h2>
           <p>
-            Gestión de usuarios y simulación de pedidos dentro del entorno
-            académico. No se realizan cesiones de datos a terceros con fines
-            comerciales.
+            Mostrar el contenido del sitio y atender comunicaciones voluntarias.
+            No se realizan ventas ni cesiones de datos a terceros con fines comerciales.
           </p>
 
           <h2>Base legal</h2>
           <p>
-            Consentimiento del usuario al registrarse o enviar formularios en el
-            sitio.
+            Interés legítimo para el funcionamiento técnico del sitio y consentimiento
+            cuando una persona contacte voluntariamente.
           </p>
 
           <h2>Conservación</h2>

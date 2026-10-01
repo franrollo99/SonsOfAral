@@ -5,22 +5,16 @@ namespace App\Services;
 use App\Models\Lanzamiento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class LanzamientoService
 {
     public function __construct(
         protected MultimediaService $multimediaService
-    ) {
-    }
+    ) {}
 
     public function create(array $data, Request $request): Lanzamiento
     {
-        if (!isset($data['slug']) && isset($data['titulo'])) {
-            $data['slug'] = Str::slug($data['titulo']);
-        }
-
-        unset($data['portada']);
+        unset($data['portada'], $data['remove_portada']);
 
         $canciones = $this->parseCanciones($request->input('canciones'));
 
@@ -37,7 +31,7 @@ class LanzamientoService
                 $lanzamiento->save();
             }
 
-            if (!empty($canciones)) {
+            if (! empty($canciones)) {
                 $this->syncCanciones($lanzamiento, $canciones, $request);
             }
 
@@ -45,19 +39,14 @@ class LanzamientoService
         });
 
         return $lanzamiento->load([
-            'canciones' => fn($q) => $q->with('audio')->orderBy('track_number'),
+            'portada',
+            'canciones' => fn ($q) => $q->with('audio')->orderBy('track_number'),
         ]);
     }
 
     public function update(Lanzamiento $lanzamiento, array $data, Request $request): Lanzamiento
     {
-        if (isset($data['titulo']) && $data['titulo'] !== $lanzamiento->titulo) {
-            $data['slug'] = Str::slug($data['titulo']);
-        } else {
-            unset($data['slug']);
-        }
-
-        unset($data['portada']);
+        unset($data['portada'], $data['remove_portada']);
 
         $canciones = $this->parseCanciones($request->input('canciones'));
 
@@ -87,7 +76,8 @@ class LanzamientoService
         });
 
         return $lanzamiento->load([
-            'canciones' => fn($q) => $q->with('audio')->orderBy('track_number'),
+            'portada',
+            'canciones' => fn ($q) => $q->with('audio')->orderBy('track_number'),
         ]);
     }
 
@@ -121,7 +111,7 @@ class LanzamientoService
         $keepIds = [];
 
         foreach ($canciones as $c) {
-            if (!is_array($c)) {
+            if (! is_array($c)) {
                 continue;
             }
 
@@ -145,7 +135,7 @@ class LanzamientoService
             if ($id) {
                 $song = $lanzamiento->canciones()->with('audio')->whereKey($id)->first();
 
-                if (!$song) {
+                if (! $song) {
                     continue;
                 }
 
@@ -170,6 +160,7 @@ class LanzamientoService
                 }
 
                 $keepIds[] = $song->id;
+
                 continue;
             }
 
@@ -191,7 +182,7 @@ class LanzamientoService
 
         $toDelete = array_diff($existingSongs->keys()->all(), $keepIds);
 
-        if (!empty($toDelete)) {
+        if (! empty($toDelete)) {
             $songsToDelete = $lanzamiento->canciones()->with('audio')->whereIn('id', $toDelete)->get();
 
             foreach ($songsToDelete as $song) {

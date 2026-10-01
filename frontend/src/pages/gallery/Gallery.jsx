@@ -22,7 +22,9 @@ function readCache(key) {
 function writeCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch { }
+  } catch {
+    // La caché es opcional.
+  }
 }
 
 function Gallery() {

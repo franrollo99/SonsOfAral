@@ -10,7 +10,6 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
@@ -46,18 +45,17 @@ function Login() {
         throw new Error("Respuesta de login inválida");
       }
 
-      setUser(userData);
-
       localStorage.setItem("token", token);
       localStorage.setItem("rol", userData.rol);
 
       if (userData.rol === "admin") {
-        navigate("/area-admin", { replace: true });
+        navigate("/gestion", { replace: true });
       } else {
-        navigate("/area-cliente", { replace: true });
+        localStorage.removeItem("token");
+        localStorage.removeItem("rol");
+        throw new Error("Esta cuenta no tiene acceso a la gestión.");
       }
     } catch (err) {
-      setUser(null);
       setError(err.message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
@@ -100,7 +98,7 @@ function Login() {
             </label>
           </div>
 
-          <Link className="userSessionLink" to="/reset-password">
+          <Link className="userSessionLink" to="/gestion/recuperar">
             ¿Has olvidado la contraseña?
           </Link>
 
@@ -109,9 +107,6 @@ function Login() {
           <button className="userSessionBtn" type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Iniciar Sesión"}
           </button>
-          <Link className="userSessionLink userSessionLinkCenter" to="/register">
-            Crear cuenta
-          </Link>
         </form>
       </div>
     </section>

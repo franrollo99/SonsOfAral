@@ -4,14 +4,14 @@ namespace App\Services;
 
 use App\Models\Multimedia;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class MultimediaService
 {
     public function __construct(
         protected ImageService $imageService
-    ) {
-    }
+    ) {}
 
     public function storeImage(
         UploadedFile $file,
@@ -79,29 +79,33 @@ class MultimediaService
 
     public function delete(?Multimedia $media): void
     {
-        if (!$media) {
+        if (! $media) {
             return;
         }
 
-        if ($media->tipo === 'imagen') {
-            $this->imageService->deleteResponsiveImage(
-                $media->directorio,
-                $media->archivo
-            );
-        } else {
-            $path = $this->buildPath($media->directorio, $media->archivo);
+        $tipo = $media->tipo;
+        $directorio = $media->directorio;
+        $archivo = $media->archivo;
+        $media->delete();
+
+        DB::afterCommit(function () use ($tipo, $directorio, $archivo) {
+            if ($tipo === 'imagen') {
+                $this->imageService->deleteResponsiveImage($directorio, $archivo);
+
+                return;
+            }
+
+            $path = $this->buildPath($directorio, $archivo);
 
             if ($path) {
                 Storage::disk('public')->delete($path);
             }
-        }
-
-        $media->delete();
+        });
     }
 
     protected function buildPath(?string $directorio, ?string $archivo): ?string
     {
-        if (!$archivo) {
+        if (! $archivo) {
             return null;
         }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { compressImageIfNeeded } from "../../../utils/compressImage";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
@@ -245,16 +245,6 @@ function GalleryManagement() {
         return () => controller.abort();
     }, []);
 
-    const conciertoSelectOptions = useMemo(() => {
-        return [
-            { value: "", label: "Selecciona un concierto" },
-            ...concertOptions.map((c) => ({
-                value: String(c.id),
-                label: buildConcertLabel(c),
-            })),
-        ];
-    }, [concertOptions]);
-
     return (
         <AdminCrudPage
             title="Galerías"
@@ -423,8 +413,6 @@ function GalleryManagement() {
                 if (form.portadaFile instanceof File) {
                     const compressed = await compressImageIfNeeded(form.portadaFile);
                     fd.append("portada", compressed);
-                } else if (form.portadaId) {
-                    fd.append("portada_id", String(form.portadaId));
                 }
 
                 if (form.removePortada) {

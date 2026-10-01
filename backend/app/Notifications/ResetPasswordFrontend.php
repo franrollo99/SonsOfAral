@@ -26,7 +26,7 @@ class ResetPasswordFrontend extends Notification
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
 
         $url = $frontendUrl
-            . '/reset-password?token=' . $this->token
+            . '/gestion/recuperar?token=' . $this->token
             . '&email=' . urlencode($this->email);
 
         return (new MailMessage)

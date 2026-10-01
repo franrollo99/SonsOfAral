@@ -116,7 +116,7 @@ function ResetPassword() {
       setPassword("");
       setPassword2("");
 
-      setTimeout(() => navigate("/login", { replace: true }), 1200);
+      setTimeout(() => navigate("/gestion/acceso", { replace: true }), 1200);
 
     } catch (err) {
       setError(err?.message || "Error.");
@@ -188,7 +188,7 @@ function ResetPassword() {
               : "Enviar"}
           </button>
 
-          <Link className="userSessionLink userSessionLinkCenter" to="/login">
+          <Link className="userSessionLink userSessionLinkCenter" to="/gestion/acceso">
             Cancelar
           </Link>
         </form>

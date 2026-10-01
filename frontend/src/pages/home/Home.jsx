@@ -3,11 +3,6 @@ import "./Home.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const LS_KEYS = {
-  productos: "productos",
-  tipos: "tipos-productos",
-};
-
 const LS_KEY_LANZAMIENTOS = "lanzamientos";
 const LS_KEY_CONCIERTOS = "conciertos";
 
@@ -24,21 +19,15 @@ function readCache(key) {
 function writeCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch { }
+  } catch {
+    // La caché es opcional.
+  }
 }
 
 function extractData(json) {
   if (Array.isArray(json)) return json;
   if (Array.isArray(json?.data)) return json.data;
   return [];
-}
-
-function runIdle(fn) {
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(fn, { timeout: 1500 });
-  } else {
-    setTimeout(fn, 300);
-  }
 }
 
 function pickNextConcert(conciertos) {
@@ -123,18 +112,6 @@ export default function Home() {
       writeCache(LS_KEY_LANZAMIENTOS, data);
     };
 
-    const fetchShop = async () => {
-      const prodRes = await fetch(`${API_URL}/productos`, {
-        headers: { Accept: "application/json" },
-        signal: controller.signal,
-      });
-
-      if (prodRes.ok) {
-        const json = await prodRes.json().catch(() => ({}));
-        writeCache(LS_KEYS.productos, extractData(json));
-      }
-    };
-
     (async () => {
       try {
         await Promise.all([fetchConciertos(), fetchLanzamientos()]);
@@ -144,12 +121,6 @@ export default function Home() {
         setLoading(false);
       }
     })();
-
-    runIdle(() => {
-      fetchShop().catch((e) => {
-        if (e?.name !== "AbortError") console.error("Home prefetch shop:", e);
-      });
-    });
 
     return () => controller.abort();
   }, []);

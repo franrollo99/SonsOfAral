@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { compressImageIfNeeded } from "../../../utils/compressImage";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
@@ -214,7 +214,6 @@ function SongAudioField({ song, index, setForm, playingAudioRef }) {
 }
 
 function ReleasesManagement() {
-  const [form, setForm] = useState(emptyLanzamiento);
   const playingAudioRef = useRef(null);
 
   const handleDurationChange = (setFormFn, index, field, value, max) => {

@@ -17,14 +17,18 @@ class LanzamientoController extends Controller
      *     operationId="lanzamientosIndex",
      *     tags={"Lanzamientos"},
      *     summary="Obtener todos los lanzamientos",
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Lista de lanzamientos",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
+     *
      *                 @OA\Items(ref="#/components/schemas/Lanzamiento")
      *             )
      *         )
@@ -35,10 +39,11 @@ class LanzamientoController extends Controller
     {
         $query = Lanzamiento::query()
             ->with([
-                'canciones' => fn($q) => $q
+                'portada',
+                'canciones' => fn ($q) => $q
                     ->with('audio')
                     ->orderBy('track_number')
-                    ->select('id', 'lanzamiento_id', 'titulo', 'duracion', 'track_number', 'audio_id')
+                    ->select('id', 'lanzamiento_id', 'titulo', 'duracion', 'track_number', 'audio_id'),
             ])
             ->orderByDesc('fecha_lanzamiento');
 
@@ -51,20 +56,26 @@ class LanzamientoController extends Controller
      *     operationId="lanzamientosShow",
      *     tags={"Lanzamientos"},
      *     summary="Obtener un lanzamiento por ID",
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Lanzamiento encontrado",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="data", ref="#/components/schemas/Lanzamiento")
      *         )
      *     ),
+     *
      *     @OA\Response(response=404, description="Lanzamiento no encontrado")
      * )
      */
@@ -73,7 +84,8 @@ class LanzamientoController extends Controller
         $lanzamiento = Lanzamiento::findOrFail($id);
 
         $lanzamiento->load([
-            'canciones' => fn($q) => $q->with('audio')->orderBy('track_number')
+            'portada',
+            'canciones' => fn ($q) => $q->with('audio')->orderBy('track_number'),
         ]);
 
         return new LanzamientoResource($lanzamiento);
@@ -86,6 +98,7 @@ class LanzamientoController extends Controller
      *     tags={"Lanzamientos"},
      *     summary="Crear un lanzamiento",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(response=201, description="Lanzamiento creado"),
      *     @OA\Response(response=401, description="No autenticado"),
      *     @OA\Response(response=403, description="Sin permisos"),
@@ -111,12 +124,15 @@ class LanzamientoController extends Controller
      *     tags={"Lanzamientos"},
      *     summary="Actualizar un lanzamiento",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *
      *     @OA\Response(response=200, description="Lanzamiento actualizado"),
      *     @OA\Response(response=401, description="No autenticado"),
      *     @OA\Response(response=403, description="Sin permisos"),
@@ -144,20 +160,26 @@ class LanzamientoController extends Controller
      *     tags={"Lanzamientos"},
      *     summary="Eliminar un lanzamiento",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Lanzamiento eliminado",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="message", type="string", example="OK")
      *         )
      *     ),
+     *
      *     @OA\Response(response=401, description="No autenticado"),
      *     @OA\Response(response=403, description="Sin permisos"),
      *     @OA\Response(response=404, description="Lanzamiento no encontrado")

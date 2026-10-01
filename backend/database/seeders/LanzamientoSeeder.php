@@ -19,7 +19,7 @@ class LanzamientoSeeder extends Seeder
             'descripcion' => 'Un álbum que mezcla groove metal con matices progresivos.',
             'audio_url' => 'https://open.spotify.com/intl-es/artist/3rXaE7VIG232g8KyMp1Rul?si=ds8J8JE9T32wpJap-pkcHg',
             'video_url' => 'https://www.youtube.com/@SonsOfAral',
-            'compra_url' => 'http://localhost:5173/tienda/cd-echoes-of-the-void',
+            'compra_url' => null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

@@ -6,12 +6,8 @@ const emptyUser = {
   nombre: "",
   apellidos: "",
   email: "",
-  direccion: "",
-  municipio: "",
-  provincia: "",
-  cp: "",
+  rol: "",
   created_at: "",
-  pedidos_count: 0,
 };
 
 function UsersManagement() {
@@ -30,7 +26,7 @@ function UsersManagement() {
         { key: "nombre", header: "Nombre" },
         { key: "apellidos", header: "Apellidos" },
         { key: "email", header: "Email", className: "adminTruncate", title: (v) => v || "" },
-        { key: "pedidos_count", header: "Pedidos", className: "adminMono" },
+        { key: "rol", header: "Rol" },
         { key: "created_at", header: "Alta" },
       ]}
       columnsGridCss={`
@@ -39,7 +35,7 @@ function UsersManagement() {
           1.1fr
           1.3fr
           1.6fr
-          110px
+          100px
           140px;
         min-width: 980px;
       `}
@@ -54,13 +50,8 @@ function UsersManagement() {
         { name: "apellidos", label: "Apellidos", type: "text", disabled: true, full: true },
         { name: "email", label: "Email", type: "text", disabled: true, full: true },
 
-        { name: "direccion", label: "Dirección", type: "text", disabled: true, full: true },
-        { name: "municipio", label: "Municipio", type: "text", disabled: true },
-        { name: "provincia", label: "Provincia", type: "text", disabled: true },
-        { name: "cp", label: "CP", type: "text", disabled: true },
-
+        { name: "rol", label: "Rol", type: "text", disabled: true },
         { name: "created_at", label: "Fecha de alta", type: "text", disabled: true },
-        { name: "pedidos_count", label: "Nº pedidos", type: "text", disabled: true },
       ]}
 
       buildPayload={() => ({})}

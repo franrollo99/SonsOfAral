@@ -21,7 +21,9 @@ function readCache(key) {
 function writeCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch { }
+  } catch {
+    // La caché es opcional.
+  }
 }
 
 function normalizeOrdered(raw) {
@@ -176,7 +178,9 @@ function Musica() {
 
         setActiveTrackId(id);
         setIsPlaying(true);
-      } catch (e) { }
+      } catch {
+        // El navegador puede rechazar la reproducción.
+      }
     };
 
     cargarYReproducir();

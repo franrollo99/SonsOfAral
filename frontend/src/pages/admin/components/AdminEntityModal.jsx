@@ -14,7 +14,9 @@ function normalizeArrayValue(v) {
       try {
         const parsed = JSON.parse(s);
         if (Array.isArray(parsed)) return parsed.map(String);
-      } catch { }
+      } catch {
+        // Se conserva como texto normal si no es JSON válido.
+      }
     }
 
     if (s.includes(",")) {
@@ -31,6 +33,7 @@ function normalizeArrayValue(v) {
 }
 
 function Field({ field, form, setForm }) {
+  const fileInputRef = useRef(null);
   const {
     name,
     label,
@@ -72,7 +75,6 @@ function Field({ field, form, setForm }) {
     const currentName = field.currentNameKey ? form?.[field.currentNameKey] : null;
     const removeFlag = field.removeFlagKey ? !!form?.[field.removeFlagKey] : false;
     const selectedFile = form?.[name] instanceof File ? form[name] : null;
-    const fileInputRef = useRef(null);
 
     const previewUrl = selectedFile
       ? URL.createObjectURL(selectedFile)
@@ -288,48 +290,6 @@ function Field({ field, form, setForm }) {
                 </button>
               );
             })}
-          </div>
-        </div>
-      ) : type === "orderLines" ? (
-        <div className="adminSizes" style={{ padding: 0 }}>
-          <div style={{ overflowX: "auto" }}>
-            <table className="adminTable" style={{ width: "100%", minWidth: 560 }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: "left" }}>Producto</th>
-                  <th style={{ textAlign: "right" }}>Cantidad</th>
-                  <th style={{ textAlign: "right" }}>Precio</th>
-                  <th style={{ textAlign: "right" }}>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(Array.isArray(form?.[name]) ? form?.[name] : []).map((ln, idx) => {
-                  const producto =
-                    ln?.nombre ?? "-";
-
-                  const qty = Number(ln?.cantidad ?? ln?.qty ?? 0) || 0;
-                  const price = Number(ln?.precio ?? ln?.precio_unitario ?? ln?.price ?? 0) || 0;
-                  const subtotal = qty * price;
-
-                  return (
-                    <tr key={idx}>
-                      <td>{producto}</td>
-                      <td style={{ textAlign: "right" }}>{qty}</td>
-                      <td style={{ textAlign: "right" }}>{price.toFixed(2)} €</td>
-                      <td style={{ textAlign: "right" }}>{subtotal.toFixed(2)} €</td>
-                    </tr>
-                  );
-                })}
-
-                {(!Array.isArray(form?.[name]) || form?.[name].length === 0) && (
-                  <tr>
-                    <td colSpan={4} className="adminMuted" style={{ padding: "12px 8px" }}>
-                      Sin líneas.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
           </div>
         </div>
       ) : (

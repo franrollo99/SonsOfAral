@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -18,7 +17,5 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(LanzamientoSeeder::class);
         $this->call(ConciertoSeeder::class);
-        $this->call(ProductosSeeder::class);
-        $this->call(PedidosSeeder::class);
     }
 }

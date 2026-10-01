@@ -16,7 +16,7 @@ class ConciertoRequest extends FormRequest
             'descripcion' => ['nullable', 'string'],
             'precio_entrada' => ['nullable', 'numeric', 'min:0'],
             'entrada_anticipada' => ['required', 'boolean'],
-            'enlace_entrada_anticipada' => ['nullable', 'string'],
+            'enlace_entrada_anticipada' => ['nullable', 'url', 'max:255'],
             'remove_cartel' => ['nullable', 'boolean'],
             'cartel' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
         ];
@@ -40,15 +40,29 @@ class ConciertoRequest extends FormRequest
             'entrada_anticipada.required' => 'Debes indicar si existe entrada anticipada.',
             'entrada_anticipada.boolean' => 'El campo entrada anticipada debe ser verdadero o falso.',
             'enlace_entrada_anticipada.string' => 'El enlace de la entrada anticipada debe ser un texto.',
+            'enlace_entrada_anticipada.url' => 'El enlace de la entrada anticipada no es válido.',
+            'enlace_entrada_anticipada.max' => 'El enlace de la entrada anticipada no puede superar los 255 caracteres.',
             'cartel.image' => 'El archivo debe ser una imagen.',
             'cartel.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
-            'cartel.max'   => 'La imagen no puede superar los 2 MB.',
+            'cartel.max' => 'La imagen no puede superar los 2 MB.',
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        if (!$this->entrada_anticipada) {
+        foreach (['entrada_anticipada', 'remove_cartel'] as $field) {
+            if ($this->has($field)) {
+                $this->merge([
+                    $field => filter_var(
+                        $this->input($field),
+                        FILTER_VALIDATE_BOOL,
+                        FILTER_NULL_ON_FAILURE
+                    ) ?? $this->input($field),
+                ]);
+            }
+        }
+
+        if ($this->input('entrada_anticipada') === false) {
             $this->merge(['enlace_entrada_anticipada' => null]);
         }
     }

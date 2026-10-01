@@ -16,30 +16,39 @@ class ConciertoController extends Controller
      *     operationId="conciertosIndex",
      *     tags={"Conciertos"},
      *     summary="Obtener todos los conciertos",
+     *
      *     @OA\Parameter(
      *         name="sort",
      *         in="query",
      *         required=false,
+     *
      *         @OA\Schema(type="string", example="latest")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="sin_galeria",
      *         in="query",
      *         required=false,
+     *
      *         @OA\Schema(type="boolean", example=true)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="all",
      *         in="query",
      *         required=false,
      *         description="Si es true, devuelve todos los conciertos. Si no, solo los actuales y futuros.",
+     *
      *         @OA\Schema(type="boolean", example=true)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Lista de conciertos",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Concierto"))
      *         )
      *     )
@@ -52,9 +61,9 @@ class ConciertoController extends Controller
         $sinGaleria = request()->boolean('sin_galeria');
         $galeriaActualId = request('galeria_actual_id');
 
-        $query = Concierto::query();
+        $query = Concierto::query()->with('cartel');
 
-        if (!$all) {
+        if (! $all) {
             $query->whereDate('fecha', '>=', now()->toDateString());
         }
 
@@ -85,26 +94,32 @@ class ConciertoController extends Controller
      *     operationId="conciertosShow",
      *     tags={"Conciertos"},
      *     summary="Obtener un concierto por ID",
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Concierto encontrado",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="data", ref="#/components/schemas/Concierto")
      *         )
      *     ),
+     *
      *     @OA\Response(response=404, description="No encontrado")
      * )
      */
     public function show(int $id)
     {
-        $concierto = Concierto::findOrFail($id);
+        $concierto = Concierto::with('cartel')->findOrFail($id);
 
         return new ConciertoResource($concierto);
     }
@@ -116,12 +131,16 @@ class ConciertoController extends Controller
      *     tags={"Conciertos"},
      *     summary="Crear un concierto",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"fecha","lugar","entrada_anticipada"},
+     *
      *                 @OA\Property(property="fecha", type="string", format="date"),
      *                 @OA\Property(property="provincia", type="string"),
      *                 @OA\Property(property="municipio", type="string"),
@@ -134,6 +153,7 @@ class ConciertoController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=201, description="Creado"),
      *     @OA\Response(response=422, description="Error de validación")
      * )
@@ -141,7 +161,7 @@ class ConciertoController extends Controller
     public function store(ConciertoRequest $request, MultimediaService $multimediaService)
     {
         $data = $request->validated();
-        unset($data['cartel']);
+        unset($data['cartel'], $data['remove_cartel']);
 
         $concierto = Concierto::create($data);
 
@@ -167,12 +187,15 @@ class ConciertoController extends Controller
      *     tags={"Conciertos"},
      *     summary="Actualizar un concierto",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response=200, description="Actualizado"),
      *     @OA\Response(response=404, description="No encontrado"),
      *     @OA\Response(response=422, description="Error de validación")
@@ -183,9 +206,16 @@ class ConciertoController extends Controller
         $concierto = Concierto::findOrFail($id);
 
         $data = $request->validated();
-        unset($data['cartel']);
+        unset($data['cartel'], $data['remove_cartel']);
 
         $concierto->update($data);
+
+        if ($request->boolean('remove_cartel')) {
+            $multimediaService->delete($concierto->cartel);
+            $concierto->cartel_id = null;
+            $concierto->save();
+            $concierto->unsetRelation('cartel');
+        }
 
         if ($request->hasFile('cartel')) {
             $media = $multimediaService->replaceImage(
@@ -208,12 +238,15 @@ class ConciertoController extends Controller
      *     tags={"Conciertos"},
      *     summary="Eliminar un concierto",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response=200, description="OK"),
      *     @OA\Response(response=404, description="No encontrado")
      * )

@@ -22,8 +22,7 @@ function AdminCrudPage({
   emptyForm = {},
   formFields = [],
   buildPayload = (form) => form,
-  requireAdmin = true,
-  backTo = "/area-admin",
+  backTo = "/gestion",
   modalAfterFields,
   mapRowToForm,
   onSaveSuccess,
@@ -65,34 +64,7 @@ function AdminCrudPage({
     const run = async () => {
       setError("");
 
-      if (!token) {
-        navigate("/login", { replace: true });
-        return;
-      }
-
       try {
-        if (requireAdmin) {
-          const meRes = await fetch(`${API_URL}/auth/me`, {
-            method: "GET",
-            headers: authHeaders,
-          });
-          const meData = await meRes.json().catch(() => ({}));
-
-          if (!meRes.ok) {
-            localStorage.removeItem("token");
-            navigate("/login", { replace: true });
-            return;
-          }
-
-          const user = meData?.data?.user ?? meData?.user ?? null;
-          const rol = user?.rol || user?.role;
-
-          if (rol !== "admin") {
-            navigate("/area-cliente", { replace: true });
-            return;
-          }
-        }
-
         const res = await fetch(`${API_URL}${listPath}`, {
           method: "GET",
           headers: authHeaders,
@@ -111,7 +83,7 @@ function AdminCrudPage({
     };
 
     run();
-  }, [authHeaders, listPath, navigate, requireAdmin, title, token]);
+  }, [authHeaders, listPath, title]);
 
   const filtered = useMemo(() => {
     const needle = normalize(q).trim();

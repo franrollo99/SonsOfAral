@@ -29,36 +29,6 @@
   border-bottom: 2px solid var(--muted);
 }
 
-.cartIcon,
-.loginIcon {
-  background: none;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  outline: none;
-}
-
-.cartIcon:focus,
-.loginIcon:focus {
-  outline: none;
-}
-
-.cartIcon:hover,
-.loginIcon:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-.cartIcon,
-.loginIcon {
-  display: inline-block;
-}
-
-.cartIcon img,
-.loginIcon img {
-  width: 50px;
-  display: block;
-}
 
 .navBurger {
   background: rgba(255, 255, 255, 0.06);
@@ -95,47 +65,6 @@
 
 .mobileLink:hover {
   background: rgba(255, 255, 255, 0.06);
-}
-
-.mobileDivider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.14);
-  margin: 8px 0;
-}
-
-.mobileMenu .cartIcon,
-.mobileMenu .loginIcon {
-  background: none;
-  border: none;
-  padding: 14px 18px;
-  text-align: left;
-  width: 100%;
-  color: var(--text);
-}
-
-.mobileMenu .cartIcon:hover,
-.mobileMenu .loginIcon:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.mobileBtn {
-  background: none;
-  border: none;
-  color: var(--text);
-  padding: 14px 18px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 600;
-}
-
-.mobileBtn:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.mobileBtn:focus {
-  outline: none;
 }
 
 @media (max-width: 768px) {
