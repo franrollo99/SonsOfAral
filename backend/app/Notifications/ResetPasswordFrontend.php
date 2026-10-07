@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -23,11 +22,11 @@ class ResetPasswordFrontend extends Notification
 
     public function toMail($notifiable)
     {
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+        $frontendUrl = rtrim(config('site.frontend_url'), '/');
 
         $url = $frontendUrl
-            . '/gestion/recuperar?token=' . $this->token
-            . '&email=' . urlencode($this->email);
+            .'/gestion/recuperar?token='.$this->token
+            .'&email='.urlencode($this->email);
 
         return (new MailMessage)
             ->subject('Restablecer contraseña')

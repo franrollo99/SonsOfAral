@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { apiJson } from "../../../lib/api";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../AdminManagement.css";
 import ConfirmModal from "./ConfirmModal";
 import AdminEntityModal from "./AdminEntityModal";
 
-const API_URL = import.meta.env.VITE_API_URL;
 const normalize = (v) => String(v ?? "").toLowerCase();
 
 function AdminCrudPage({
@@ -29,16 +29,7 @@ function AdminCrudPage({
   onDeleteSuccess,
 }) {
   const navigate = useNavigate();
-  const token = useMemo(() => localStorage.getItem("token"), []);
-
-  const authHeaders = useMemo(() => {
-    return {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-  }, [token]);
-
+  const controlsId = useId();
   const canCreate = !!createPath;
   const canDelete = typeof deletePath === "function";
 
@@ -52,6 +43,8 @@ function AdminCrudPage({
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [editorFieldErrors, setEditorFieldErrors] = useState({});
   const [toDelete, setToDelete] = useState(null);
 
   const [editorOpen, setEditorOpen] = useState(false);
@@ -61,29 +54,30 @@ function AdminCrudPage({
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
+    const controller = new AbortController();
     const run = async () => {
       setError("");
 
       try {
-        const res = await fetch(`${API_URL}${listPath}`, {
-          method: "GET",
-          headers: authHeaders,
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data?.message || `No se pudieron cargar ${title.toLowerCase()}.`);
-
-        const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+        const data = await apiJson(listPath, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const list = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : [];
         setRows(list);
       } catch (e) {
-        setError(e.message || `Error cargando ${title.toLowerCase()}.`);
+        if (!controller.signal.aborted)
+          setError(e.message || `Error cargando ${title.toLowerCase()}.`);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     run();
-  }, [authHeaders, listPath, title]);
+    return () => controller.abort();
+  }, [listPath, title]);
 
   const filtered = useMemo(() => {
     const needle = normalize(q).trim();
@@ -111,6 +105,7 @@ function AdminCrudPage({
 
   const onDeleteClick = (row) => {
     if (!canDelete) return;
+    setDeleteError("");
     setToDelete(row);
     setConfirmOpen(true);
   };
@@ -125,15 +120,11 @@ function AdminCrudPage({
     if (!canDelete) return;
     if (!toDelete?.id) return;
 
+    setDeleteError("");
     setConfirmLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}${deletePath(toDelete.id)}`, {
-        method: "DELETE",
-        headers: authHeaders,
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || `No se pudo borrar el ${entityName}.`);
+      await apiJson(deletePath(toDelete.id), { method: "DELETE" });
 
       setRows((prev) => prev.filter((r) => r.id !== toDelete.id));
 
@@ -143,26 +134,30 @@ function AdminCrudPage({
 
       closeConfirm();
     } catch (e) {
-      alert(e.message || "Error borrando.");
+      setDeleteError(e.message || "Error borrando.");
       setConfirmLoading(false);
     }
   };
 
   const openCreate = () => {
     if (!canCreate) return;
+    setEditorFieldErrors({});
     setEditorError("");
     setEditorOk("");
     const base = { ...emptyForm };
-    const finalForm = typeof mapRowToForm === "function" ? mapRowToForm(base, null) : base;
+    const finalForm =
+      typeof mapRowToForm === "function" ? mapRowToForm(base, null) : base;
     setForm(finalForm);
     setEditorOpen(true);
   };
 
   const openEdit = (row) => {
+    setEditorFieldErrors({});
     setEditorError("");
     setEditorOk("");
     const base = { ...emptyForm, ...(row || {}) };
-    const finalForm = typeof mapRowToForm === "function" ? mapRowToForm(base, row) : base;
+    const finalForm =
+      typeof mapRowToForm === "function" ? mapRowToForm(base, row) : base;
     setForm(finalForm);
     setEditorOpen(true);
   };
@@ -170,11 +165,14 @@ function AdminCrudPage({
   const closeEditor = () => {
     setEditorOpen(false);
     setEditorLoading(false);
+    setEditorFieldErrors({});
     setEditorError("");
     setEditorOk("");
   };
 
   const onSave = async () => {
+    if (editorLoading) return;
+    setEditorFieldErrors({});
     setEditorError("");
     setEditorOk("");
     setEditorLoading(true);
@@ -186,7 +184,7 @@ function AdminCrudPage({
         throw new Error("Crear está deshabilitado para esta entidad.");
       }
 
-      const url = isEdit ? `${API_URL}${updatePath(form.id)}` : `${API_URL}${createPath}`;
+      const url = isEdit ? updatePath(form.id) : createPath;
 
       const payload = await buildPayload(form);
       const isFD = payload instanceof FormData;
@@ -198,23 +196,11 @@ function AdminCrudPage({
         method = "POST";
       }
 
-      const res = await fetch(url, {
+      const data = await apiJson(url, {
         method,
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-          ...(isFD ? {} : { "Content-Type": "application/json" }),
-        },
+        headers: isFD ? {} : { "Content-Type": "application/json" },
         body: isFD ? payload : JSON.stringify(payload),
       });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const msg =
-          data?.message ||
-          (data?.errors ? Object.values(data.errors).flat().join(" ") : "No se pudo guardar.");
-        throw new Error(msg);
-      }
 
       const saved = data?.data ?? data;
 
@@ -228,9 +214,14 @@ function AdminCrudPage({
         onSaveSuccess(saved);
       }
 
-      setEditorOk(isEdit ? `${title.slice(0, -1)} actualizado.` : `${title.slice(0, -1)} creado.`);
+      setEditorOk(
+        isEdit
+          ? `${title.slice(0, -1)} actualizado.`
+          : `${title.slice(0, -1)} creado.`,
+      );
       setEditorOpen(false);
     } catch (e) {
+      setEditorFieldErrors(e.data?.errors || {});
       setEditorError(e.message || "Error guardando.");
     } finally {
       setEditorLoading(false);
@@ -242,7 +233,9 @@ function AdminCrudPage({
       <section className="container adminPageWrap">
         <div className="adminPageCard">
           <h1 className="adminPageTitle">{title}</h1>
-          <p className="adminMuted">Cargando...</p>
+          <p className="adminMuted" role="status">
+            Cargando...
+          </p>
         </div>
       </section>
     );
@@ -253,7 +246,9 @@ function AdminCrudPage({
       <section className="container adminPageWrap">
         <div className="adminPageCard">
           <h1 className="adminPageTitle">{title}</h1>
-          <p className="adminError">{error}</p>
+          <p className="adminError" role="alert">
+            {error}
+          </p>
           <button className="adminBtn" onClick={() => navigate(backTo)}>
             Volver al panel
           </button>
@@ -272,17 +267,34 @@ function AdminCrudPage({
             <h1 className="adminPageTitle">{title}</h1>
           </div>
 
-          <button className="adminLinkBtn" type="button" onClick={() => navigate(backTo)}>
+          <button
+            className="adminLinkBtn"
+            data-modal-return-focus
+            type="button"
+            onClick={() => navigate(backTo)}
+          >
             Volver
           </button>
         </div>
 
         <div className="adminDivider" />
 
+        {editorOk && (
+          <p className="adminOk" role="status">
+            {editorOk}
+          </p>
+        )}
         <div className="adminTableControls">
           <div className="adminControl">
-            <label className="adminControlLabel">Mostrar</label>
-            <select className="adminSelect" value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+            <label className="adminControlLabel" htmlFor={`${controlsId}-size`}>
+              Mostrar
+            </label>
+            <select
+              id={`${controlsId}-size`}
+              className="adminSelect"
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+            >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
@@ -291,9 +303,15 @@ function AdminCrudPage({
           </div>
 
           <div className="adminControl adminControlGrow">
-            <label className="adminControlLabel">Buscar</label>
+            <label
+              className="adminControlLabel"
+              htmlFor={`${controlsId}-search`}
+            >
+              Buscar
+            </label>
             <input
               className="adminInput"
+              id={`${controlsId}-search`}
               placeholder="Busca por cualquier campo"
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -325,17 +343,30 @@ function AdminCrudPage({
                   <div key={r.id} className={`adminTableRow ${colsClass}`}>
                     {columns.map((c) => {
                       const raw = r?.[c.key];
-                      const content = c.render ? c.render(raw, r) : raw ?? "-";
-                      const titleAttr = typeof c.title === "function" ? c.title(raw, r) : c.title;
+                      const content = c.render
+                        ? c.render(raw, r)
+                        : (raw ?? "-");
+                      const titleAttr =
+                        typeof c.title === "function"
+                          ? c.title(raw, r)
+                          : c.title;
                       return (
-                        <div key={c.key} className={c.className || ""} title={titleAttr || ""}>
+                        <div
+                          key={c.key}
+                          className={c.className || ""}
+                          title={titleAttr || ""}
+                        >
                           {content}
                         </div>
                       );
                     })}
 
                     <div className="adminActions">
-                      <button className="adminActionBtn" type="button" onClick={() => openEdit(r)}>
+                      <button
+                        className="adminActionBtn"
+                        type="button"
+                        onClick={() => openEdit(r)}
+                      >
                         {editLabel}
                       </button>
 
@@ -357,10 +388,22 @@ function AdminCrudPage({
         </div>
 
         <div className="adminPager">
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(1)} disabled={page === 1}>
+          <button
+            className="adminPagerBtn"
+            aria-label="Primera página"
+            type="button"
+            onClick={() => goTo(1)}
+            disabled={page === 1}
+          >
             «
           </button>
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(page - 1)} disabled={page === 1}>
+          <button
+            className="adminPagerBtn"
+            aria-label="Página anterior"
+            type="button"
+            onClick={() => goTo(page - 1)}
+            disabled={page === 1}
+          >
             ‹
           </button>
 
@@ -368,10 +411,22 @@ function AdminCrudPage({
             Página <b>{page}</b> de <b>{totalPages}</b>
           </div>
 
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(page + 1)} disabled={page === totalPages}>
+          <button
+            className="adminPagerBtn"
+            aria-label="Página siguiente"
+            type="button"
+            onClick={() => goTo(page + 1)}
+            disabled={page === totalPages}
+          >
             ›
           </button>
-          <button className="adminPagerBtn" type="button" onClick={() => goTo(totalPages)} disabled={page === totalPages}>
+          <button
+            className="adminPagerBtn"
+            aria-label="Última página"
+            type="button"
+            onClick={() => goTo(totalPages)}
+            disabled={page === totalPages}
+          >
             »
           </button>
         </div>
@@ -379,7 +434,11 @@ function AdminCrudPage({
         {canCreate ? (
           <div className="adminCreateBand">
             <div className="adminCreateBandInner">
-              <button className="adminCreateBtn" type="button" onClick={openCreate}>
+              <button
+                className="adminCreateBtn"
+                type="button"
+                onClick={openCreate}
+              >
                 Crear {entityName}
               </button>
             </div>
@@ -392,6 +451,7 @@ function AdminCrudPage({
           open={confirmOpen}
           title="Confirmar borrado"
           text={`¿Seguro que quieres borrar el ${entityName}?`}
+          error={deleteError}
           loading={confirmLoading}
           onCancel={closeConfirm}
           onConfirm={doDelete}
@@ -404,6 +464,7 @@ function AdminCrudPage({
         formFields={formFields}
         form={form}
         setForm={setForm}
+        fieldErrors={editorFieldErrors}
         error={editorError}
         ok={editorOk}
         loading={editorLoading}
@@ -411,7 +472,15 @@ function AdminCrudPage({
         onSave={onSave}
         saveText="Guardar"
         showSave={!hideSave}
-        afterFields={typeof modalAfterFields === "function" ? modalAfterFields({ form, setForm }) : null}
+        afterFields={
+          typeof modalAfterFields === "function"
+            ? modalAfterFields({
+                form,
+                setForm,
+                fieldErrors: editorFieldErrors,
+              })
+            : null
+        }
       />
 
       <style>{`

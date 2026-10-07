@@ -1,48 +1,19 @@
+import { imageSrcSet } from "../../lib/images";
+import { useContent } from "../../hooks/useContent";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "./Gallery.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useModal } from "../../hooks/useModal";
 
 function GalleryDetail() {
   const { id } = useParams();
 
-  const [galeria, setGaleria] = useState(null);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    data: galeria,
+    loading: cargando,
+    error,
+  } = useContent(`/galerias/${id}`);
   const [lightboxIndex, setLightboxIndex] = useState(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const cargarGaleria = async () => {
-      try {
-        setError(null);
-        setCargando(true);
-
-        const res = await fetch(`${API_URL}/galerias/${id}`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json().catch(() => ({}));
-        setGaleria(data?.data ?? null);
-      } catch (e) {
-        if (e?.name !== "AbortError") {
-          console.error(e);
-          setError("No se pudo cargar la galería.");
-        }
-      } finally {
-        setCargando(false);
-      }
-    };
-
-    cargarGaleria();
-
-    return () => controller.abort();
-  }, [id]);
 
   const imagenes = useMemo(() => {
     return Array.isArray(galeria?.imagenes) ? galeria.imagenes : [];
@@ -70,25 +41,29 @@ function GalleryDetail() {
     });
   }, [imagenes.length]);
 
-  useEffect(() => {
-    if (lightboxIndex === null) return;
+  const lightboxOpen = lightboxIndex !== null && !!imagenes[lightboxIndex];
+  const dialogRef = useModal(lightboxOpen, cerrarLightbox);
 
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+  useEffect(() => {
+    if (!lightboxOpen) return;
 
     const onKeyDown = (e) => {
-      if (e.key === "Escape") cerrarLightbox();
-      if (e.key === "ArrowLeft") prevImage();
-      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevImage();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextImage();
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [cerrarLightbox, lightboxIndex, nextImage, prevImage]);
+  }, [lightboxOpen, nextImage, prevImage]);
 
   return (
     <section>
@@ -98,19 +73,33 @@ function GalleryDetail() {
         </Link>
       </div>
 
-      {cargando && <p>Cargando galería...</p>}
-      {error && !cargando && <p className="errorMessage">{error}</p>}
+      {cargando && <p role="status">Cargando galería...</p>}
+      {error && !cargando && (
+        <p className="errorMessage" role="alert">
+          {error}
+        </p>
+      )}
 
       {!cargando && !error && galeria && (
         <>
           <header className="galleryDetailHeader">
-            <h1 className="galleryTitle mb-2">{galeria.nombre || galeria.titulo}</h1>
+            <h1 className="galleryTitle mb-2">
+              {galeria.nombre || galeria.titulo}
+            </h1>
 
             <div className="galleryDetailMeta">
-              {galeria.concierto?.fecha ? <span>{galeria.concierto.fecha}</span> : null}
-              {galeria.concierto?.lugar ? <span>{galeria.concierto.lugar}</span> : null}
-              {galeria.concierto?.municipio ? <span>{galeria.concierto.municipio}</span> : null}
-              {galeria.concierto?.provincia ? <span>{galeria.concierto.provincia}</span> : null}
+              {galeria.concierto?.fecha ? (
+                <span>{galeria.concierto.fecha}</span>
+              ) : null}
+              {galeria.concierto?.lugar ? (
+                <span>{galeria.concierto.lugar}</span>
+              ) : null}
+              {galeria.concierto?.municipio ? (
+                <span>{galeria.concierto.municipio}</span>
+              ) : null}
+              {galeria.concierto?.provincia ? (
+                <span>{galeria.concierto.provincia}</span>
+              ) : null}
             </div>
           </header>
 
@@ -119,16 +108,14 @@ function GalleryDetail() {
               <button
                 key={imagen.id ?? index}
                 type="button"
+                aria-label={`Abrir imagen ${index + 1}`}
+                aria-haspopup="dialog"
                 className="galleryImageCard"
                 onClick={() => abrirLightbox(index)}
               >
                 <img
                   src={imagen.url}
-                  srcSet={
-                    imagen.urlSm
-                      ? `${imagen.urlSm} 500w, ${imagen.url} 1400w`
-                      : undefined
-                  }
+                  srcSet={imageSrcSet(imagen)}
                   sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 33vw"
                   alt={imagen.nombre_original || `Imagen ${index + 1}`}
                   className="galleryImage"
@@ -146,7 +133,15 @@ function GalleryDetail() {
 
       {lightboxIndex !== null && imagenes[lightboxIndex] && (
         <div className="lightboxOverlay" onMouseDown={cerrarLightbox}>
-          <div className="lightboxInner" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Imágenes de ${galeria?.nombre || galeria?.titulo || "la galería"}`}
+            tabIndex={-1}
+            className="lightboxInner"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
               className="lightboxClose"
@@ -184,7 +179,7 @@ function GalleryDetail() {
               className="lightboxImage"
             />
 
-            <div className="lightboxCounter">
+            <div className="lightboxCounter" role="status" aria-atomic="true">
               {lightboxIndex + 1} / {imagenes.length}
             </div>
           </div>

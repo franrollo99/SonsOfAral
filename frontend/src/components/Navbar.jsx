@@ -1,46 +1,107 @@
+import { Link, NavLink } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import "./Navbar.css";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useContent } from "../hooks/useContent";
+import { imageSrcSet } from "../lib/images";
+import defaultImages from "../assets/site-images.json";
+
+const links = [
+  ["/", "Inicio"],
+  ["/conciertos", "Directo"],
+  ["/musica", "Música"],
+  ["/galeria", "Archivo visual"],
+];
 
 function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: content } = useContent("/contenido-web");
+  const logo = content?.logo || defaultImages.logo;
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+  const toggleRef = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    const desktop = window.matchMedia("(min-width: 761px)");
+    const resize = () => {
+      if (desktop.matches) setOpen(false);
+    };
+    window.addEventListener("keydown", dismiss);
+    desktop.addEventListener("change", resize);
+    return () => {
+      window.removeEventListener("keydown", dismiss);
+      desktop.removeEventListener("change", resize);
+    };
+  }, [open]);
 
   return (
-    <header className="navbarHeader d-flex justify-content-between align-items-center gap-5">
-      <Link to="/" className="navbarLogo">
-        <img src="/images/logo.png" alt="logo" />
-      </Link>
-
-      <nav className="navbarLinks d-none d-lg-flex gap-4">
-        <Link to="/">Inicio</Link>
-        <Link to="/conciertos">Conciertos</Link>
-        <Link to="/musica">Música</Link>
-        <Link to="/galeria">Galería</Link>
-      </nav>
-
-      <div className="d-flex align-items-center gap-3">
-        <button
-          className="navBurger d-lg-none"
-          onClick={() => setIsMenuOpen((v) => !v)}
-          aria-label="Abrir menú"
-          aria-expanded={isMenuOpen}
+    <header className="siteHeader">
+      <div className="siteNav">
+        <Link
+          to="/"
+          className="brandMark"
+          aria-label="Sons of Aral · Inicio"
+          onClick={close}
         >
-          ☰
-        </button>
+          <img
+            src={logo.urlSm || logo.url}
+            srcSet={imageSrcSet(logo)}
+            sizes="42px"
+            alt=""
+          />
+          <span>
+            Sons
+            <br />
+            of Aral
+          </span>
+        </Link>
 
+        <nav className="desktopNav" aria-label="Navegación principal">
+          {links.map(([to, label], index) => (
+            <NavLink key={to} to={to} end={to === "/"} className="navLink">
+              <span>0{index + 1}</span>
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <button
+          ref={toggleRef}
+          className="menuToggle"
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+          aria-controls="mobile-navigation"
+        >
+          <span>{open ? "Cerrar" : "Menú"}</span>
+          <i aria-hidden="true" />
+        </button>
       </div>
 
-      {isMenuOpen && (
-        <div className="mobileMenu d-lg-none d-flex flex-column gap-3">
-          <nav className="d-flex flex-column gap-2">
-            <Link className="mobileLink" to="/" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
-            <Link className="mobileLink" to="/conciertos" onClick={() => setIsMenuOpen(false)}>Conciertos</Link>
-            <Link className="mobileLink" to="/musica" onClick={() => setIsMenuOpen(false)}>Música</Link>
-            <Link className="mobileLink" to="/galeria" onClick={() => setIsMenuOpen(false)}>Galería</Link>
-          </nav>
-
-        </div>
-      )}
+      <nav
+        aria-label="Navegación móvil"
+        inert={!open}
+        id="mobile-navigation"
+        className={`mobileNav ${open ? "isOpen" : ""}`}
+        aria-hidden={!open}
+      >
+        {links.map(([to, label], index) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === "/"}
+            className="mobileNavLink"
+            onClick={close}
+          >
+            <span>0{index + 1}</span>
+            {label}
+          </NavLink>
+        ))}
+      </nav>
     </header>
   );
 }

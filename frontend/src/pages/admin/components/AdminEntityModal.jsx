@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useRef } from "react";
+import { useEffect, useId, useRef } from "react";
+import { useModal } from "../../../hooks/useModal";
 import "../AdminManagement.css";
 
 function normalizeArrayValue(v) {
@@ -32,7 +32,20 @@ function normalizeArrayValue(v) {
   return [String(v)];
 }
 
-function Field({ field, form, setForm }) {
+function Field({ field, form, setForm, fieldErrors }) {
+  const id = useId();
+  const error = [fieldErrors[field.errorName || field.name]]
+    .flat()
+    .filter(Boolean)
+    .join(" ");
+  const accessibility = {
+    id,
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby":
+      [field.help ? `${id}-help` : null, error ? `${id}-error` : null]
+        .filter(Boolean)
+        .join(" ") || undefined,
+  };
   const fileInputRef = useRef(null);
   const {
     name,
@@ -55,15 +68,18 @@ function Field({ field, form, setForm }) {
     return null;
   }
 
-  const isDisabled = typeof disabled === "function" ? disabled(form) : !!disabled;
+  const isDisabled =
+    typeof disabled === "function" ? disabled(form) : !!disabled;
 
   const onChange = (value) => {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
-  const currentSizes = type === "sizes" ? normalizeArrayValue(form?.[name]) : null;
+  const currentSizes =
+    type === "sizes" ? normalizeArrayValue(form?.[name]) : null;
 
   const commonProps = {
+    ...accessibility,
     className: type === "textarea" ? "adminTextarea" : "adminInput",
     value: form?.[name] ?? "",
     placeholder: placeholder || "",
@@ -72,21 +88,20 @@ function Field({ field, form, setForm }) {
 
   if (type === "file") {
     const currentUrl = field.currentUrlKey ? form?.[field.currentUrlKey] : null;
-    const currentName = field.currentNameKey ? form?.[field.currentNameKey] : null;
-    const removeFlag = field.removeFlagKey ? !!form?.[field.removeFlagKey] : false;
+    const currentName = field.currentNameKey
+      ? form?.[field.currentNameKey]
+      : null;
+    const removeFlag = field.removeFlagKey
+      ? !!form?.[field.removeFlagKey]
+      : false;
     const selectedFile = form?.[name] instanceof File ? form[name] : null;
 
+    const existingUrl = removeFlag ? null : currentUrl;
+    const existingName = removeFlag ? null : currentName;
     const previewUrl = selectedFile
       ? URL.createObjectURL(selectedFile)
-      : !removeFlag
-        ? currentUrl
-        : null;
-
-    const shownName = selectedFile
-      ? selectedFile.name
-      : !removeFlag
-        ? currentName
-        : null;
+      : existingUrl;
+    const shownName = selectedFile ? selectedFile.name : existingName;
 
     const clearSelectedNewFile = () => {
       setForm((p) => ({
@@ -115,10 +130,13 @@ function Field({ field, form, setForm }) {
 
     return (
       <div className={`adminFormField ${full ? "adminFormFieldFull" : ""}`}>
-        <label className="adminControlLabel">{label}</label>
+        <label className="adminControlLabel" htmlFor={id}>
+          {label}
+        </label>
 
         <input
           ref={fileInputRef}
+          aria-label={label}
           type="file"
           accept={field.accept || "image/png,image/jpeg,image/webp"}
           disabled={isDisabled}
@@ -138,6 +156,7 @@ function Field({ field, form, setForm }) {
 
         <button
           type="button"
+          {...accessibility}
           className="adminActionBtn text-start px-3"
           disabled={isDisabled}
           onClick={() => fileInputRef.current?.click()}
@@ -191,8 +210,13 @@ function Field({ field, form, setForm }) {
           </div>
         ) : null}
 
+        {error && (
+          <p id={`${id}-error`} className="adminError">
+            {error}
+          </p>
+        )}
         {help ? (
-          <p className="adminMuted">
+          <p id={`${id}-help`} className="adminMuted">
             {typeof help === "function" ? help(form) : help}
           </p>
         ) : null}
@@ -202,7 +226,9 @@ function Field({ field, form, setForm }) {
 
   return (
     <div className={`adminFormField ${full ? "adminFormFieldFull" : ""}`}>
-      <label className="adminControlLabel">{label}</label>
+      <label className="adminControlLabel" htmlFor={id}>
+        {label}
+      </label>
 
       {type === "textarea" ? (
         <textarea
@@ -212,26 +238,11 @@ function Field({ field, form, setForm }) {
         />
       ) : type === "select" ? (
         <select
+          {...accessibility}
           className="adminSelect"
           value={form?.[name] ?? ""}
           onChange={(e) => onChange(e.target.value)}
           disabled={isDisabled}
-          onMouseDown={() => {
-            const currentValue = form?.[name] ?? "";
-            if (String(currentValue) !== "") return;
-
-            const firstReal = options.find((o) => {
-              const isObj = typeof o === "object" && o !== null;
-              const v = isObj ? o.value : o;
-              return String(v) !== "";
-            });
-
-            if (firstReal) {
-              const isObj = typeof firstReal === "object" && firstReal !== null;
-              const v = isObj ? firstReal.value : firstReal;
-              onChange(String(v));
-            }
-          }}
         >
           {options.map((opt) => {
             const isObj = typeof opt === "object" && opt !== null;
@@ -242,7 +253,8 @@ function Field({ field, form, setForm }) {
 
             const currentValue = form?.[name] ?? "";
             const isPlaceholder = String(optValue) === "";
-            const shouldHide = optHidden || (isPlaceholder && String(currentValue) !== "");
+            const shouldHide =
+              optHidden || (isPlaceholder && String(currentValue) !== "");
 
             return (
               <option
@@ -260,6 +272,7 @@ function Field({ field, form, setForm }) {
       ) : type === "checkbox" ? (
         <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <input
+            {...accessibility}
             type="checkbox"
             checked={!!form?.[name]}
             onChange={(e) => onChange(e.target.checked ? 1 : 0)}
@@ -303,10 +316,19 @@ function Field({ field, form, setForm }) {
         />
       )}
 
+      {error && (
+        <p id={`${id}-error`} className="adminError">
+          {error}
+        </p>
+      )}
       {typeof help === "function" ? (
-        <p className="adminMuted">{help(form)}</p>
+        <p id={`${id}-help`} className="adminMuted">
+          {help(form)}
+        </p>
       ) : help ? (
-        <p className="adminMuted">{help}</p>
+        <p id={`${id}-help`} className="adminMuted">
+          {help}
+        </p>
       ) : null}
     </div>
   );
@@ -319,6 +341,7 @@ function AdminEntityModal({
   form,
   setForm,
   error,
+  fieldErrors = {},
   ok,
   loading,
   onClose,
@@ -327,58 +350,109 @@ function AdminEntityModal({
   saveText = "Guardar",
   afterFields,
 }) {
+  const titleId = useId();
+  const dialogRef = useModal(open, onClose, !loading);
   useEffect(() => {
-    if (!open) {
-      document.body.style.overflow = "";
-      return;
+    if (open && error) {
+      const dialog = dialogRef.current;
+      (
+        dialog?.querySelector('[aria-invalid="true"]:not(:disabled)') ||
+        dialog?.querySelector('[role="alert"]')
+      )?.focus();
     }
-
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  }, [open, error, fieldErrors, dialogRef]);
 
   if (!open) return null;
 
   return (
-    <div className="adminModalOverlay" role="dialog" aria-modal="true" onMouseDown={onClose}>
-      <div className="adminModal" onMouseDown={(e) => e.stopPropagation()}>
+    <div
+      className="adminModalOverlay"
+      onMouseDown={() => {
+        if (!loading) onClose();
+      }}
+    >
+      <form
+        className="adminModal"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        aria-busy={loading}
+        onMouseDown={(e) => e.stopPropagation()}
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!loading && showSave) onSave();
+        }}
+      >
         <div className="adminModalHeader">
-          <h3 className="adminModalTitle">{title}</h3>
-          <button className="adminModalClose" type="button" onClick={onClose} disabled={loading}>
+          <h3 id={titleId} className="adminModalTitle">
+            {title}
+          </h3>
+          <button
+            className="adminModalClose"
+            aria-label="Cerrar editor"
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+          >
             ✕
           </button>
         </div>
 
         <div className="adminModalBody">
-          {error && <p className="adminError" style={{ marginTop: 0 }}>{error}</p>}
-          {ok && <p className="adminOk" style={{ marginTop: 0 }}>{ok}</p>}
+          {error && (
+            <p
+              className="adminError"
+              role="alert"
+              tabIndex={-1}
+              style={{ marginTop: 0 }}
+            >
+              {error}
+            </p>
+          )}
+          {ok && (
+            <p className="adminOk" role="status" style={{ marginTop: 0 }}>
+              {ok}
+            </p>
+          )}
 
           <div className="adminFormGrid">
             {formFields.map((f) => (
-              <Field key={f.name} field={f} form={form} setForm={setForm} />
+              <Field
+                key={f.name}
+                field={f}
+                form={form}
+                setForm={setForm}
+                fieldErrors={fieldErrors}
+              />
             ))}
           </div>
 
-          {afterFields ? <div className="adminAfterFields">{afterFields}</div> : null}
+          {afterFields ? (
+            <div className="adminAfterFields">{afterFields}</div>
+          ) : null}
         </div>
 
         <div className="adminModalFooter">
           <div className="adminModalFooterInner">
-            <button className="adminBtn" type="button" onClick={onClose} disabled={loading}>
+            <button
+              className="adminBtn"
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+            >
               Volver
             </button>
 
             {showSave && (
-              <button className="adminBtn" type="button" onClick={onSave} disabled={loading}>
+              <button className="adminBtn" type="submit" disabled={loading}>
                 {loading ? "Guardando..." : saveText}
               </button>
             )}
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

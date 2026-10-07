@@ -21,8 +21,8 @@ class LanzamientoResource extends JsonResource
             'fechaLanzamiento' => (string) $this->fecha_lanzamiento,
             'fechaFormateada' => $this->fecha_lanzamiento
                 ? Carbon::parse($this->fecha_lanzamiento)
-                ->locale('es')
-                ->translatedFormat('d F Y')
+                    ->locale('es')
+                    ->translatedFormat('d F Y')
                 : null,
             'descripcion' => $this->descripcion,
             'duracionTotalMinutos' => $this->relationLoaded('canciones')
@@ -36,6 +36,7 @@ class LanzamientoResource extends JsonResource
                 'id' => $this->portada->id,
                 'url' => $this->portada->url,
                 'urlSm' => $this->portada->url_sm,
+                'variants' => $this->portada->responsive_variants,
                 'nombre_original' => $this->portada->nombre_original,
             ] : null,
         ];

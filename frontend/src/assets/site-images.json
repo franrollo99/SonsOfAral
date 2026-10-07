@@ -1,0 +1,54 @@
+{
+    "home": {
+        "alt": "Sons of Aral",
+        "custom": false,
+        "url": "/images/optimized/home-lg.webp",
+        "urlSm": "/images/optimized/home-sm.webp",
+        "variants": [
+            {
+                "url": "/images/optimized/home-sm.webp",
+                "width": 480,
+                "height": 360,
+                "bytes": 46406
+            },
+            {
+                "url": "/images/optimized/home-md.webp",
+                "width": 960,
+                "height": 721,
+                "bytes": 154562
+            },
+            {
+                "url": "/images/optimized/home-lg.webp",
+                "width": 1920,
+                "height": 1442,
+                "bytes": 478562
+            }
+        ]
+    },
+    "logo": {
+        "alt": "Sons of Aral",
+        "custom": false,
+        "url": "/images/optimized/logo-lg.png",
+        "urlSm": "/images/optimized/logo-sm.png",
+        "variants": [
+            {
+                "url": "/images/optimized/logo-sm.png",
+                "width": 96,
+                "height": 96,
+                "bytes": 3420
+            },
+            {
+                "url": "/images/optimized/logo-md.png",
+                "width": 192,
+                "height": 192,
+                "bytes": 7863
+            },
+            {
+                "url": "/images/optimized/logo-lg.png",
+                "width": 384,
+                "height": 384,
+                "bytes": 18220
+            }
+        ]
+    }
+}

@@ -1,26 +1,28 @@
+import { Link } from "react-router-dom";
 import "./Footer.css";
+
+const social = [
+  ["Instagram", "https://www.instagram.com/sonsofaral/", "/images/redesSociales/instagram.png"],
+  ["YouTube", "https://www.youtube.com/@SonsOfAral", "/images/redesSociales/youtube.png"],
+  ["Facebook", "https://www.facebook.com/sonsofaral", "/images/redesSociales/facebook.png"],
+  ["TikTok", "https://www.tiktok.com/@sonsofaral_band", "/images/redesSociales/tiktok.png"],
+  ["Spotify", "https://open.spotify.com/intl-es/artist/3rXaE7VIG232g8KyMp1Rul", "/images/redesSociales/spotify.png"],
+];
 
 function Footer() {
   return (
-    <footer className="p-4 d-flex flex-column gap-3 text-center">
-      <div className="d-flex justify-content-center align-items-center gap-5">
-        <ul className="nav d-flex align-items-center gap-4">
-          <li className="nav-item">
-            <a href="/privacidad" className="nav-link active">Privacidad</a>
-          </li>
-          <li className="nav-item">
-            <a href="/aviso-legal" className="nav-link active">Aviso Legal</a>
-          </li>
-        </ul>
-        <div className="redesSociales d-flex align-items-center gap-4">
-          <a href="https://www.instagram.com/sonsofaral/"><img src="/images/redesSociales/instagram.png" alt="Icono instagram" /></a>
-          <a href="https://www.youtube.com/@SonsOfAral"><img src="/images/redesSociales/youtube.png" alt="Icono youtube" /></a>
-          <a href="https://www.facebook.com/sonsofaral"><img src="/images/redesSociales/facebook.png" alt="Icono facebook" /></a>
-          <a href="https://www.tiktok.com/@sonsofaral_band"><img src="/images/redesSociales/tiktok.png" alt="Icono tik tok" /></a>
-          <a href="https://open.spotify.com/intl-es/artist/3rXaE7VIG232g8KyMp1Rul?si=hbUXYXQpTkS4OMBoQYeNnA"><img src="/images/redesSociales/spotify.png" alt="Icono spotify" /></a>
+    <footer className="siteFooter">
+      <div className="footerInner">
+        <p className="footerStatement"><span>Noise from</span> Cantabria, ES.</p>
+        <div className="footerSocial" aria-label="Redes sociales">
+          {social.map(([name, href, icon]) => <a key={name} href={href} target="_blank" rel="noreferrer" aria-label={name}><img src={icon} alt="" /></a>)}
+        </div>
+        <div className="footerMeta">
+          <span>© {new Date().getFullYear()} Sons of Aral</span>
+          <Link to="/privacidad">Privacidad</Link>
+          <Link to="/aviso-legal">Aviso legal</Link>
         </div>
       </div>
-      <p className="copyrigth">© {new Date().getFullYear()} Sons of Aral. Todos los derechos reservados.</p>
     </footer>
   );
 }

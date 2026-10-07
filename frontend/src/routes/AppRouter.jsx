@@ -7,12 +7,12 @@ import Concerts from "../pages/concerts/Concerts";
 import Music from "../pages/music/Music";
 import Gallery from "../pages/gallery/Gallery";
 import GalleryDetail from "../pages/gallery/GalleryDetail";
+import SiteContent from "../pages/admin/SiteContent";
 import AdminArea from "../pages/admin/AdminArea";
 import ConcertsManagement from "../pages/admin/adminManagement/ConcertsManagement";
 import ReleasesManagement from "../pages/admin/adminManagement/ReleasesManagement";
-import SongsManagement from "../pages/admin/adminManagement/SongsManagement";
 import GalleryManagement from "../pages/admin/adminManagement/GalleryManagement";
-import UsersManagement from "../pages/admin/adminManagement/UsersManagement";
+import ChangePassword from "../pages/admin/ChangePassword";
 import AdminRoute from "../components/AdminRoute";
 import Privacidad from "../pages/legal/Privacidad";
 import AvisoLegal from "../pages/legal/AvisoLegal";
@@ -32,10 +32,13 @@ export function AppRouter() {
         <Route element={<AdminRoute />}>
           <Route path="/gestion" element={<AdminArea />} />
           <Route path="/gestion/conciertos" element={<ConcertsManagement />} />
-          <Route path="/gestion/lanzamientos" element={<ReleasesManagement />} />
-          <Route path="/gestion/canciones" element={<SongsManagement />} />
+          <Route
+            path="/gestion/lanzamientos"
+            element={<ReleasesManagement />}
+          />
           <Route path="/gestion/galerias" element={<GalleryManagement />} />
-          <Route path="/gestion/usuarios" element={<UsersManagement />} />
+          <Route path="/gestion/contenido" element={<SiteContent />} />
+          <Route path="/gestion/contrasena" element={<ChangePassword />} />
         </Route>
         <Route path="/privacidad" element={<Privacidad />} />
         <Route path="/aviso-legal" element={<AvisoLegal />} />

@@ -16,10 +16,12 @@ class Multimedia extends Model
         'mime_type',
         'peso',
         'galeria_id',
+        'variants',
     ];
 
     protected $casts = [
         'peso' => 'integer',
+        'variants' => 'array',
     ];
 
     public function galeria()
@@ -42,5 +44,15 @@ class Multimedia extends Model
     public function getUrlAttribute()
     {
         return $this->buildUrl('lg');
+    }
+
+    public function getResponsiveVariantsAttribute(): array
+    {
+        $variants = [];
+        foreach ($this->variants ?? [] as $size => $dimensions) {
+            $variants[] = [...$dimensions, 'url' => $this->buildUrl($size)];
+        }
+
+        return $variants;
     }
 }

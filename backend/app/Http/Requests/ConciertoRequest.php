@@ -18,7 +18,7 @@ class ConciertoRequest extends FormRequest
             'entrada_anticipada' => ['required', 'boolean'],
             'enlace_entrada_anticipada' => ['nullable', 'url', 'max:255'],
             'remove_cartel' => ['nullable', 'boolean'],
-            'cartel' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'cartel' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=8000,max_height=8000'],
         ];
     }
 
@@ -44,7 +44,7 @@ class ConciertoRequest extends FormRequest
             'enlace_entrada_anticipada.max' => 'El enlace de la entrada anticipada no puede superar los 255 caracteres.',
             'cartel.image' => 'El archivo debe ser una imagen.',
             'cartel.mimes' => 'La imagen debe ser JPG, PNG o WEBP.',
-            'cartel.max' => 'La imagen no puede superar los 2 MB.',
+            'cartel.max' => 'La imagen no puede superar los 5 MB.',
         ];
     }
 

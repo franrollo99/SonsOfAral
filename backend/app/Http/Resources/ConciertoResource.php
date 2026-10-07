@@ -19,8 +19,8 @@ class ConciertoResource extends JsonResource
             'fecha' => (string) $this->fecha,
             'fecha_formateada' => $this->fecha
                 ? Carbon::parse($this->fecha)
-                ->locale('es')
-                ->translatedFormat('d \d\e F, Y')
+                    ->locale('es')
+                    ->translatedFormat('d \d\e F, Y')
                 : null,
             'provincia' => $this->provincia,
             'municipio' => $this->municipio,
@@ -33,6 +33,7 @@ class ConciertoResource extends JsonResource
                 'id' => $this->cartel->id,
                 'url' => $this->cartel->url,
                 'urlSm' => $this->cartel->url_sm,
+                'variants' => $this->cartel->responsive_variants,
                 'nombre_original' => $this->cartel->nombre_original,
             ] : null,
         ];

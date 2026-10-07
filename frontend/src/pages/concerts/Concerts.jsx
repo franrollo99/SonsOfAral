@@ -1,30 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContent } from "../../hooks/useContent";
+import { useMemo } from "react";
 import "./Concerts.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const LS_KEY = "conciertos";
-
-function readCache(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    if (!("ts" in parsed) || !("data" in parsed)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch {
-    // La caché es opcional.
-  }
-}
 
 function normalizeUpcoming(raw) {
   const today = new Date();
@@ -49,69 +25,41 @@ function normalizeUpcoming(raw) {
 }
 
 function Conciertos() {
-  const [conciertosRaw, setConciertosRaw] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading: cargando, error } = useContent("/conciertos");
+  const conciertosRaw = useMemo(
+    () => (Array.isArray(data) ? data : []),
+    [data],
+  );
 
-  useEffect(() => {
-    const cached = readCache(LS_KEY);
-
-    if (Array.isArray(cached?.data)) {
-      setConciertosRaw(cached.data);
-      setCargando(false);
-    }
-
-    const controller = new AbortController();
-
-    const cargarConciertos = async () => {
-      try {
-        setError(null);
-
-        const respuesta = await fetch(`${API_URL}/conciertos`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        });
-
-        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
-
-        const data = await respuesta.json();
-        const raw = Array.isArray(data?.data) ? data.data : [];
-
-        setConciertosRaw(raw);
-        writeCache(LS_KEY, raw);
-      } catch (err) {
-        if (err?.name !== "AbortError") {
-          console.error(err);
-          if (!Array.isArray(cached?.data)) {
-            setError("No se pudieron cargar los conciertos.");
-          }
-        }
-      } finally {
-        setCargando(false);
-      }
-    };
-
-    cargarConciertos();
-
-    return () => controller.abort();
-  }, []);
-
-  const conciertos = useMemo(() => normalizeUpcoming(conciertosRaw), [conciertosRaw]);
+  const conciertos = useMemo(
+    () => normalizeUpcoming(conciertosRaw),
+    [conciertosRaw],
+  );
 
   return (
     <section>
-      {cargando && <p>Cargando conciertos...</p>}
-      {error && !cargando && <p className="errorMessage">{error}</p>}
+      <header className="listingHeader">
+        <p className="eyebrow">Agenda / próxima señal</p>
+        <h1>Directo</h1>
+        <p>Próximas fechas, ruido y puntos de encuentro.</p>
+      </header>
+      {cargando && <p role="status">Cargando conciertos...</p>}
+      {error && !cargando && (
+        <p className="errorMessage" role="alert">
+          {error}
+        </p>
+      )}
       {!cargando && !error && conciertos.length === 0 && (
         <p>No hay conciertos disponibles por ahora.</p>
       )}
 
       {!cargando && !error && conciertos.length > 0 && (
-        <div className="d-flex flex-column gap-4 py-3">
-          {conciertos.map((concierto) => (
-            <article key={concierto.id} className="concierto card gap-3">
-              <div className="row g-3 align-items-baseline">
-                <div className="col-12 col-md-8">
+        <div className="concertList">
+          {conciertos.map((concierto, index) => (
+            <article key={concierto.id} className="concierto">
+              <span className="concertIndex">0{index + 1}</span>
+              <div className="concertTop">
+                <div>
                   <h1 className="m-0">
                     {concierto.lugar}{" "}
                     <span>
@@ -119,40 +67,38 @@ function Conciertos() {
                     </span>
                   </h1>
                 </div>
-                <div className="col-12 col-md-4 text-md-end">
+                <div className="concertDate">
                   <h2 className="m-0">{concierto.fecha_formateada}</h2>
                 </div>
               </div>
 
-              <div className="row g-3 align-items-end">
-                <div className="col-12 col-md-7">
+              <div className="concertBottom">
+                <div>
                   {concierto.descripcion && (
                     <p className="descripcion m-0">{concierto.descripcion}</p>
                   )}
                 </div>
 
-                <div className="col-12 col-md-5">
-                  <div className="entrada d-flex flex-wrap align-items-center justify-content-md-end gap-3">
-                    {concierto.precioEntrada !== null &&
-                      concierto.precioEntrada !== undefined && (
-                        <h4 className="m-0">
-                          Entrada
-                          {Number(concierto.precioEntrada) === 0
-                            ? " gratis"
-                            : `: ${concierto.precioEntrada} €`}
-                        </h4>
-                      )}
+                <div className="entrada">
+                  {concierto.precioEntrada !== null &&
+                    concierto.precioEntrada !== undefined && (
+                      <h4 className="m-0">
+                        Entrada
+                        {Number(concierto.precioEntrada) === 0
+                          ? " gratis"
+                          : `: ${concierto.precioEntrada} €`}
+                      </h4>
+                    )}
 
-                    {concierto.entradaAnticipada &&
-                      concierto.enlaceEntradaAnticipada && (
-                        <a
-                          href={concierto.enlaceEntradaAnticipada}
-                          className="btn btn-secondary entradaBtn"
-                        >
-                          Entrada anticipada
-                        </a>
-                      )}
-                  </div>
+                  {concierto.entradaAnticipada &&
+                    concierto.enlaceEntradaAnticipada && (
+                      <a
+                        href={concierto.enlaceEntradaAnticipada}
+                        className="btn btn-secondary entradaBtn"
+                      >
+                        Entrada anticipada
+                      </a>
+                    )}
                 </div>
               </div>
             </article>

@@ -1,34 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { imageSrcSet } from "../../lib/images";
+import defaultImages from "../../assets/site-images.json";
+import { useContent } from "../../hooks/useContent";
+import { useMemo, useState } from "react";
 import "./Home.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const LS_KEY_LANZAMIENTOS = "lanzamientos";
-const LS_KEY_CONCIERTOS = "conciertos";
-
-function readCache(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch {
-    // La caché es opcional.
-  }
-}
-
-function extractData(json) {
-  if (Array.isArray(json)) return json;
-  if (Array.isArray(json?.data)) return json.data;
-  return [];
-}
+import { useModal } from "../../hooks/useModal";
 
 function pickNextConcert(conciertos) {
   if (!Array.isArray(conciertos)) return null;
@@ -68,65 +43,24 @@ function pickLatestAlbum(lanzamientos) {
 }
 
 export default function Home() {
-  const [conciertosRaw, setConciertosRaw] = useState([]);
-  const [lanzamientosRaw, setLanzamientosRaw] = useState([]);
-
-  const [loading, setLoading] = useState(true);
+  const { data: content } = useContent("/contenido-web");
+  const homeImage = content?.home || defaultImages.home;
+  const concerts = useContent("/conciertos");
+  const releases = useContent("/lanzamientos");
+  const conciertosRaw = concerts.data;
+  const lanzamientosRaw = releases.data;
+  const loading = concerts.loading || releases.loading;
 
   const [isPosterOpen, setIsPosterOpen] = useState(false);
 
-  useEffect(() => {
-    const cachedConciertos = readCache(LS_KEY_CONCIERTOS);
-    const cachedLanzamientos = readCache(LS_KEY_LANZAMIENTOS);
-
-    if (Array.isArray(cachedConciertos?.data)) setConciertosRaw(cachedConciertos.data);
-    if (Array.isArray(cachedLanzamientos?.data)) setLanzamientosRaw(cachedLanzamientos.data);
-
-    if (Array.isArray(cachedConciertos?.data) || Array.isArray(cachedLanzamientos?.data)) {
-      setLoading(false);
-    }
-
-    const controller = new AbortController();
-
-    const fetchConciertos = async () => {
-      const res = await fetch(`${API_URL}/conciertos`, {
-        headers: { Accept: "application/json" },
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status} (conciertos)`);
-      const json = await res.json().catch(() => ({}));
-      const data = extractData(json);
-      setConciertosRaw(data);
-      writeCache(LS_KEY_CONCIERTOS, data);
-    };
-
-    const fetchLanzamientos = async () => {
-      const res = await fetch(`${API_URL}/lanzamientos`, {
-        headers: { Accept: "application/json" },
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status} (lanzamientos)`);
-      const json = await res.json().catch(() => ({}));
-      const data = extractData(json);
-      setLanzamientosRaw(data);
-      writeCache(LS_KEY_LANZAMIENTOS, data);
-    };
-
-    (async () => {
-      try {
-        await Promise.all([fetchConciertos(), fetchLanzamientos()]);
-      } catch (e) {
-        if (e?.name !== "AbortError") console.error("Home prefetch:", e);
-      } finally {
-        setLoading(false);
-      }
-    })();
-
-    return () => controller.abort();
-  }, []);
-
-  const nextConcert = useMemo(() => pickNextConcert(conciertosRaw), [conciertosRaw]);
-  const latestAlbum = useMemo(() => pickLatestAlbum(lanzamientosRaw), [lanzamientosRaw]);
+  const nextConcert = useMemo(
+    () => pickNextConcert(conciertosRaw),
+    [conciertosRaw],
+  );
+  const latestAlbum = useMemo(
+    () => pickLatestAlbum(lanzamientosRaw),
+    [lanzamientosRaw],
+  );
 
   const poster = nextConcert?.cartel || null;
 
@@ -138,25 +72,34 @@ export default function Home() {
 
   const latestAlbumCover = latestAlbum?.portada || null;
 
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === "Escape") setIsPosterOpen(false);
-    }
-    if (isPosterOpen) window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isPosterOpen]);
+  const dialogRef = useModal(isPosterOpen, () => setIsPosterOpen(false));
 
   return (
     <section>
+      {(concerts.error || releases.error) && (
+        <p className="errorMessage" role="alert">
+          No se pudo actualizar parte del contenido. Vuelve a intentarlo más
+          tarde.
+        </p>
+      )}
       <div>
         <div className="homePanel homeHero d-flex flex-column flex-md-row align-items-center gap-4">
           <div className="homeHeroMedia">
-            <img className="homeHeroImg" src="/images/bandaSOA2.png" alt="Sons of Aral" />
+            <img
+              className="homeHeroImg"
+              src={homeImage.url}
+              srcSet={imageSrcSet(homeImage)}
+              sizes="(max-width: 760px) calc(100vw - 32px), 55vw"
+              fetchPriority="high"
+              alt={homeImage.alt}
+            />
           </div>
 
           <div className="homeHeroCopy">
             <h1 className="homeHeroTitle">WELCOME TO SONS OF ARAL</h1>
-            <p className="homeHeroSubtitle">A NU-METAL/HARDCORE BAND FROM CANTABRIA, SPAIN</p>
+            <p className="homeHeroSubtitle">
+              A NU-METAL/HARDCORE BAND FROM CANTABRIA, SPAIN
+            </p>
           </div>
         </div>
       </div>
@@ -174,12 +117,16 @@ export default function Home() {
 
                     <div className="homeReleaseMeta">
                       <span>{latestAlbum?.fechaFormateada ?? ""}</span>
-                      {latestAlbum?.tipo ? <span className="homeReleaseDot">•</span> : null}
+                      {latestAlbum?.tipo ? (
+                        <span className="homeReleaseDot">•</span>
+                      ) : null}
                       <span>{latestAlbum?.tipo ?? ""}</span>
                     </div>
 
                     {latestAlbum?.descripcion ? (
-                      <p className="homeReleaseDesc">{latestAlbum.descripcion}</p>
+                      <p className="homeReleaseDesc">
+                        {latestAlbum.descripcion}
+                      </p>
                     ) : null}
                   </div>
 
@@ -222,11 +169,7 @@ export default function Home() {
                 <div className="homeReleaseCover">
                   <img
                     src={latestAlbumCover?.url}
-                    srcSet={
-                      latestAlbumCover?.urlSm
-                        ? `${latestAlbumCover.urlSm} 500w, ${latestAlbumCover.url} 1400w`
-                        : undefined
-                    }
+                    srcSet={imageSrcSet(latestAlbumCover)}
                     sizes="(max-width: 768px) 100vw, 420px"
                     alt={`Portada ${latestAlbum?.titulo}`}
                     loading="lazy"
@@ -257,7 +200,7 @@ export default function Home() {
                   <img
                     className="homePosterImg"
                     src={posterThumbUrl}
-                    srcSet={poster?.urlSm ? `${poster.urlSm} 500w, ${poster.url} 1400w` : undefined}
+                    srcSet={imageSrcSet(poster)}
                     sizes="(max-width: 768px) 100vw, 320px"
                     alt={posterAlt}
                     loading="lazy"
@@ -268,32 +211,45 @@ export default function Home() {
                     {nextConcert?.lugar ?? nextConcert?.titulo ?? "Concierto"}
                   </h3>
 
-                  {(nextConcert?.municipio || nextConcert?.provincia) ? (
+                  {nextConcert?.municipio || nextConcert?.provincia ? (
                     <div className="homeConcertPlace">
                       {nextConcert?.municipio ? nextConcert.municipio : ""}
-                      {nextConcert?.municipio && nextConcert?.provincia ? ", " : ""}
+                      {nextConcert?.municipio && nextConcert?.provincia
+                        ? ", "
+                        : ""}
                       {nextConcert?.provincia ? nextConcert.provincia : ""}
                     </div>
                   ) : null}
 
-                  {nextConcert?.fecha_formateada || nextConcert?.fechaFormateada ? (
+                  {nextConcert?.fecha_formateada ||
+                  nextConcert?.fechaFormateada ? (
                     <div className="homeConcertDate">
-                      {nextConcert?.fecha_formateada ?? nextConcert?.fechaFormateada}
+                      {nextConcert?.fecha_formateada ??
+                        nextConcert?.fechaFormateada}
                     </div>
                   ) : null}
 
                   {nextConcert?.descripcion ? (
-                    <p className="homeConcertDesc m-0">{nextConcert.descripcion}</p>
+                    <p className="homeConcertDesc m-0">
+                      {nextConcert.descripcion}
+                    </p>
                   ) : null}
 
                   <div className="d-flex align-items-center justify-content-between gap-3 homeConcertBottom">
-                    {nextConcert?.precioEntrada !== null && nextConcert?.precioEntrada !== undefined ? (
+                    {nextConcert?.precioEntrada !== null &&
+                    nextConcert?.precioEntrada !== undefined ? (
                       <span className="homeConcertPrice">
-                        Entrada{Number(nextConcert.precioEntrada) === 0 ? " gratis" : `: ${nextConcert.precioEntrada} €`}
+                        Entrada
+                        {Number(nextConcert.precioEntrada) === 0
+                          ? " gratis"
+                          : `: ${nextConcert.precioEntrada} €`}
                       </span>
-                    ) : <span />}
+                    ) : (
+                      <span />
+                    )}
 
-                    {nextConcert?.entradaAnticipada && nextConcert?.enlaceEntradaAnticipada ? (
+                    {nextConcert?.entradaAnticipada &&
+                    nextConcert?.enlaceEntradaAnticipada ? (
                       <a
                         href={nextConcert.enlaceEntradaAnticipada}
                         className="btn btn-secondary"
@@ -312,7 +268,15 @@ export default function Home() {
 
         {isPosterOpen ? (
           <div className="homeLightbox" onClick={() => setIsPosterOpen(false)}>
-            <div className="homeLightboxInner d-flex align-items-center justify-content-center">
+            <div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label={posterAlt}
+              tabIndex={-1}
+              onClick={(event) => event.stopPropagation()}
+              className="homeLightboxInner d-flex align-items-center justify-content-center"
+            >
               <img
                 className="homeLightboxImg"
                 src={posterLightboxUrl}

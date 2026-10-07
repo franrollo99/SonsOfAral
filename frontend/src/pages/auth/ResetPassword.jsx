@@ -1,11 +1,11 @@
+import FieldError from "../../components/FieldError";
+import { useFormErrors } from "../../hooks/useFormErrors";
+import { apiJson } from "../../lib/api";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "./Auth.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 function ResetPassword() {
-  const navigate = useNavigate();
   const [params] = useSearchParams();
 
   // Si vienes del email: /reset-password?token=...&email=...
@@ -24,21 +24,19 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState("");
   const [error, setError] = useState("");
+  const { formRef, fieldErrors, setFieldErrors, fieldProps } =
+    useFormErrors(error);
 
   // Si entra con email en URL, lo ponemos en el input
   useEffect(() => {
     if (emailFromUrl) setEmail(emailFromUrl);
   }, [emailFromUrl]);
 
-  const getFirstValidationError = (data) => {
-    if (!data?.errors) return null;
-    return Object.values(data.errors).flat()[0] || null;
-  };
-
   const onSubmit = async (e) => {
     e.preventDefault();
     setOk("");
     setError("");
+    setFieldErrors({});
 
     // Validación simple front
     if (isResetMode) {
@@ -51,6 +49,9 @@ function ResetPassword() {
         return;
       }
       if (password !== password2) {
+        setFieldErrors({
+          password_confirmation: ["La contraseña no coincide."],
+        });
         setError("La contraseña no coincide.");
         return;
       }
@@ -66,35 +67,22 @@ function ResetPassword() {
     try {
       if (!isResetMode) {
         // 1) Enviar enlace de recuperación
-        const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        await apiJson("/auth/forgot-password", {
+          auth: false,
           method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          if (res.status === 422) {
-            throw new Error(getFirstValidationError(data) || "Datos inválidos.");
-          }
-          throw new Error(data?.message || "No se pudo enviar el enlace.");
-        }
 
         setOk("Te hemos enviado un enlace para restablecer la contraseña.");
         return;
       }
 
       // 2) Cambiar contraseña con token
-      const res = await fetch(`${API_URL}/auth/reset-password`, {
+      await apiJson("/auth/reset-password", {
+        auth: false,
         method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token,
           email,
@@ -103,22 +91,11 @@ function ResetPassword() {
         }),
       });
 
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        if (res.status === 422) {
-          throw new Error(getFirstValidationError(data) || data?.message || "Datos inválidos.");
-        }
-        throw new Error(data?.message || "No se pudo cambiar la contraseña.");
-      }
-
       setOk("Contraseña restablecida. Ya puedes iniciar sesión.");
       setPassword("");
       setPassword2("");
-
-      setTimeout(() => navigate("/gestion/acceso", { replace: true }), 1200);
-
     } catch (err) {
+      setFieldErrors(err.data?.errors || {});
       setError(err?.message || "Error.");
     } finally {
       setLoading(false);
@@ -132,11 +109,12 @@ function ResetPassword() {
           {isResetMode ? "Nueva contraseña" : "Restablecer la contraseña"}
         </h1>
 
-        <form className="userSessionForm" onSubmit={onSubmit} noValidate>
+        <form ref={formRef} className="userSessionForm" onSubmit={onSubmit}>
           <div className={`flField ${email ? "hasValue" : ""}`}>
             <input
               className="flInput"
               id="email"
+              {...fieldProps("email")}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -144,7 +122,10 @@ function ResetPassword() {
               required
               readOnly={!!emailFromUrl} // si viene del enlace, mejor no dejar cambiarlo
             />
-            <label className="flLabel" htmlFor="email">Email</label>
+            <label className="flLabel" htmlFor="email">
+              Email
+            </label>
+            <FieldError id="email-error" error={fieldErrors.email} />
           </div>
 
           {isResetMode && (
@@ -153,43 +134,65 @@ function ResetPassword() {
                 <input
                   className="flInput"
                   id="password"
+                  {...fieldProps("password")}
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
                   required
                 />
-                <label className="flLabel" htmlFor="password">Nueva contraseña</label>
+                <label className="flLabel" htmlFor="password">
+                  Nueva contraseña
+                </label>
+                <FieldError id="password-error" error={fieldErrors.password} />
               </div>
 
               <div className={`flField ${password2 ? "hasValue" : ""}`}>
                 <input
                   className="flInput"
                   id="password2"
+                  {...fieldProps("password_confirmation")}
                   type="password"
                   value={password2}
                   onChange={(e) => setPassword2(e.target.value)}
                   autoComplete="new-password"
                   required
                 />
-                <label className="flLabel" htmlFor="password2">Confirmar contraseña</label>
+                <label className="flLabel" htmlFor="password2">
+                  Confirmar contraseña
+                </label>
+                <FieldError
+                  id="password_confirmation-error"
+                  error={fieldErrors.password_confirmation}
+                />
               </div>
             </>
           )}
 
-          {ok && <p className="userSessionOk">{ok}</p>}
-          {error && <p className="userSessionError">{error}</p>}
+          {ok && (
+            <p className="userSessionOk" role="status">
+              {ok}
+            </p>
+          )}
+          {error && (
+            <p className="userSessionError" role="alert" tabIndex={-1}>
+              {error}
+            </p>
+          )}
 
           <button className="userSessionBtn" type="submit" disabled={loading}>
             {loading
               ? "Procesando..."
               : isResetMode
-              ? "Cambiar contraseña"
-              : "Enviar"}
+                ? "Cambiar contraseña"
+                : "Enviar"}
           </button>
 
-          <Link className="userSessionLink userSessionLinkCenter" to="/gestion/acceso">
-            Cancelar
+          <Link
+            className="userSessionLink userSessionLinkCenter"
+            to="/gestion/acceso"
+          >
+            {ok ? "Volver al acceso" : "Cancelar"}
           </Link>
         </form>
       </div>

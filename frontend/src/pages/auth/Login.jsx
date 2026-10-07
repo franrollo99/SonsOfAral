@@ -1,8 +1,9 @@
+import FieldError from "../../components/FieldError";
+import { useFormErrors } from "../../hooks/useFormErrors";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Auth.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useAuth } from "../../auth/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -10,52 +11,23 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { formRef, fieldErrors, setFieldErrors, fieldProps } =
+    useFormErrors(error);
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
     setLoading(true);
 
     try {
-      const loginRes = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const loginData = await loginRes.json();
-
-      if (!loginRes.ok) {
-        const msg = loginData?.errors
-          ? Object.values(loginData.errors).flat()[0]
-          : loginData?.message || "Credenciales incorrectas";
-
-        throw new Error(msg);
-      }
-
-      const token = loginData?.data?.token;
-      const userData = loginData?.data?.user;
-
-      if (!token || !userData) {
-        throw new Error("Respuesta de login inválida");
-      }
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("rol", userData.rol);
-
-      if (userData.rol === "admin") {
-        navigate("/gestion", { replace: true });
-      } else {
-        localStorage.removeItem("token");
-        localStorage.removeItem("rol");
-        throw new Error("Esta cuenta no tiene acceso a la gestión.");
-      }
+      await login(email, password);
+      navigate("/gestion", { replace: true });
     } catch (err) {
+      setFieldErrors(err.data?.errors || {});
       setError(err.message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
@@ -67,11 +39,12 @@ function Login() {
       <div className="container userSessionContainer">
         <h1 className="userSessionTitle">Inicio de Sesión</h1>
 
-        <form className="userSessionForm" onSubmit={onSubmit} noValidate>
+        <form ref={formRef} className="userSessionForm" onSubmit={onSubmit}>
           <div className={`flField ${email ? "hasValue" : ""}`}>
             <input
               className="flInput"
               id="email"
+              {...fieldProps("email")}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -81,12 +54,14 @@ function Login() {
             <label className="flLabel" htmlFor="email">
               Email
             </label>
+            <FieldError id="email-error" error={fieldErrors.email} />
           </div>
 
           <div className={`flField ${password ? "hasValue" : ""}`}>
             <input
               className="flInput"
               id="password"
+              {...fieldProps("password")}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -96,13 +71,22 @@ function Login() {
             <label className="flLabel" htmlFor="password">
               Contraseña
             </label>
+            <FieldError id="password-error" error={fieldErrors.password} />
           </div>
 
           <Link className="userSessionLink" to="/gestion/recuperar">
             ¿Has olvidado la contraseña?
           </Link>
 
-          {error && <p className="userSessionError errorMessage">{error}</p>}
+          {error && (
+            <p
+              className="userSessionError errorMessage"
+              role="alert"
+              tabIndex={-1}
+            >
+              {error}
+            </p>
+          )}
 
           <button className="userSessionBtn" type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Iniciar Sesión"}

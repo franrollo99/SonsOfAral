@@ -12,7 +12,11 @@ const date = (iso) => {
   if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleDateString("es-ES", { year: "numeric", month: "2-digit", day: "2-digit" });
+  return d.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 };
 
 const yesNo = (v) => (String(v) === "1" || v === 1 || v === true ? "Sí" : "No");
@@ -65,11 +69,20 @@ function ConcertsManagement() {
       columns={[
         { key: "id", header: "ID", className: "adminMono" },
         { key: "fecha", header: "Fecha", render: (v) => date(v) },
-        { key: "lugar", header: "Lugar", className: "adminTruncate", title: (v) => v || "" },
+        {
+          key: "lugar",
+          header: "Lugar",
+          className: "adminTruncate",
+          title: (v) => v || "",
+        },
         { key: "provincia", header: "Provincia" },
         { key: "municipio", header: "Municipio" },
         { key: "precioEntrada", header: "Precio", render: (v) => money(v) },
-        { key: "entradaAnticipada", header: "Anticipada", render: (v) => yesNo(v) },
+        {
+          key: "entradaAnticipada",
+          header: "Anticipada",
+          render: (v) => yesNo(v),
+        },
       ]}
       columnsGridCss={`
         grid-template-columns:
@@ -84,7 +97,13 @@ function ConcertsManagement() {
       `}
       formFields={[
         { name: "fecha", label: "Fecha", type: "date" },
-        { name: "precioEntrada", label: "Precio entrada (€)", type: "number", step: "0.01" },
+        {
+          name: "precioEntrada",
+          errorName: "precio_entrada",
+          label: "Precio entrada (€)",
+          type: "number",
+          step: "0.01",
+        },
         { name: "provincia", label: "Provincia", type: "text" },
         { name: "municipio", label: "Municipio", type: "text" },
         { name: "lugar", label: "Lugar", type: "text", full: true },
@@ -98,9 +117,15 @@ function ConcertsManagement() {
           currentNameKey: "cartelNombreActual",
           removeFlagKey: "removeCartel",
         },
-        { name: "descripcion", label: "Descripción", type: "textarea", full: true },
+        {
+          name: "descripcion",
+          label: "Descripción",
+          type: "textarea",
+          full: true,
+        },
         {
           name: "entradaAnticipada",
+          errorName: "entrada_anticipada",
           label: "Entrada anticipada",
           type: "select",
           full: true,
@@ -111,6 +136,7 @@ function ConcertsManagement() {
         },
         {
           name: "enlaceEntradaAnticipada",
+          errorName: "enlace_entrada_anticipada",
           label: "Enlace entrada anticipada",
           type: "text",
           full: true,
@@ -119,7 +145,7 @@ function ConcertsManagement() {
             String(form?.entradaAnticipada) === "true"
               ? ""
               : "Activa “Entrada anticipada” para habilitar el enlace.",
-        }
+        },
       ]}
       buildPayload={async (form) => {
         const anticipada = String(form.entradaAnticipada) === "true";
@@ -130,9 +156,15 @@ function ConcertsManagement() {
         fd.append("municipio", form.municipio || "");
         fd.append("lugar", form.lugar || "");
         fd.append("descripcion", form.descripcion || "");
-        fd.append("precio_entrada", form.precioEntrada === "" ? "0" : String(Number(form.precioEntrada)));
+        fd.append(
+          "precio_entrada",
+          form.precioEntrada === "" ? "0" : String(Number(form.precioEntrada)),
+        );
         fd.append("entrada_anticipada", anticipada ? "1" : "0");
-        fd.append("enlace_entrada_anticipada", anticipada ? (form.enlaceEntradaAnticipada || "") : "");
+        fd.append(
+          "enlace_entrada_anticipada",
+          anticipada ? form.enlaceEntradaAnticipada || "" : "",
+        );
         fd.append("remove_cartel", form.removeCartel ? "1" : "0");
 
         if (form.cartel instanceof File) {

@@ -16,19 +16,26 @@ class MultimediaService
     public function storeImage(
         UploadedFile $file,
         string $directorio,
-        array $extra = []
+        array $extra = [],
+        string $profile = 'photo'
     ): Multimedia {
-        $imageData = $this->imageService->storeResponsiveImage($file, $directorio);
+        $imageData = $this->imageService->storeResponsiveImage($file, $directorio, $profile);
 
-        return Multimedia::create([
-            'directorio' => $imageData['directorio'],
-            'archivo' => $imageData['archivo'],
-            'nombre_original' => $imageData['nombre_original'],
-            'tipo' => 'imagen',
-            'mime_type' => $imageData['mime_type'],
-            'peso' => $imageData['peso'],
-            ...$extra,
-        ]);
+        try {
+            return Multimedia::create([
+                'directorio' => $imageData['directorio'],
+                'archivo' => $imageData['archivo'],
+                'nombre_original' => $imageData['nombre_original'],
+                'tipo' => 'imagen',
+                'mime_type' => $imageData['mime_type'],
+                'peso' => $imageData['peso'],
+                'variants' => $imageData['variants'],
+                ...$extra,
+            ]);
+        } catch (\Throwable $failure) {
+            $this->imageService->deleteResponsiveImage($imageData['directorio'], $imageData['archivo']);
+            throw $failure;
+        }
     }
 
     public function replaceImage(
@@ -37,11 +44,12 @@ class MultimediaService
         string $directorio,
         array $extra = []
     ): Multimedia {
+        $newMedia = $this->storeImage($file, $directorio, $extra);
         if ($oldMedia) {
             $this->delete($oldMedia);
         }
 
-        return $this->storeImage($file, $directorio, $extra);
+        return $newMedia;
     }
 
     public function storeFile(

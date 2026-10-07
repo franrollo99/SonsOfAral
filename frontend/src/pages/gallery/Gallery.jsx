@@ -1,81 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { imageSrcSet } from "../../lib/images";
+import { useContent } from "../../hooks/useContent";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Gallery.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const LS_KEY = "galerias";
-
-function readCache(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    if (!("ts" in parsed) || !("data" in parsed)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch {
-    // La caché es opcional.
-  }
-}
-
 function Gallery() {
-  const [galerias, setGalerias] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading: cargando, error } = useContent("/galerias");
+  const galerias = useMemo(() => (Array.isArray(data) ? data : []), [data]);
   const [filtro, setFiltro] = useState("all");
   const [orden, setOrden] = useState("newest");
-
-  useEffect(() => {
-    const cached = readCache(LS_KEY);
-
-    if (Array.isArray(cached?.data)) {
-      setGalerias(cached.data);
-      setCargando(false);
-    }
-
-    const controller = new AbortController();
-
-    const cargarGalerias = async () => {
-      try {
-        setError(null);
-
-        const res = await fetch(`${API_URL}/galerias`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json().catch(() => ({}));
-        const raw = Array.isArray(data?.data) ? data.data : [];
-
-        writeCache(LS_KEY, raw);
-        setGalerias(raw);
-      } catch (e) {
-        if (e?.name !== "AbortError") {
-          console.error(e);
-          if (!Array.isArray(cached?.data)) {
-            setError("No se pudieron cargar las galerías.");
-          }
-        }
-      } finally {
-        setCargando(false);
-      }
-    };
-
-    cargarGalerias();
-
-    return () => controller.abort();
-  }, []);
 
   const galeriasFiltradas = useMemo(() => {
     let list = [...galerias];
@@ -85,8 +18,12 @@ function Gallery() {
     }
 
     list.sort((a, b) => {
-      const da = a?.concierto?.fecha ? new Date(a.concierto.fecha) : new Date(a?.createdAt ?? 0);
-      const db = b?.concierto?.fecha ? new Date(b.concierto.fecha) : new Date(b?.createdAt ?? 0);
+      const da = a?.concierto?.fecha
+        ? new Date(a.concierto.fecha)
+        : new Date(a?.createdAt ?? 0);
+      const db = b?.concierto?.fecha
+        ? new Date(b.concierto.fecha)
+        : new Date(b?.createdAt ?? 0);
 
       return orden === "oldest" ? da - db : db - da;
     });
@@ -94,13 +31,20 @@ function Gallery() {
     return list;
   }, [galerias, filtro, orden]);
 
-  const destacadas = galeriasFiltradas.length >= 7 ? galeriasFiltradas.slice(0, 4) : [];
-  const resto = galeriasFiltradas.length >= 7 ? galeriasFiltradas.slice(4) : galeriasFiltradas;
+  const destacadas =
+    galeriasFiltradas.length >= 7 ? galeriasFiltradas.slice(0, 4) : [];
+  const resto =
+    galeriasFiltradas.length >= 7
+      ? galeriasFiltradas.slice(4)
+      : galeriasFiltradas;
 
   return (
     <section>
-      <div className="galleryTop d-flex align-items-end justify-content-between gap-3 flex-wrap">
-        <h1 className="galleryTitle">Galería</h1>
+      <div className="galleryTop">
+        <div>
+          <p className="eyebrow">Archivo visual / sin filtro</p>
+          <h1 className="galleryTitle">Galería</h1>
+        </div>
 
         <div className="gallerySortWrap d-flex align-items-center gap-2">
           <label className="gallerySortLabel" htmlFor="gallerySort">
@@ -163,11 +107,7 @@ function Gallery() {
                   <div className="galleryCardImageWrap">
                     <img
                       src={galeria.portada?.url}
-                      srcSet={
-                        galeria.portada?.urlSm
-                          ? `${galeria.portada.urlSm} 500w, ${galeria.portada.url} 1400w`
-                          : undefined
-                      }
+                      srcSet={imageSrcSet(galeria.portada)}
                       sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 33vw"
                       alt={galeria.nombre || galeria.titulo || "Galería"}
                       className="galleryCardImage"
@@ -198,11 +138,7 @@ function Gallery() {
                 <div className="galleryCardImageWrap">
                   <img
                     src={galeria.portada?.url}
-                    srcSet={
-                      galeria.portada?.urlSm
-                        ? `${galeria.portada.urlSm} 500w, ${galeria.portada.url} 1400w`
-                        : undefined
-                    }
+                    srcSet={imageSrcSet(galeria.portada)}
                     sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 33vw"
                     alt={galeria.nombre || galeria.titulo || "Galería"}
                     className="galleryCardImage"

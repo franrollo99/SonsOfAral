@@ -1,30 +1,9 @@
+import { imageSrcSet } from "../../lib/images";
+import { apiRequest } from "../../lib/api";
+import { useContent } from "../../hooks/useContent";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./Music.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const LS_KEY = "lanzamientos";
-
-function readCache(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    if (!("ts" in parsed) || !("data" in parsed)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(key, data) {
-  try {
-    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-  } catch {
-    // La caché es opcional.
-  }
-}
+import { useModal } from "../../hooks/useModal";
 
 function normalizeOrdered(raw) {
   return [...raw].sort((a, b) => {
@@ -35,15 +14,20 @@ function normalizeOrdered(raw) {
 }
 
 function Musica() {
-  const [lanzamientos, setLanzamientos] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading: cargando, error } = useContent("/lanzamientos");
+  const lanzamientos = useMemo(
+    () => normalizeOrdered(Array.isArray(data) ? data : []),
+    [data],
+  );
   const [filtro, setFiltro] = useState("all");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [lanzamientoSeleccionado, setLanzamientoSeleccionado] = useState(null);
 
   const audioRef = useRef(null);
+  const audioController = useRef(null);
+  const audioBlobUrl = useRef(null);
+  const [audioError, setAudioError] = useState("");
   const [activeTrackId, setActiveTrackId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -53,72 +37,21 @@ function Musica() {
   const audioUrl = (lanzamientoSeleccionado?.audioUrl || "").trim();
   const videoUrl = (lanzamientoSeleccionado?.videoUrl || "").trim();
 
-  useEffect(() => {
-    const cached = readCache(LS_KEY);
-
-    if (Array.isArray(cached?.data)) {
-      setLanzamientos(normalizeOrdered(cached.data));
-      setCargando(false);
-    }
-
-    const controller = new AbortController();
-
-    const cargarLanzamientos = async () => {
-      try {
-        setError(null);
-
-        const res = await fetch(`${API_URL}/lanzamientos`, {
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json().catch(() => ({}));
-        const raw = Array.isArray(data?.data) ? data.data : [];
-        writeCache(LS_KEY, raw);
-        setLanzamientos(normalizeOrdered(raw));
-      } catch (e) {
-        if (e?.name !== "AbortError") {
-          console.error(e);
-          if (!Array.isArray(cached?.data)) setError("No se pudieron cargar los discos.");
-        }
-      } finally {
-        setCargando(false);
-      }
-    };
-
-    cargarLanzamientos();
-
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    if (!modalOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [modalOpen]);
-
   const abrirModal = (lanzamiento) => {
-    const canciones = Array.isArray(lanzamiento?.canciones) ? lanzamiento.canciones : [];
+    const canciones = Array.isArray(lanzamiento?.canciones)
+      ? lanzamiento.canciones
+      : [];
     setLanzamientoSeleccionado({ ...lanzamiento, canciones });
     setModalOpen(true);
-  };
-
-  const cerrarModal = () => {
-    stopAudio();
-    setModalOpen(false);
-    setLanzamientoSeleccionado(null);
   };
 
   const lanzamientosFiltrados = useMemo(() => {
     const f = (filtro ?? "all").toLowerCase();
     if (f === "all") return lanzamientos;
     const tipoBuscado = f === "all" ? "all" : f;
-    return lanzamientos.filter((l) => (l?.tipo ?? "").toLowerCase() === tipoBuscado);
+    return lanzamientos.filter(
+      (l) => (l?.tipo ?? "").toLowerCase() === tipoBuscado,
+    );
   }, [lanzamientos, filtro]);
 
   const formatTime = (secs) => {
@@ -129,6 +62,11 @@ function Musica() {
   };
 
   const stopAudio = () => {
+    audioController.current?.abort();
+    if (audioBlobUrl.current) {
+      URL.revokeObjectURL(audioBlobUrl.current);
+      audioBlobUrl.current = null;
+    }
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -146,8 +84,16 @@ function Musica() {
     setDuration(0);
   };
 
+  const cerrarModal = () => {
+    stopAudio();
+    setModalOpen(false);
+    setLanzamientoSeleccionado(null);
+  };
+
+  const dialogRef = useModal(modalOpen, cerrarModal);
+
   const toggleTrack = (track) => {
-    const url = `${API_URL}/canciones/${track.id}/audio`;
+    const url = `/canciones/${track.id}/audio`;
     const id = track?.id;
 
     if (!url || !id) return;
@@ -157,7 +103,10 @@ function Musica() {
 
     if (activeTrackId === id) {
       if (audio.paused) {
-        audio.play().then(() => setIsPlaying(true)).catch(() => { });
+        audio
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(() => {});
       } else {
         audio.pause();
         setIsPlaying(false);
@@ -166,25 +115,45 @@ function Musica() {
     }
 
     const cargarYReproducir = async () => {
+      audioController.current?.abort();
+      const controller = new AbortController();
+      audioController.current = controller;
+      setAudioError("");
       try {
-        const res = await fetch(url);
+        const res = await apiRequest(url, {
+          auth: false,
+          signal: controller.signal,
+        });
         const blob = await res.blob();
+        if (controller.signal.aborted) return;
+        if (audioBlobUrl.current) URL.revokeObjectURL(audioBlobUrl.current);
         const blobUrl = URL.createObjectURL(blob);
+        audioBlobUrl.current = blobUrl;
 
         audio.src = blobUrl;
         audio.load();
 
         await audio.play();
+        if (controller.signal.aborted) return;
 
         setActiveTrackId(id);
         setIsPlaying(true);
       } catch {
-        // El navegador puede rechazar la reproducción.
+        if (!controller.signal.aborted)
+          setAudioError("No se pudo reproducir esta canción.");
       }
     };
 
     cargarYReproducir();
   };
+
+  useEffect(
+    () => () => {
+      audioController.current?.abort();
+      if (audioBlobUrl.current) URL.revokeObjectURL(audioBlobUrl.current);
+    },
+    [],
+  );
 
   const onSeekTrack = (value) => {
     const audio = audioRef.current;
@@ -252,8 +221,11 @@ function Musica() {
 
   return (
     <section>
-      <div className="d-flex align-items-end justify-content-between gap-3">
-        <h1>Explorar lanzamientos</h1>
+      <header className="musicHeader">
+        <div>
+          <p className="eyebrow">Discografía / volumen I</p>
+          <h1>Ruido grabado</h1>
+        </div>
 
         <div className="d-flex flex-wrap justify-content-end gap-2">
           {filtrosVisibles.map((item) => (
@@ -262,17 +234,23 @@ function Musica() {
               className={`filtroMusica ${filtro === item.value ? "isActive" : ""}`}
               onClick={() => setFiltro(item.value)}
               type="button"
+              aria-pressed={filtro === item.value}
             >
               {item.label}
             </button>
           ))}
         </div>
-      </div>
-      <hr />
+      </header>
 
-      {cargando && <p>Cargando música...</p>}
-      {error && !cargando && <p className="errorMessage">{error}</p>}
-      {!cargando && !error && lanzamientosFiltrados.length === 0 && <p>No hay lanzamientos disponibles por ahora.</p>}
+      {cargando && <p role="status">Cargando música...</p>}
+      {error && !cargando && (
+        <p className="errorMessage" role="alert">
+          {error}
+        </p>
+      )}
+      {!cargando && !error && lanzamientosFiltrados.length === 0 && (
+        <p>No hay lanzamientos disponibles por ahora.</p>
+      )}
 
       {!cargando && !error && lanzamientosFiltrados.length > 0 && (
         <div className="lanzamientos row g-4">
@@ -282,16 +260,20 @@ function Musica() {
                 className="lanzamiento"
                 onClick={() => abrirModal(lanzamiento)}
                 role="button"
+                aria-label={`Ver lanzamiento ${lanzamiento.titulo}`}
+                aria-haspopup="dialog"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    abrirModal(lanzamiento);
+                  }
+                }}
                 tabIndex={0}
               >
                 <div className="lanzamientoPortada">
                   <img
                     src={lanzamiento.portada?.url}
-                    srcSet={
-                      lanzamiento.portada?.urlSm
-                        ? `${lanzamiento.portada.urlSm} 500w, ${lanzamiento.portada.url} 1400w`
-                        : undefined
-                    }
+                    srcSet={imageSrcSet(lanzamiento.portada)}
                     sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 25vw"
                     alt={`Portada ${lanzamiento.titulo}`}
                     loading="lazy"
@@ -300,7 +282,8 @@ function Musica() {
 
                 <div className="lanzamientoDatos">
                   <div className="lanzamientoFecha">
-                    {lanzamiento.fechaFormateada} <span className="p-2">•</span> {lanzamiento.tipo}
+                    {lanzamiento.fechaFormateada} <span className="p-2">•</span>{" "}
+                    {lanzamiento.tipo}
                   </div>
                   <div className="lanzamientoTitulo">{lanzamiento.titulo}</div>
                 </div>
@@ -312,8 +295,21 @@ function Musica() {
 
       {modalOpen && lanzamientoSeleccionado && (
         <div className="releaseModalOverlay" onMouseDown={cerrarModal}>
-          <div className="releaseModal d-flex flex-column" onMouseDown={(e) => e.stopPropagation()}>
-            <button className="modalClose d-flex align-items-center justify-content-center" type="button" aria-label="Cerrar" onClick={cerrarModal}>
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="release-dialog-title"
+            tabIndex={-1}
+            className="releaseModal d-flex flex-column"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modalClose d-flex align-items-center justify-content-center"
+              type="button"
+              aria-label="Cerrar"
+              onClick={cerrarModal}
+            >
               <img src="/images/close.svg" alt="" />
             </button>
 
@@ -330,7 +326,9 @@ function Musica() {
 
                 <div className="leftMeta d-flex flex-column gap-3">
                   <div className="smallMeta">
-                    PISTAS: {(lanzamientoSeleccionado.canciones ?? []).length} <span>|</span> DURACION: {lanzamientoSeleccionado.duracionTotalMinutos} MIN
+                    PISTAS: {(lanzamientoSeleccionado.canciones ?? []).length}{" "}
+                    <span>|</span> DURACION:{" "}
+                    {lanzamientoSeleccionado.duracionTotalMinutos} MIN
                   </div>
 
                   {(compraUrl || audioUrl || videoUrl) && (
@@ -338,13 +336,23 @@ function Musica() {
                       {(compraUrl || audioUrl) && (
                         <div className="d-flex gap-3">
                           {compraUrl && (
-                            <a href={compraUrl} target="_blank" rel="noreferrer" className="btn btn-outline-light btnWide buyListen">
+                            <a
+                              href={compraUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn btn-outline-light btnWide buyListen"
+                            >
                               COMPRAR
                             </a>
                           )}
 
                           {audioUrl && (
-                            <a href={audioUrl} target="_blank" rel="noreferrer" className="btn btn-outline-light btnWide buyListen">
+                            <a
+                              href={audioUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn btn-outline-light btnWide buyListen"
+                            >
                               ESCUCHAR
                             </a>
                           )}
@@ -352,7 +360,12 @@ function Musica() {
                       )}
 
                       {videoUrl && (
-                        <a href={videoUrl} target="_blank" rel="noreferrer" className="btn btn-danger btnWide">
+                        <a
+                          href={videoUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-danger btnWide"
+                        >
                           VER
                         </a>
                       )}
@@ -361,79 +374,106 @@ function Musica() {
                 </div>
               </aside>
 
-              <main className="modalRight d-flex flex-column gap-3">
+              <div className="modalRight d-flex flex-column gap-3">
                 <header className="headerModal">
-                  <h2 className="title">{lanzamientoSeleccionado.titulo}</h2>
+                  <h2 id="release-dialog-title" className="title">
+                    {lanzamientoSeleccionado.titulo}
+                  </h2>
                   <div className="sub">
-                    {lanzamientoSeleccionado.fechaFormateada} · {lanzamientoSeleccionado.tipo}
+                    {lanzamientoSeleccionado.fechaFormateada} ·{" "}
+                    {lanzamientoSeleccionado.tipo}
                   </div>
                 </header>
 
                 <div className="rightContent d-flex flex-column gap-3">
-                  <p className="releaseDescription">{lanzamientoSeleccionado.descripcion}</p>
+                  <p className="releaseDescription">
+                    {lanzamientoSeleccionado.descripcion}
+                  </p>
                   <hr className="divider" />
                   <div className="tracklist">
+                    {audioError && (
+                      <p className="errorMessage" role="alert">
+                        {audioError}
+                      </p>
+                    )}
                     <ol>
-                      {(lanzamientoSeleccionado.canciones ?? []).map((c, idx) => {
-                        const hasAudio = !!c?.audio?.url;
-                        const isActive = activeTrackId === c?.id;
-                        const shownTime = isActive
-                          ? `${formatTime(currentTime)} / ${formatTime(duration || c?.duracion || 0)}`
-                          : c?.duracion_formateada ?? c?.duracionFormateada ?? "";
+                      {(lanzamientoSeleccionado.canciones ?? []).map(
+                        (c, idx) => {
+                          const hasAudio = !!c?.audio?.url;
+                          const isActive = activeTrackId === c?.id;
+                          const shownTime = isActive
+                            ? `${formatTime(currentTime)} / ${formatTime(duration || c?.duracion || 0)}`
+                            : (c?.duracion_formateada ??
+                              c?.duracionFormateada ??
+                              "");
 
-                        return (
-                          <li
-                            key={c.id ?? idx}
-                            className={`trackRow ${isActive ? "isActive" : ""}`}
-                          >
-                            <div className="trackLead">
-                              <span className="trackIndex">{idx + 1}</span>
-                            </div>
-
-                            <div className="trackMain">
-                              <div className="trackTop">
-                                <span className="trackName">{c.titulo}</span>
-                                <span className="trackTime">{shownTime}</span>
+                          return (
+                            <li
+                              key={c.id ?? idx}
+                              className={`trackRow ${isActive ? "isActive" : ""}`}
+                            >
+                              <div className="trackLead">
+                                <span className="trackIndex">{idx + 1}</span>
                               </div>
 
-                              {hasAudio && (
-                                <div className="trackPlayerRow">
-                                  <button
-                                    type="button"
-                                    className={`trackPlayBtn ${isActive && isPlaying ? "isPlaying" : ""}`}
-                                    onClick={() => toggleTrack(c)}
-                                    aria-label={isActive && isPlaying ? "Pausar canción" : "Reproducir canción"}
-                                  >
-                                    {isActive && isPlaying ? "❚❚" : "▶"}
-                                  </button>
-
-                                  {isActive ? (
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max={Math.max(duration || c?.duracion || 0, 1)}
-                                      step="0.1"
-                                      value={Math.min(currentTime, duration || c?.duracion || 0)}
-                                      onChange={(e) => onSeekTrack(e.target.value)}
-                                      className="trackProgress"
-                                    />
-                                  ) : (
-                                    <div className="trackProgress trackProgressPlaceholder" />
-                                  )}
+                              <div className="trackMain">
+                                <div className="trackTop">
+                                  <span className="trackName">{c.titulo}</span>
+                                  <span className="trackTime">{shownTime}</span>
                                 </div>
-                              )}
-                            </div>
-                          </li>
-                        );
-                      })}
+
+                                {hasAudio && (
+                                  <div className="trackPlayerRow">
+                                    <button
+                                      type="button"
+                                      className={`trackPlayBtn ${isActive && isPlaying ? "isPlaying" : ""}`}
+                                      onClick={() => toggleTrack(c)}
+                                      aria-label={`${isActive && isPlaying ? "Pausar" : "Reproducir"} ${c.titulo}`}
+                                    >
+                                      {isActive && isPlaying ? "❚❚" : "▶"}
+                                    </button>
+
+                                    {isActive ? (
+                                      <input
+                                        aria-label={`Posición de ${c.titulo}`}
+                                        aria-valuetext={`${formatTime(currentTime)} de ${formatTime(duration || c.duracion)}`}
+                                        type="range"
+                                        min="0"
+                                        max={Math.max(
+                                          duration || c?.duracion || 0,
+                                          1,
+                                        )}
+                                        step="0.1"
+                                        value={Math.min(
+                                          currentTime,
+                                          duration || c?.duracion || 0,
+                                        )}
+                                        onChange={(e) =>
+                                          onSeekTrack(e.target.value)
+                                        }
+                                        className="trackProgress"
+                                      />
+                                    ) : (
+                                      <div className="trackProgress trackProgressPlaceholder" />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </li>
+                          );
+                        },
+                      )}
                     </ol>
 
-                    {(!lanzamientoSeleccionado.canciones || lanzamientoSeleccionado.canciones.length === 0) && (
-                      <div className="text-secondary">Sin canciones para mostrar.</div>
+                    {(!lanzamientoSeleccionado.canciones ||
+                      lanzamientoSeleccionado.canciones.length === 0) && (
+                      <div className="text-secondary">
+                        Sin canciones para mostrar.
+                      </div>
                     )}
                   </div>
                 </div>
-              </main>
+              </div>
             </div>
           </div>
         </div>

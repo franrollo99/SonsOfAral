@@ -1,80 +1,16 @@
-.concierto {
-  color: var(--text);
-}
-
-.concierto h1 {
-  line-height: 1.1;
-}
-
-.concierto h1 span {
-  padding-left: 10px;
-  font-size: 60%;
-  color: var(--muted);
-}
-
-.concierto h2 {
-  max-width: 100%;
-  letter-spacing: 0;
-}
-
-.entrada a {
-  font-weight: bold;
-  border: 1px solid #6d363e;
-  background: #442226;
-}
-
-.entrada a:hover {
-  border: 1px solid #6d363e;
-  background: #6d363e;
-}
-
-.entradaBtn {
-  white-space: nowrap;
-}
-
-.descripcion {
-  color: var(--muted);
-  font-size: 1.05rem;
-}
-
-@media (max-width: 1024px) {
-  .concierto h2 {
-    white-space: normal;
-    overflow-wrap: anywhere;
-    line-height: 1.15;
-    font-size: 1.35rem;
-  }
-
-  .concierto h1 span {
-    padding-left: 8px;
-    font-size: 70%;
-  }
-}
-
-@media (max-width: 768px) {
-  .concierto h1 span {
-    display: block;
-    padding-left: 0;
-    margin-top: 6px;
-    font-size: 75%;
-  }
-
-  .concierto h2 {
-    font-size: 1.25rem;
-    word-break: break-word;
-    text-align: left;
-  }
-
-  .entrada {
-    width: 100%;
-  }
-
-  .entradaBtn {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-  }
-}
+.listingHeader { max-width: 800px; margin-bottom: clamp(3rem, 7vw, 6rem); }
+.listingHeader > p:last-child { max-width: 48ch; color: var(--muted); font-size: 1rem; line-height: 1.75; }
+.concertList { border-top: 1px solid var(--line-strong); }
+.concierto { position: relative; display: grid; grid-template-columns: 52px 1fr; gap: 1.25rem; border-bottom: 1px solid var(--line); padding: clamp(1.8rem, 4vw, 3.4rem) 0; transition: background 180ms ease, padding 180ms ease; }
+.concierto:hover { padding-right: 1rem; padding-left: 1rem; background: rgba(255,255,255,.025); }
+.concertIndex { padding-top: .25rem; color: var(--signal); font-family: var(--font-mono); font-size: .7rem; }
+.concertTop { display: flex; align-items: start; justify-content: space-between; gap: 2rem; }
+.concierto h1 { max-width: none; margin: 0; font-family: var(--font-display); font-size: clamp(2.6rem, 5.4vw, 5.3rem); font-weight: 800; letter-spacing: -.035em; line-height: .8; text-transform: uppercase; }
+.concierto h1 span { display: block; margin-top: .7rem; color: var(--muted); font-family: var(--font-mono); font-size: .65rem; font-weight: 400; letter-spacing: .11em; line-height: 1.5; text-transform: uppercase; }
+.concertDate h2 { margin: 0; color: var(--signal-bright); font-family: var(--font-mono); font-size: .74rem; font-weight: 500; letter-spacing: .1em; line-height: 1.5; text-align: right; text-transform: uppercase; }
+.concertBottom { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: end; margin-top: 2rem; }
+.descripcion { max-width: 65ch; margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.8; }
+.entrada { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; }
+.entrada h4 { margin: 0; color: var(--text); font-family: var(--font-display); font-size: 1.45rem; letter-spacing: .01em; text-transform: uppercase; white-space: nowrap; }
+.entradaBtn { white-space: nowrap; }
+@media (max-width: 700px) { .concierto { grid-template-columns: 28px 1fr; gap: .75rem; } .concertTop, .concertBottom { display: block; } .concertDate { margin-top: 1.25rem; } .concertDate h2 { text-align: left; } .concertBottom { margin-top: 1.4rem; } .entrada { justify-content: space-between; margin-top: 1.5rem; } .entradaBtn { min-height: 40px; padding: .65rem .8rem; } }

@@ -5,6 +5,7 @@ use App\Http\Controllers\CancionController;
 use App\Http\Controllers\ConciertoController;
 use App\Http\Controllers\GaleriaController;
 use App\Http\Controllers\LanzamientoController;
+use App\Http\Controllers\SiteImageController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ Route::apiResource('conciertos', ConciertoController::class)->only(['index', 'sh
 Route::apiResource('galerias', GaleriaController::class)->only(['index', 'show']);
 
 Route::get('/canciones/{id}/audio', [CancionController::class, 'audio']);
+Route::get('/contenido-web', [SiteImageController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -30,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'can:manage-content'])->group(function () {
+    Route::put('/contenido-web/{key}', [SiteImageController::class, 'update'])->whereIn('key', ['home', 'logo']);
     Route::post('/conciertos', [ConciertoController::class, 'store']);
     Route::put('/conciertos/{id}', [ConciertoController::class, 'update']);
     Route::delete('/conciertos/{id}', [ConciertoController::class, 'destroy']);
@@ -73,7 +76,7 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
         $user->markEmailAsVerified();
     }
 
-    $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+    $frontendUrl = rtrim(config('site.frontend_url'), '/');
 
     return redirect()->away($frontendUrl.'/gestion/acceso?verified=1');
 })->middleware('signed')->name('verification.verify');

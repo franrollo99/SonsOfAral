@@ -1,9 +1,9 @@
-import { useRef } from "react";
+import FieldError from "../../../components/FieldError";
+import { useId, useRef } from "react";
+import { apiUrl } from "../../../lib/api";
 import { compressImageIfNeeded } from "../../../utils/compressImage";
 import AdminCrudPage from "../components/AdminCrudPage";
 import "../AdminManagement.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 const date = (iso) => {
   if (!iso) return "-";
@@ -49,11 +49,16 @@ const toSeconds = (min, sec) => {
 
 const fromSeconds = (total) => {
   const t = Number(total);
-  if (!Number.isFinite(t) || t <= 0) return { duracionMin: "", duracionSeg: "" };
-  return { duracionMin: String(Math.floor(t / 60)), duracionSeg: String(t % 60) };
+  if (!Number.isFinite(t) || t <= 0)
+    return { duracionMin: "", duracionSeg: "" };
+  return {
+    duracionMin: String(Math.floor(t / 60)),
+    duracionSeg: String(t % 60),
+  };
 };
 
-function SongAudioField({ song, index, setForm, playingAudioRef }) {
+function SongAudioField({ song, index, setForm, playingAudioRef, error }) {
+  const audioId = useId();
   const inputRef = useRef(null);
   const audioRef = useRef(null);
 
@@ -68,7 +73,7 @@ function SongAudioField({ song, index, setForm, playingAudioRef }) {
     setForm((p) => ({
       ...p,
       cancionesDraft: (p.cancionesDraft || []).map((x, i) =>
-        i === index ? { ...x, ...updater(x) } : x
+        i === index ? { ...x, ...updater(x) } : x,
       ),
     }));
   };
@@ -137,9 +142,12 @@ function SongAudioField({ song, index, setForm, playingAudioRef }) {
 
   return (
     <div className="adminSongAudioBlock d-flex flex-column gap-2">
-      <label className="adminSongLabel">Audio</label>
+      <label className="adminSongLabel" htmlFor={audioId}>
+        Audio de canción {index + 1}
+      </label>
 
       <input
+        aria-label={`Archivo de audio de canción ${index + 1}`}
         ref={inputRef}
         type="file"
         accept="audio/mpeg,.mp3"
@@ -150,6 +158,9 @@ function SongAudioField({ song, index, setForm, playingAudioRef }) {
       <div className="d-flex align-items-center gap-3 flex-wrap">
         <button
           type="button"
+          id={audioId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${audioId}-error` : undefined}
           className="adminActionBtn text-start px-3"
           onClick={() => inputRef.current?.click()}
         >
@@ -163,6 +174,7 @@ function SongAudioField({ song, index, setForm, playingAudioRef }) {
         ) : null}
       </div>
 
+      <FieldError id={`${audioId}-error`} error={error} />
       {hasVisibleAudio ? (
         <div>
           <audio
@@ -221,7 +233,7 @@ function ReleasesManagement() {
       setFormFn((p) => ({
         ...p,
         cancionesDraft: (p.cancionesDraft || []).map((x, i) =>
-          i === index ? { ...x, [field]: "" } : x
+          i === index ? { ...x, [field]: "" } : x,
         ),
       }));
       return;
@@ -237,7 +249,7 @@ function ReleasesManagement() {
     setFormFn((p) => ({
       ...p,
       cancionesDraft: (p.cancionesDraft || []).map((x, i) =>
-        i === index ? { ...x, [field]: String(n) } : x
+        i === index ? { ...x, [field]: String(n) } : x,
       ),
     }));
   };
@@ -258,32 +270,38 @@ function ReleasesManagement() {
         const draft =
           list.length > 0
             ? list
-              .slice()
-              .sort((a, b) => (a.track ?? 0) - (b.track ?? 0))
-              .map((s) => ({
-                id: s.id ?? null,
-                _k: String(s.id ?? crypto?.randomUUID?.() ?? Date.now() + Math.random()),
-                titulo: s.titulo ?? "",
-                ...fromSeconds(s.duracion ?? 0),
-                audio: null,
-                audioUrlActual: s?.audio?.id ? `${API_URL}/canciones/${s.id}/audio` : "",
-                audioNombreActual: s.audio?.nombre_original || "",
-                removeAudio: false,
-              }))
+                .slice()
+                .sort((a, b) => (a.track ?? 0) - (b.track ?? 0))
+                .map((s) => ({
+                  id: s.id ?? null,
+                  _k: String(
+                    s.id ??
+                      crypto?.randomUUID?.() ??
+                      Date.now() + Math.random(),
+                  ),
+                  titulo: s.titulo ?? "",
+                  ...fromSeconds(s.duracion ?? 0),
+                  audio: null,
+                  audioUrlActual: s?.audio?.id
+                    ? apiUrl(`/canciones/${s.id}/audio`)
+                    : "",
+                  audioNombreActual: s.audio?.nombre_original || "",
+                  removeAudio: false,
+                }))
             : base.cancionesDraft && base.cancionesDraft.length
               ? base.cancionesDraft
               : [
-                {
-                  _k: "base",
-                  titulo: "",
-                  duracionMin: "",
-                  duracionSeg: "",
-                  audio: null,
-                  audioUrlActual: "",
-                  audioNombreActual: "",
-                  removeAudio: false,
-                },
-              ];
+                  {
+                    _k: "base",
+                    titulo: "",
+                    duracionMin: "",
+                    duracionSeg: "",
+                    audio: null,
+                    audioUrlActual: "",
+                    audioNombreActual: "",
+                    removeAudio: false,
+                  },
+                ];
 
         return {
           ...base,
@@ -300,9 +318,22 @@ function ReleasesManagement() {
         { key: "tipo", header: "Tipo" },
         { key: "titulo", header: "Título" },
         { key: "fechaLanzamiento", header: "Fecha", render: (v) => date(v) },
-        { key: "duracionTotalMinutos", header: "Duración", render: (v) => (typeof v === "number" ? `${v} min` : "-") },
-        { key: "canciones", header: "Canciones", render: (v) => (Array.isArray(v) ? v.length : "-") },
-        { key: "descripcion", header: "Descripción", className: "adminTruncate", title: (v) => v || "" },
+        {
+          key: "duracionTotalMinutos",
+          header: "Duración",
+          render: (v) => (typeof v === "number" ? `${v} min` : "-"),
+        },
+        {
+          key: "canciones",
+          header: "Canciones",
+          render: (v) => (Array.isArray(v) ? v.length : "-"),
+        },
+        {
+          key: "descripcion",
+          header: "Descripción",
+          className: "adminTruncate",
+          title: (v) => v || "",
+        },
       ]}
       columnsGridCss={`
         grid-template-columns:
@@ -327,7 +358,12 @@ function ReleasesManagement() {
           ],
         },
         { name: "titulo", label: "Título", type: "text", full: true },
-        { name: "fechaLanzamiento", label: "Fecha lanzamiento", type: "date" },
+        {
+          name: "fechaLanzamiento",
+          errorName: "fecha_lanzamiento",
+          label: "Fecha lanzamiento",
+          type: "date",
+        },
         {
           name: "portada",
           label: "Portada",
@@ -338,12 +374,36 @@ function ReleasesManagement() {
           currentNameKey: "portadaNombreActual",
           removeFlagKey: "removePortada",
         },
-        { name: "descripcion", label: "Descripción", type: "textarea", full: true, rows: 6 },
-        { name: "compraUrl", label: "URL compra", type: "text", full: true },
-        { name: "audioUrl", label: "URL audio", type: "text", full: true },
-        { name: "videoUrl", label: "URL video", type: "text", full: true },
+        {
+          name: "descripcion",
+          label: "Descripción",
+          type: "textarea",
+          full: true,
+          rows: 6,
+        },
+        {
+          name: "compraUrl",
+          errorName: "compra_url",
+          label: "URL compra",
+          type: "text",
+          full: true,
+        },
+        {
+          name: "audioUrl",
+          errorName: "audio_url",
+          label: "URL audio",
+          type: "text",
+          full: true,
+        },
+        {
+          name: "videoUrl",
+          errorName: "video_url",
+          label: "URL video",
+          type: "text",
+          full: true,
+        },
       ]}
-      modalAfterFields={({ form, setForm }) => (
+      modalAfterFields={({ form, setForm, fieldErrors }) => (
         <div>
           <h4 className="adminSongsTitle">Canciones</h4>
 
@@ -355,33 +415,78 @@ function ReleasesManagement() {
                 <div className="adminSongContent">
                   <div className="d-flex align-items-end gap-3 flex-wrap">
                     <div className="adminSongField flex-grow-1">
-                      <label className="adminSongLabel">Nombre</label>
+                      <label
+                        className="adminSongLabel"
+                        htmlFor={`song-${s._k}-title`}
+                      >
+                        Nombre de canción {i + 1}
+                      </label>
                       <input
                         className="adminInput"
                         type="text"
+                        id={`song-${s._k}-title`}
+                        aria-invalid={
+                          fieldErrors[`canciones.${i}.titulo`]
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          fieldErrors[`canciones.${i}.titulo`]
+                            ? `song-${s._k}-title-error`
+                            : undefined
+                        }
                         value={s.titulo ?? ""}
                         onChange={(e) => {
                           const titulo = e.target.value;
                           setForm((p) => ({
                             ...p,
-                            cancionesDraft: (p.cancionesDraft || []).map((x, idx) =>
-                              idx === i ? { ...x, titulo } : x
+                            cancionesDraft: (p.cancionesDraft || []).map(
+                              (x, idx) => (idx === i ? { ...x, titulo } : x),
                             ),
                           }));
                         }}
                       />
+                      <FieldError
+                        id={`song-${s._k}-title-error`}
+                        error={fieldErrors[`canciones.${i}.titulo`]}
+                      />
                     </div>
 
                     <div className="adminSongField adminSongDurationField">
-                      <label className="adminSongLabel">Duración</label>
+                      <label
+                        className="adminSongLabel"
+                        htmlFor={`song-${s._k}-minutes`}
+                      >
+                        Duración
+                      </label>
 
                       <div className="d-flex align-items-center gap-2">
                         <input
                           type="number"
                           className="adminInput adminSongTimeInput"
+                          id={`song-${s._k}-minutes`}
+                          aria-label={`Minutos de canción ${i + 1}`}
+                          aria-invalid={
+                            fieldErrors[`canciones.${i}.duracion`]
+                              ? true
+                              : undefined
+                          }
+                          aria-describedby={
+                            fieldErrors[`canciones.${i}.duracion`]
+                              ? `song-${s._k}-duration-error`
+                              : undefined
+                          }
+                          min={0}
+                          max={99}
                           value={s.duracionMin ?? ""}
                           onChange={(e) =>
-                            handleDurationChange(setForm, i, "duracionMin", e.target.value, 99)
+                            handleDurationChange(
+                              setForm,
+                              i,
+                              "duracionMin",
+                              e.target.value,
+                              99,
+                            )
                           }
                         />
 
@@ -390,22 +495,49 @@ function ReleasesManagement() {
                         <input
                           type="number"
                           className="adminInput adminSongTimeInput"
+                          id={`song-${s._k}-seconds`}
+                          aria-label={`Segundos de canción ${i + 1}`}
+                          aria-invalid={
+                            fieldErrors[`canciones.${i}.duracion`]
+                              ? true
+                              : undefined
+                          }
+                          aria-describedby={
+                            fieldErrors[`canciones.${i}.duracion`]
+                              ? `song-${s._k}-duration-error`
+                              : undefined
+                          }
+                          min={0}
+                          max={59}
                           value={s.duracionSeg ?? ""}
                           onChange={(e) =>
-                            handleDurationChange(setForm, i, "duracionSeg", e.target.value, 59)
+                            handleDurationChange(
+                              setForm,
+                              i,
+                              "duracionSeg",
+                              e.target.value,
+                              59,
+                            )
                           }
                         />
                       </div>
                     </div>
 
+                    <FieldError
+                      id={`song-${s._k}-duration-error`}
+                      error={fieldErrors[`canciones.${i}.duracion`]}
+                    />
                     {i > 0 ? (
                       <button
+                        aria-label={`Quitar canción ${i + 1}: ${s.titulo || "sin nombre"}`}
                         className="adminSongBtn btn-red adminSongRemoveBtn"
                         type="button"
                         onClick={() =>
                           setForm((p) => ({
                             ...p,
-                            cancionesDraft: (p.cancionesDraft || []).filter((_, idx) => idx !== i),
+                            cancionesDraft: (p.cancionesDraft || []).filter(
+                              (_, idx) => idx !== i,
+                            ),
                           }))
                         }
                       >
@@ -422,6 +554,10 @@ function ReleasesManagement() {
                       index={i}
                       setForm={setForm}
                       playingAudioRef={playingAudioRef}
+                      error={
+                        fieldErrors[`audio_${i}`] ||
+                        fieldErrors[`canciones.${i}.audio`]
+                      }
                     />
                   </div>
                 </div>
@@ -439,7 +575,9 @@ function ReleasesManagement() {
                   cancionesDraft: [
                     ...(p.cancionesDraft || []),
                     {
-                      _k: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+                      _k: crypto?.randomUUID
+                        ? crypto.randomUUID()
+                        : String(Date.now() + Math.random()),
                       titulo: "",
                       duracionMin: "",
                       duracionSeg: "",
@@ -490,16 +628,36 @@ function ReleasesManagement() {
           };
         });
 
-        const primeraOk = cancionesNorm[0] && cancionesNorm[0].titulo && cancionesNorm[0].duracion;
-        if (!primeraOk) throw new Error("Debes añadir al menos 1 canción (nombre y duración).");
+        const primeraOk =
+          cancionesNorm[0] &&
+          cancionesNorm[0].titulo &&
+          cancionesNorm[0].duracion;
+        if (!primeraOk) {
+          const errors = {};
+          if (!cancionesNorm[0]?.titulo) {
+            errors["canciones.0.titulo"] = [
+              "El nombre de la canción es obligatorio.",
+            ];
+          }
+          if (!cancionesNorm[0]?.duracion) {
+            errors["canciones.0.duracion"] = [
+              "La duración debe ser mayor que cero.",
+            ];
+          }
+          const failure = new Error(
+            "Debes añadir al menos 1 canción (nombre y duración).",
+          );
+          failure.data = { errors };
+          throw failure;
+        }
 
         fd.append(
           "canciones",
           JSON.stringify(
             cancionesNorm
               .filter((x) => x.titulo && x.duracion)
-              .map((x, i) => ({ ...x, track: i + 1 }))
-          )
+              .map((x, i) => ({ ...x, track: i + 1 })),
+          ),
         );
 
         return fd;

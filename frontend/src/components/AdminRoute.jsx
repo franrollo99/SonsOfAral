@@ -1,37 +1,11 @@
-import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { apiJson, clearSession, getAuthToken } from "../lib/api";
-
+import { useAuth } from "../auth/AuthContext";
 function AdminRoute() {
-  const [state, setState] = useState(() => (getAuthToken() ? "checking" : "unauthenticated"));
-
-  useEffect(() => {
-    if (!getAuthToken()) {
-      return;
-    }
-
-    let mounted = true;
-
-    apiJson("/auth/me")
-      .then((data) => {
-        if (!mounted) return;
-        setState(data?.data?.user?.rol === "admin" ? "allowed" : "forbidden");
-      })
-      .catch(() => {
-        clearSession();
-        if (mounted) setState("unauthenticated");
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  if (state === "checking") return <p className="container py-4">Comprobando acceso…</p>;
-  if (state === "unauthenticated") return <Navigate to="/gestion/acceso" replace />;
-  if (state === "forbidden") return <Navigate to="/" replace />;
-
+  const { status, error, recheck } = useAuth();
+  if (status === "checking") return <p className="container py-4">Comprobando acceso…</p>;
+  if (status === "unauthenticated") return <Navigate to="/gestion/acceso" replace />;
+  if (status === "forbidden") return <Navigate to="/" replace />;
+  if (status === "error") return <section><p role="alert">{error}</p><button className="adminBtn" onClick={recheck}>Reintentar</button></section>;
   return <Outlet />;
 }
-
 export default AdminRoute;

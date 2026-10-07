@@ -8,49 +8,55 @@ use Intervention\Image\ImageManager;
 
 class ImageService
 {
-    public function storeResponsiveImage(
-        UploadedFile $file,
-        string $directorio
-    ): array {
-        $nombreBase = pathinfo($file->hashName(), PATHINFO_FILENAME);
-        $nombreWebp = $nombreBase . '.webp';
+    public const PHOTO_WIDTHS = ['sm' => 480, 'md' => 960, 'lg' => 1920];
 
+    public const LOGO_WIDTHS = ['sm' => 96, 'md' => 192, 'lg' => 384];
+
+    public function storeResponsiveImage(UploadedFile $file, string $directorio, string $profile = 'photo'): array
+    {
+        $logo = $profile === 'logo';
+        $extension = $logo ? 'png' : 'webp';
+        $filename = pathinfo($file->hashName(), PATHINFO_FILENAME).'.'.$extension;
         $driver = extension_loaded('imagick')
-            ? new \Intervention\Image\Drivers\Imagick\Driver()
-            : new \Intervention\Image\Drivers\Gd\Driver();
-
+            ? new \Intervention\Image\Drivers\Imagick\Driver
+            : new \Intervention\Image\Drivers\Gd\Driver;
         $manager = new ImageManager($driver);
+        $widths = $logo ? self::LOGO_WIDTHS : self::PHOTO_WIDTHS;
+        $variants = [];
+        $written = [];
 
-        $variantes = [
-            'sm' => ['width' => 500, 'quality' => 80],
-            'lg' => ['width' => 1400, 'quality' => 80],
-        ];
-
-        foreach ($variantes as $key => $config) {
-            $img = $manager->read($file->getPathname());
-            $img->scaleDown(width: $config['width']);
-
-            $encoded = $img->toWebp($config['quality']);
-
-            $path = "{$directorio}/{$key}/{$nombreWebp}";
-
-            Storage::disk('public')->put($path, (string) $encoded);
+        try {
+            foreach ($widths as $size => $width) {
+                $image = $manager->read($file->getPathname())->scaleDown(width: $width);
+                $encoded = (string) ($logo ? $image->toPng() : $image->toWebp(80));
+                $path = "{$directorio}/{$size}/{$filename}";
+                $written[] = $path;
+                if (! Storage::disk('public')->put($path, $encoded)) {
+                    throw new \RuntimeException('No se pudo guardar la imagen.');
+                }
+                $variants[$size] = ['width' => $image->width(), 'height' => $image->height(), 'bytes' => strlen($encoded)];
+            }
+        } catch (\Throwable $failure) {
+            Storage::disk('public')->delete($written);
+            throw $failure;
         }
 
         return [
             'directorio' => $directorio,
-            'archivo' => $nombreWebp,
+            'archivo' => $filename,
             'nombre_original' => $file->getClientOriginalName(),
-            'mime_type' => 'image/webp',
-            'peso' => $file->getSize(),
+            'mime_type' => $logo ? 'image/png' : 'image/webp',
+            'peso' => $variants['lg']['bytes'],
+            'variants' => $variants,
         ];
     }
 
     public function deleteResponsiveImage(?string $directorio, ?string $archivo): void
     {
-        if (!$directorio || !$archivo) return;
-
-        foreach (['sm', 'lg'] as $size) {
+        if (! $directorio || ! $archivo) {
+            return;
+        }
+        foreach (['sm', 'md', 'lg'] as $size) {
             Storage::disk('public')->delete("{$directorio}/{$size}/{$archivo}");
         }
     }

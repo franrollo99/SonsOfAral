@@ -1,110 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./AdminArea.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useAuth } from "../../auth/AuthContext";
 
 function AdminArea() {
   const navigate = useNavigate();
-  const token = useMemo(() => localStorage.getItem("token"), []);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const run = async () => {
-      setError("");
-
-      if (!token) {
-        navigate("/gestion/acceso", { replace: true });
-        return;
-      }
-
-      try {
-        const meRes = await fetch(`${API_URL}/auth/me`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const meData = await meRes.json().catch(() => ({}));
-
-        if (!meRes.ok) {
-          localStorage.removeItem("token");
-          navigate("/gestion/acceso", { replace: true });
-          return;
-        }
-
-        const user = meData?.data?.user ?? meData?.user ?? null;
-
-        if (!user) {
-          localStorage.removeItem("token");
-          navigate("/gestion/acceso", { replace: true });
-          return;
-        }
-
-        if (user.rol !== "admin") {
-          navigate("/", { replace: true });
-          return;
-        }
-      } catch {
-        setError("No se pudo cargar tu sesión. Reintenta.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    run();
-  }, [navigate, token]);
-
+  const { logout } = useAuth();
   const onLogout = async () => {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-      });
+      await logout();
     } catch {
-      // El cierre local continúa aunque la petición falle.
-    } finally {
-      localStorage.removeItem("token");
-      navigate("/gestion/acceso", { replace: true });
+      /* El cierre local se completa aunque el servidor no responda. */
     }
+    navigate("/gestion/acceso", { replace: true });
   };
 
   const sections = [
+    {
+      title: "Contenido de la web",
+      desc: "Foto de Inicio y logo.",
+      to: "contenido",
+    },
     { title: "Conciertos", desc: "Gestionar conciertos.", to: "conciertos" },
-    { title: "Lanzamientos", desc: "Gestionar lanzamientos.", to: "lanzamientos" },
-    { title: "Canciones", desc: "Visualizar detalles de canciones.", to: "canciones" },
-    { title: "Galerías", desc: "Gestionar galerías de imágenes.", to: "galerias" },
-    { title: "Usuarios", desc: "Listado de usuarios y visualizacion de información.", to: "usuarios" },
+    {
+      title: "Lanzamientos",
+      desc: "Gestionar lanzamientos.",
+      to: "lanzamientos",
+    },
+    {
+      title: "Galerías",
+      desc: "Gestionar galerías de imágenes.",
+      to: "galerias",
+    },
   ];
-
-  if (loading) {
-    return (
-      <section className="container">
-        <div className="adminCard">
-          <h1 className="adminTitle">Área de administración</h1>
-          <p className="adminMuted">Cargando...</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="container">
-        <div className="adminCard">
-          <h1 className="adminTitle">Área de administración</h1>
-          <p className="adminError">{error}</p>
-          <button className="adminBtn" onClick={() => navigate("/gestion/acceso")}>
-            Volver al login
-          </button>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="container">
@@ -121,6 +48,12 @@ function AdminArea() {
 
         <div className="adminDivider" />
 
+        <div className="mb-4">
+          <Link className="adminLinkBtn" to="/gestion/contrasena">
+            Cambiar contraseña
+          </Link>
+        </div>
+
         <div className="adminGrid">
           {sections.map((s) => (
             <Link key={s.to} to={s.to} className="adminTile">
@@ -130,7 +63,6 @@ function AdminArea() {
             </Link>
           ))}
         </div>
-
       </div>
     </section>
   );

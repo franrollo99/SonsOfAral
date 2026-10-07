@@ -1417,6 +1417,97 @@
                 ]
             }
         },
+        "/api/contenido-web": {
+            "get": {
+                "tags": [
+                    "Contenido web"
+                ],
+                "summary": "Imágenes públicas de la web",
+                "operationId": "41f23a4423685ac842944e2415d65104",
+                "responses": {
+                    "200": {
+                        "description": "Foto de Inicio y logo con sus variantes y descripciones"
+                    }
+                }
+            }
+        },
+        "/api/contenido-web/{key}": {
+            "post": {
+                "tags": [
+                    "Contenido web"
+                ],
+                "summary": "Cambiar imagen o descripción (admin)",
+                "operationId": "7f2f077d9adddb157f88e308c066aa1c",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "home",
+                                "logo"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "_method",
+                                    "alt"
+                                ],
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "default": "PUT",
+                                        "enum": [
+                                            "PUT"
+                                        ]
+                                    },
+                                    "alt": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "reset": {
+                                        "description": "Restaurar respaldo; no combinar con image",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Imagen guardada"
+                    },
+                    "401": {
+                        "description": "Sin sesión"
+                    },
+                    "403": {
+                        "description": "Solo administradores"
+                    },
+                    "422": {
+                        "description": "Datos inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/usuarios": {
             "get": {
                 "tags": [
@@ -1890,6 +1981,10 @@
         {
             "name": "Lanzamientos",
             "description": "Lanzamientos"
+        },
+        {
+            "name": "Contenido web",
+            "description": "Contenido web"
         },
         {
             "name": "Usuarios",

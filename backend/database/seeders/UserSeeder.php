@@ -2,38 +2,22 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        User::factory()->create([
-            'nombre' => 'Francisco',
-            'apellidos' => 'Rodríguez',
-            'email' => 'admin@sonsofaral.com',
-            'rol' => 'admin',
-            'password' => bcrypt('admin123'),
-        ]);
-
-        User::factory()->create([
-            'nombre' => 'Laura',
-            'apellidos' => 'Martínez',
-            'email' => 'cliente@sonsofaral.com',
-            'rol' => 'cliente',
-            'password' => bcrypt('cliente123'),
-        ]);
-
-        User::factory()->create([
-            'nombre' => 'Maria',
-            'apellidos' => 'Martínez',
-            'email' => 'cliente2@sonsofaral.com',
-            'rol' => 'cliente',
-            'password' => bcrypt('cliente123'),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@sonsofaral.com'],
+            [
+                'nombre' => 'Francisco',
+                'apellidos' => 'Rodríguez',
+                'rol' => 'admin',
+                'password' => bcrypt('admin123'),
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

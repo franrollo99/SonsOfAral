@@ -1,275 +1,315 @@
-.homePanel {
-  background: var(--bg-alt);
-  box-shadow:var(--bg-shadow);
-  border-radius: 16px;
-  padding: 36px;
-  backdrop-filter: blur(6px);
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
 .homeHero {
-  border-radius: 14px;
+  position: relative;
+  display: grid;
+  min-height: 580px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
-
+.homeHero::after {
+  position: absolute;
+  right: -6%;
+  bottom: -17%;
+  width: min(41vw, 520px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 28px rgba(255, 255, 255, 0.025),
+    0 0 0 56px rgba(255, 255, 255, 0.018);
+  content: "";
+  pointer-events: none;
+}
 .homeHeroMedia {
-  flex: 1 1 55%;
-  max-width: 680px;
+  min-height: 100%;
+  overflow: hidden;
 }
-
 .homeHeroImg {
   width: 100%;
-  height: 430px;
+  height: 100%;
+  min-height: 580px;
   object-fit: cover;
-  display: block;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  filter: grayscale(0.5) contrast(1.18) brightness(0.73);
+  animation: revealImage 900ms ease-out both;
 }
-
 .homeHeroCopy {
-  flex: 1 1 45%;
-}
-
-.homeHeroTitle {
-  margin: 0;
-  color: var(--text);
-  font-size: 54px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.homeHeroSubtitle {
-  margin: 14px 0 0 0;
-  color: var(--muted);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-size: 24px;
-}
-
-.homeFeaturedReleaseWrap {
-  margin-top: 28px;
-}
-
-.homeReleaseBody {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.homeReleaseTitle {
-  margin: 0;
-  color: var(--text);
-  font-size: clamp(26px, 2.6vw, 40px);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.homeReleaseMeta {
-  color: var(--muted);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-size: 12px;
+  position: relative;
+  z-index: 1;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-self: center;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 5rem);
 }
-
-.homeReleaseDot {
-  opacity: 0.75;
+.homeHeroCopy::before {
+  width: 50px;
+  height: 3px;
+  margin-bottom: 1.5rem;
+  background: var(--signal);
+  content: "";
 }
-
-.homeReleaseDesc {
-  margin: 6px 0 0 0;
+.homeHeroTitle {
+  max-width: 6ch;
+  margin: 0;
+  font-size: clamp(4rem, 8.2vw, 8.3rem);
+  line-height: 0.76;
+  animation: riseIn 700ms 100ms ease-out both;
+}
+.homeHeroSubtitle {
+  max-width: 32ch;
+  margin: 1.8rem 0 0;
   color: var(--muted);
-  line-height: 1.7;
-  max-width: 70ch;
+  font-family: var(--font-mono);
+  font-size: clamp(0.68rem, 1.1vw, 0.82rem);
+  letter-spacing: 0.12em;
+  line-height: 1.8;
+  text-transform: uppercase;
+  animation: riseIn 700ms 220ms ease-out both;
 }
-
+.homeFeaturedReleaseWrap,
+.homeSection {
+  margin-top: clamp(5rem, 11vw, 9rem);
+}
+.homeSectionTitle {
+  margin: 0 0 1.4rem;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.2vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+.homeSectionTitle::before {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--signal);
+  font-family: var(--font-mono);
+  font-size: 0.61rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  content: "// NOW PLAYING";
+}
+.homeFeaturedRelease,
+.homeNextConcert {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  padding: clamp(1.4rem, 3vw, 2.7rem) 0;
+}
+.homeFeaturedRelease::before,
+.homeNextConcert::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 90px;
+  height: 2px;
+  background: var(--signal);
+  content: "";
+}
+.homeReleaseBody {
+  padding: 0.5rem clamp(0rem, 2vw, 2rem) 0.5rem 0;
+}
+.homeReleaseTitle,
+.homeConcertTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 5.2vw, 5.7rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.8;
+  text-transform: uppercase;
+}
+.homeReleaseMeta,
+.homeConcertPlace,
+.homeConcertDate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.homeReleaseDot {
+  color: var(--signal);
+}
+.homeReleaseDesc,
+.homeConcertDesc {
+  max-width: 58ch;
+  margin: 1.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.8;
+}
 .homeReleaseActions {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 10px;
+  gap: 0.7rem;
+  margin-top: 2rem;
 }
-
-.homeReleaseActions .btn {
-  font-weight: 600;
-}
-
 .homeReleaseCover {
-  flex: 0 0 auto;
-  width: min(360px, 100%);
+  width: min(330px, 100%);
 }
-
 .homeReleaseCover img {
   width: 100%;
-  height: 320px;
+  aspect-ratio: 1;
   object-fit: cover;
-  display: block;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line-strong);
+  filter: contrast(1.08);
+  transition:
+    transform 300ms ease,
+    filter 300ms ease;
 }
-
+.homeReleaseCover:hover img {
+  filter: contrast(1.16) brightness(1.08);
+  transform: rotate(1deg) scale(1.025);
+}
+.homeNextConcert {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) 1.3fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: center;
+}
 .homePosterBtn {
-  border: 0;
   padding: 0;
+  border: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: zoom-in;
 }
-
 .homePosterImg {
-  width: min(400px, 90vw);
-  max-height: 500px;
+  width: 100%;
+  max-height: 440px;
   object-fit: cover;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-  filter: contrast(1.08) brightness(0.92);
-  transition: transform 160ms ease, filter 160ms ease;
+  border: 1px solid var(--line-strong);
+  filter: grayscale(0.2) contrast(1.1);
+  transition:
+    transform 260ms ease,
+    filter 260ms ease;
 }
-
 .homePosterBtn:hover .homePosterImg {
-  transform: scale(1.01);
-  filter: brightness(1.05);
+  filter: grayscale(0) contrast(1.08) brightness(1.08);
+  transform: translateY(-5px);
 }
-
+.homeConcertInfo {
+  padding: 1rem 0;
+}
+.homeConcertPlace {
+  color: var(--signal-bright);
+}
+.homeConcertDate {
+  color: var(--text);
+}
+.homeConcertBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.2rem;
+}
+.homeConcertPrice {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
 .homeLightbox {
   position: fixed;
+  z-index: 100;
   inset: 0;
-  background: rgba(0, 0, 0, 0.82);
-  z-index: 9999;
-  padding: 24px;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(12px);
 }
-
 .homeLightboxInner {
   position: relative;
+  display: grid;
   width: 100%;
+  min-width: 0;
   height: 100%;
+  place-items: center;
 }
 
 .homeLightboxImg {
-  max-width: 92vw;
-  max-height: 92vh;
-  width: auto;
-  height: auto;
-  display: block;
-  border-radius: 12px;
-  box-shadow: 0 18px 80px rgba(0, 0, 0, 0.85);
+  max-width: 100%;
+  max-height: 89vh;
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow);
 }
-
 .homeLightboxClose {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  border: 0;
-  background: rgba(0, 0, 0, 0.55);
-  color: white;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line-strong);
+  background: var(--ink);
+  font-size: 1.3rem;
   cursor: pointer;
-  font-size: 18px;
 }
-
-.homeNextConcert {
-  margin-top: 28px;
+.homeLightboxClose:hover {
+  border-color: var(--signal);
+  color: var(--signal);
 }
-
-.homeConcertTitle {
-  margin: 0;
-  color: var(--text);
-  font-size: clamp(28px, 5vw, 50px);
-  letter-spacing: 0.02em;
-}
-
-.homeConcertPlace {
-  color: var(--muted);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-size: 18px;
-}
-
-.homeConcertDate {
-  color: var(--text);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 600;
-  font-size: 18px;
-}
-
-.homeConcertDesc {
-  color: var(--muted);
-  line-height: 1.75;
-  max-width: 70ch;
-  font-size: 16px;
-}
-
-.homeConcertBottom {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.homeConcertBottom .btn {
-  font-weight: 600;
-}
-
-.homeConcertPrice {
-  color: var(--text);
-  font-weight: 700;
-  font-size: 24px;
-}
-
-.homeSection {
-  margin-top: 56px;
-}
-
-.homeSectionTitle {
-  margin: 0 0 18px 0;
-  font-size: clamp(24px, 2.4vw, 32px);
-  letter-spacing: 0.02em;
-}
-
-.homeConcertInfo {
-  padding-left: 8px;
-}
-
-@media (max-width: 768px) {
-  .homeSection {
-    margin-top: 42px;
+@keyframes revealImage {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
   }
-
-  .homePanel {
-    padding: 22px;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
-
-  .homeHeroTitle {
-    font-size: 24px;
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
   }
-
-  .homeHeroSubtitle {
-    font-size: 14px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-
+}
+@media (max-width: 760px) {
   .homeHero {
-    margin-top: 24px;
+    min-height: 0;
+    grid-template-columns: 1fr;
   }
-
   .homeHeroImg {
-    height: 280px;
+    min-height: 330px;
   }
-
   .homeHeroCopy {
-    text-align: center;
+    min-height: 320px;
   }
-
-  .homeReleaseCover img {
-    height: 260px;
+  .homeHeroTitle {
+    font-size: clamp(4rem, 20vw, 6rem);
   }
-
+  .homeNextConcert {
+    grid-template-columns: 1fr;
+  }
   .homePosterImg {
-    width: 100%;
+    max-height: none;
   }
-
+  .homeReleaseCover {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+  .homeReleaseCover img {
+    max-height: 400px;
+  }
   .homeConcertBottom {
-    flex-direction: column;
     align-items: flex-start;
+    flex-direction: column;
   }
 }
