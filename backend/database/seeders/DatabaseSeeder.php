@@ -15,6 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(UserSeeder::class);
+        if (config('demo.media_path')) {
+            $this->call(DemoMediaSeeder::class);
+
+            return;
+        }
+
         $this->call(LanzamientoSeeder::class);
         $this->call(ConciertoSeeder::class);
     }

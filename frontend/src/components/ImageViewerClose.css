@@ -1,0 +1,44 @@
+.imageViewerClose {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--text);
+  border-radius: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--text);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.imageViewerClose svg {
+  display: block;
+  pointer-events: none;
+  transition: transform 180ms ease;
+}
+
+.imageViewerClose:hover,
+.imageViewerClose:focus-visible {
+  background: var(--text);
+  color: var(--ink);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
+}
+
+.imageViewerClose:hover svg,
+.imageViewerClose:focus-visible svg {
+  transform: rotate(90deg);
+}
+
+.imageViewerClose:active {
+  transform: scale(0.94);
+}

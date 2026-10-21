@@ -7,42 +7,70 @@ function AvisoLegal() {
       <div className="legalWrap d-flex flex-column gap-4">
         <div className="legalHeader d-flex flex-column gap-2">
           <h1>Aviso Legal</h1>
-          <p className="legalSubtitle">Información legal del sitio web.</p>
+          <p className="legalSubtitle">
+            Condiciones para disfrutar del contenido de Sons of Aral.
+          </p>
         </div>
 
         <div className="legalBody d-flex flex-column gap-2">
           <p>
-            En cumplimiento de lo dispuesto en la Ley 34/2002, de Servicios de la
-            Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se
-            informa que el presente sitio web constituye un proyecto académico
-            desarrollado como Trabajo de Fin de Grado Superior.
+            Bienvenido al sitio web de Sons of Aral. Aquí compartimos nuestra
+            música, los próximos conciertos y las imágenes que forman parte de
+            la trayectoria de la banda.
           </p>
 
-          <h2>Titular del sitio web</h2>
-          <ul>
-            <li>Nombre: Francisco Rodríguez Llorente</li>
-            <li>Proyecto: Sons of Aral Website</li>
-            <li>Finalidad: Proyecto académico sin fines comerciales reales</li>
-          </ul>
-
-          <h2>Condiciones de uso</h2>
+          <h2>Uso del sitio</h2>
           <p>
-            El acceso y navegación por este sitio web implica la aceptación de las
-            condiciones aquí establecidas. El titular no se responsabiliza del uso
-            indebido que los usuarios puedan hacer del contenido del sitio web.
+            La consulta de los contenidos es gratuita y no requiere registro.
+            Utiliza la web de forma lícita y respetuosa con los derechos de
+            otras personas. No se permiten usos que perjudiquen el servicio,
+            alteren sus contenidos o vulneren los derechos de la banda o de
+            terceros.
           </p>
 
-          <h2>Enlaces a terceros</h2>
+          <h2>Derechos sobre los contenidos</h2>
           <p>
-            Este sitio puede contener enlaces a páginas de terceros. El titular no
-            se responsabiliza del contenido externo enlazado.
+            Las canciones, grabaciones, fotografías, logotipos, textos y demás
+            materiales pertenecen a Sons of Aral o a sus respectivos titulares.
+            Poder acceder a ellos no supone una cesión de derechos ni autoriza
+            su reproducción, distribución o explotación, salvo autorización o en
+            los casos permitidos por la ley.
           </p>
 
-          <h2>Cookies</h2>
+          <h2>Conciertos y entradas</h2>
           <p>
-            Este sitio puede utilizar cookies técnicas necesarias para el
-            funcionamiento y la navegación. Para más información, revisa la
-            política de privacidad.
+            Las fechas, recintos, horarios y precios pueden variar por
+            circunstancias de organización. Antes de acudir a un concierto o
+            adquirir entradas, comprueba la información del organizador y las
+            condiciones de la plataforma de venta.
+          </p>
+          <p>
+            Las compras que realices a través de los enlaces de entradas se
+            gestionan en sitios externos, bajo sus propias condiciones. Esta web
+            no tramita pedidos ni pagos.
+          </p>
+
+          <h2>Plataformas externas</h2>
+          <p>
+            Los enlaces a servicios de música, vídeo y redes sociales te
+            permiten seguir disfrutando del contenido de la banda fuera de esta
+            web. Cada plataforma establece sus propias condiciones de acceso y
+            uso.
+          </p>
+
+          <h2>Información y disponibilidad</h2>
+          <p>
+            Procuramos mantener el contenido actualizado y disponible. Aun así,
+            puede haber cambios, errores o interrupciones temporales. Estas
+            condiciones no limitan los derechos ni las responsabilidades
+            establecidos por la normativa aplicable.
+          </p>
+
+          <h2>Privacidad</h2>
+          <p>
+            Para conocer cómo se utiliza la información relacionada con tu
+            visita y qué derechos puedes ejercer, consulta nuestra{" "}
+            <Link to="/privacidad">política de privacidad</Link>.
           </p>
         </div>
       </div>

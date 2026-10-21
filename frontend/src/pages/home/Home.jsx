@@ -1,304 +1,262 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { imageSrcSet } from "../../lib/images";
+import {
+  formatConcertDate,
+  pickNextConcert,
+  pickLatestRelease,
+} from "../../lib/home-content.mjs";
 import defaultImages from "../../assets/site-images.json";
 import { useContent } from "../../hooks/useContent";
-import { useMemo, useState } from "react";
+import { useReveal } from "../../hooks/useReveal";
+import ReleaseModal from "../../components/ReleaseModal";
+import ImageViewer from "../../components/ImageViewer";
 import "./Home.css";
-import { useModal } from "../../hooks/useModal";
-
-function pickNextConcert(conciertos) {
-  if (!Array.isArray(conciertos)) return null;
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const parsed = conciertos
-    .map((c) => {
-      const rawDate = c?.fecha;
-
-      const d = rawDate ? new Date(rawDate) : null;
-      if (!d || Number.isNaN(d.getTime())) return { ...c, __date: null };
-
-      d.setHours(0, 0, 0, 0);
-      return { ...c, __date: d };
-    })
-    .filter((c) => c.__date && c.__date >= now)
-    .sort((a, b) => a.__date - b.__date);
-
-  return parsed[0] || null;
-}
-
-function pickLatestAlbum(lanzamientos) {
-  if (!Array.isArray(lanzamientos)) return null;
-
-  const albums = lanzamientos
-    .map((l) => {
-      const rawDate = l?.fechaLanzamiento;
-      const d = rawDate ? new Date(rawDate) : null;
-      const t = d && !Number.isNaN(d.getTime()) ? d.getTime() : 0;
-      return { ...l, __t: t };
-    })
-    .sort((a, b) => b.__t - a.__t);
-
-  return albums[0];
-}
 
 export default function Home() {
   const { data: content } = useContent("/contenido-web");
-  const homeImage = content?.home || defaultImages.home;
   const concerts = useContent("/conciertos");
   const releases = useContent("/lanzamientos");
-  const conciertosRaw = concerts.data;
-  const lanzamientosRaw = releases.data;
-  const loading = concerts.loading || releases.loading;
-
-  const [isPosterOpen, setIsPosterOpen] = useState(false);
-
+  const homeImage = content?.home || defaultImages.home;
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [selectedRelease, setSelectedRelease] = useState(null);
+  const pageRef = useReveal();
   const nextConcert = useMemo(
-    () => pickNextConcert(conciertosRaw),
-    [conciertosRaw],
+    () => pickNextConcert(concerts.data),
+    [concerts.data],
   );
-  const latestAlbum = useMemo(
-    () => pickLatestAlbum(lanzamientosRaw),
-    [lanzamientosRaw],
+  const latestRelease = useMemo(
+    () => pickLatestRelease(releases.data),
+    [releases.data],
   );
-
-  const poster = nextConcert?.cartel || null;
-
-  const posterUrl = poster?.url || null;
-  const posterThumbUrl = poster?.urlSm || poster?.url || null;
-  const posterLightboxUrl = poster?.url || null;
-
-  const posterAlt = "Cartel del próximo concierto";
-
-  const latestAlbumCover = latestAlbum?.portada || null;
-
-  const dialogRef = useModal(isPosterOpen, () => setIsPosterOpen(false));
+  const poster = nextConcert?.cartel;
+  const posterAlt = `Cartel de ${nextConcert?.lugar || "el próximo concierto"}`;
 
   return (
-    <section>
-      {(concerts.error || releases.error) && (
-        <p className="errorMessage" role="alert">
-          No se pudo actualizar parte del contenido. Vuelve a intentarlo más
-          tarde.
-        </p>
-      )}
-      <div>
-        <div className="homePanel homeHero d-flex flex-column flex-md-row align-items-center gap-4">
-          <div className="homeHeroMedia">
-            <img
-              className="homeHeroImg"
-              src={homeImage.url}
-              srcSet={imageSrcSet(homeImage)}
-              sizes="(max-width: 760px) calc(100vw - 32px), 55vw"
-              fetchPriority="high"
-              alt={homeImage.alt}
-            />
-          </div>
-
-          <div className="homeHeroCopy">
-            <h1 className="homeHeroTitle">WELCOME TO SONS OF ARAL</h1>
-            <p className="homeHeroSubtitle">
-              A NU-METAL/HARDCORE BAND FROM CANTABRIA, SPAIN
-            </p>
+    <div className="homePage" ref={pageRef}>
+      <section className="homeHero" aria-labelledby="home-title">
+        <img
+          className="homeHeroImg"
+          src={homeImage.url}
+          srcSet={imageSrcSet(homeImage)}
+          sizes="100vw"
+          fetchPriority="high"
+          alt={homeImage.alt || "Sons of Aral"}
+        />
+        <div className="homeHeroCopy">
+          <h1 id="home-title" className="homeHeroTitle">
+            SONS
+            <br />
+            OF ARAL
+          </h1>
+          <p className="homeHeroSubtitle">
+            Nu-metal y hardcore desde Cantabria, España.
+            <br />
+            Hecho para sonar en directo.
+          </p>
+          <div className="homeActions">
+            <Link to="/musica" className="btn btn-primary">
+              Escuchar música ↗
+            </Link>
+            <Link to="/conciertos" className="btn btn-primary">
+              Ver conciertos ↗
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div>
-        {!loading && latestAlbum ? (
-          <div className="homeFeaturedReleaseWrap">
-            <h2 className="homeSectionTitle">Último lanzamiento</h2>
-
-            <div className="homeFeaturedRelease homePanel">
-              <div className="d-flex flex-column flex-md-row align-items-center align-items-md-start justify-content-between gap-4">
-                <div className="d-flex flex-column justify-content-between gap-3 homeReleaseBody">
-                  <div className="d-flex flex-column gap-2">
-                    <h3 className="homeReleaseTitle">{latestAlbum?.titulo}</h3>
-
-                    <div className="homeReleaseMeta">
-                      <span>{latestAlbum?.fechaFormateada ?? ""}</span>
-                      {latestAlbum?.tipo ? (
-                        <span className="homeReleaseDot">•</span>
-                      ) : null}
-                      <span>{latestAlbum?.tipo ?? ""}</span>
-                    </div>
-
-                    {latestAlbum?.descripcion ? (
-                      <p className="homeReleaseDesc">
-                        {latestAlbum.descripcion}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="homeReleaseActions">
-                    {latestAlbum?.compraUrl ? (
-                      <a
-                        href={latestAlbum.compraUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-outline-light"
-                      >
-                        Comprar
-                      </a>
-                    ) : null}
-
-                    {latestAlbum?.audioUrl ? (
-                      <a
-                        href={latestAlbum.audioUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-outline-light"
-                      >
-                        Escuchar
-                      </a>
-                    ) : null}
-
-                    {latestAlbum?.videoUrl ? (
-                      <a
-                        href={latestAlbum.videoUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-danger"
-                      >
-                        Ver
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="homeReleaseCover">
-                  <img
-                    src={latestAlbumCover?.url}
-                    srcSet={imageSrcSet(latestAlbumCover)}
-                    sizes="(max-width: 768px) 100vw, 420px"
-                    alt={`Portada ${latestAlbum?.titulo}`}
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="homeSection">
-        {!loading && !nextConcert ? null : null}
-
-        {!loading && nextConcert && posterUrl ? (
-          <div>
-            <div className="d-flex align-items-end justify-content-between gap-3">
-              <h2 className="homeSectionTitle m-0">Próximo concierto</h2>
-            </div>
-            <div className="homeNextConcert homePanel">
-              <div className="d-flex flex-column flex-md-row gap-4 mt-3">
+      <section
+        className="homeSection"
+        aria-labelledby="home-release-title"
+        data-reveal
+      >
+        <header className="homeSectionHeading">
+          <h2 id="home-release-title">Último lanzamiento</h2>
+        </header>
+        {releases.loading && <p role="status">Cargando lanzamiento...</p>}
+        {!releases.loading && releases.error && (
+          <p className="errorMessage" role="alert">
+            No se pudo cargar el último lanzamiento. Vuelve a intentarlo más
+            tarde.
+          </p>
+        )}
+        {!releases.loading && !releases.error && !latestRelease && (
+          <p className="homeEmpty">Próximamente, nueva música.</p>
+        )}
+        {!releases.loading && !releases.error && latestRelease && (
+          <article className="homeFeature">
+            <button
+              type="button"
+              className="homeReleaseCover"
+              aria-label={`Ampliar portada de ${latestRelease.titulo}`}
+              aria-haspopup="dialog"
+              disabled={!latestRelease.portada?.url}
+              onClick={() =>
+                setLightboxImage({
+                  url: latestRelease.portada?.url,
+                  alt: `Portada ${latestRelease.titulo}`,
+                })
+              }
+            >
+              {latestRelease.portada?.url ? (
+                <img
+                  src={latestRelease.portada.url}
+                  srcSet={imageSrcSet(latestRelease.portada)}
+                  sizes="(max-width: 700px) calc(100vw - 32px), 440px"
+                  alt={`Portada ${latestRelease.titulo}`}
+                  loading="lazy"
+                />
+              ) : (
+                <span className="homeCoverFallback">
+                  {latestRelease.titulo}
+                </span>
+              )}
+            </button>
+            <div className="homeFeatureBody">
+              <p className="homeFeatureMeta">
+                {[latestRelease.fechaFormateada, latestRelease.tipo]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+              <h3>{latestRelease.titulo}</h3>
+              {latestRelease.descripcion && (
+                <p className="homeFeatureDescription">
+                  {latestRelease.descripcion}
+                </p>
+              )}
+              <div className="homeActions">
                 <button
                   type="button"
-                  className="homePosterBtn"
-                  onClick={() => setIsPosterOpen(true)}
-                  aria-label="Ver cartel en grande"
+                  className="homeSongsBtn btn btn-primary"
+                  aria-haspopup="dialog"
+                  onClick={() => setSelectedRelease(latestRelease)}
                 >
-                  <img
-                    className="homePosterImg"
-                    src={posterThumbUrl}
-                    srcSet={imageSrcSet(poster)}
-                    sizes="(max-width: 768px) 100vw, 320px"
-                    alt={posterAlt}
-                    loading="lazy"
-                  />
+                  Ver canciones
                 </button>
-                <div className="d-flex flex-column gap-2 flex-grow-1 homeConcertInfo">
-                  <h3 className="homeConcertTitle m-0">
-                    {nextConcert?.lugar ?? nextConcert?.titulo ?? "Concierto"}
-                  </h3>
-
-                  {nextConcert?.municipio || nextConcert?.provincia ? (
-                    <div className="homeConcertPlace">
-                      {nextConcert?.municipio ? nextConcert.municipio : ""}
-                      {nextConcert?.municipio && nextConcert?.provincia
-                        ? ", "
-                        : ""}
-                      {nextConcert?.provincia ? nextConcert.provincia : ""}
-                    </div>
-                  ) : null}
-
-                  {nextConcert?.fecha_formateada ||
-                  nextConcert?.fechaFormateada ? (
-                    <div className="homeConcertDate">
-                      {nextConcert?.fecha_formateada ??
-                        nextConcert?.fechaFormateada}
-                    </div>
-                  ) : null}
-
-                  {nextConcert?.descripcion ? (
-                    <p className="homeConcertDesc m-0">
-                      {nextConcert.descripcion}
-                    </p>
-                  ) : null}
-
-                  <div className="d-flex align-items-center justify-content-between gap-3 homeConcertBottom">
-                    {nextConcert?.precioEntrada !== null &&
-                    nextConcert?.precioEntrada !== undefined ? (
-                      <span className="homeConcertPrice">
-                        Entrada
-                        {Number(nextConcert.precioEntrada) === 0
-                          ? " gratis"
-                          : `: ${nextConcert.precioEntrada} €`}
-                      </span>
-                    ) : (
-                      <span />
-                    )}
-
-                    {nextConcert?.entradaAnticipada &&
-                    nextConcert?.enlaceEntradaAnticipada ? (
-                      <a
-                        href={nextConcert.enlaceEntradaAnticipada}
-                        className="btn btn-secondary"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Entrada anticipada
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
+                {latestRelease.audioUrl && (
+                  <a
+                    href={latestRelease.audioUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn"
+                  >
+                    Escuchar ↗
+                  </a>
+                )}
+                {latestRelease.videoUrl && (
+                  <a
+                    href={latestRelease.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn"
+                  >
+                    Ver vídeo ↗
+                  </a>
+                )}
               </div>
             </div>
-          </div>
-        ) : null}
+          </article>
+        )}
+      </section>
 
-        {isPosterOpen ? (
-          <div className="homeLightbox" onClick={() => setIsPosterOpen(false)}>
-            <div
-              ref={dialogRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label={posterAlt}
-              tabIndex={-1}
-              onClick={(event) => event.stopPropagation()}
-              className="homeLightboxInner d-flex align-items-center justify-content-center"
-            >
-              <img
-                className="homeLightboxImg"
-                src={posterLightboxUrl}
-                alt={posterAlt}
-                onClick={(e) => e.stopPropagation()}
-              />
-
+      <section
+        className="homeSection"
+        aria-labelledby="home-concert-title"
+        data-reveal
+      >
+        <header className="homeSectionHeading">
+          <h2 id="home-concert-title">Próximo concierto</h2>
+        </header>
+        {concerts.loading && <p role="status">Cargando concierto...</p>}
+        {!concerts.loading && concerts.error && (
+          <p className="errorMessage" role="alert">
+            No se pudo cargar el próximo concierto. Vuelve a intentarlo más
+            tarde.
+          </p>
+        )}
+        {!concerts.loading && !concerts.error && !nextConcert && (
+          <p className="homeEmpty">Nuevas fechas próximamente.</p>
+        )}
+        {!concerts.loading && !concerts.error && nextConcert && (
+          <article
+            className={`homeFeature homeConcert ${poster?.url ? "" : "homeFeatureWithoutImage"}`}
+          >
+            {poster?.url && (
               <button
                 type="button"
-                className="homeLightboxClose"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsPosterOpen(false);
-                }}
-                aria-label="Cerrar"
+                className="homePosterBtn"
+                onClick={() =>
+                  setLightboxImage({ url: poster.url, alt: posterAlt })
+                }
+                aria-label="Ver cartel en grande"
+                aria-haspopup="dialog"
               >
-                ✕
+                <img
+                  className="homePosterImg"
+                  src={poster.urlSm || poster.url}
+                  srcSet={imageSrcSet(poster)}
+                  sizes="(max-width: 700px) calc(100vw - 32px), 440px"
+                  alt={posterAlt}
+                  loading="lazy"
+                />
               </button>
+            )}
+            <div className="homeFeatureBody">
+              <time className="homeConcertDate" dateTime={nextConcert.fecha}>
+                {nextConcert.fecha_formateada ||
+                  nextConcert.fechaFormateada ||
+                  formatConcertDate(nextConcert.fecha)}
+              </time>
+              <h3>{nextConcert.lugar || nextConcert.titulo || "Concierto"}</h3>
+              {(nextConcert.municipio || nextConcert.provincia) && (
+                <p className="homeConcertPlace">
+                  {nextConcert.municipio && (
+                    <span className="homeConcertCity">
+                      {nextConcert.municipio}
+                    </span>
+                  )}
+                  {nextConcert.provincia && (
+                    <span className="homeConcertProvince">
+                      {nextConcert.provincia}
+                    </span>
+                  )}
+                </p>
+              )}
+              {nextConcert.precioEntrada != null && (
+                <p className="homeConcertPrice">
+                  {Number(nextConcert.precioEntrada) === 0
+                    ? "Entrada gratuita"
+                    : `Entrada: ${nextConcert.precioEntrada} €`}
+                </p>
+              )}
+              {nextConcert.entradaAnticipada &&
+                nextConcert.enlaceEntradaAnticipada && (
+                  <a
+                    href={nextConcert.enlaceEntradaAnticipada}
+                    className="btn btn-primary"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Entradas ↗
+                  </a>
+                )}
             </div>
-          </div>
-        ) : null}
-      </div>
-    </section>
+          </article>
+        )}
+      </section>
+
+      {selectedRelease && (
+        <ReleaseModal
+          lanzamiento={selectedRelease}
+          onClose={() => setSelectedRelease(null)}
+        />
+      )}
+      {lightboxImage && (
+        <ImageViewer
+          image={lightboxImage}
+          onClose={() => setLightboxImage(null)}
+        />
+      )}
+    </div>
   );
 }

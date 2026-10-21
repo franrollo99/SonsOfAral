@@ -28,26 +28,26 @@
     "logo": {
         "alt": "Sons of Aral",
         "custom": false,
-        "url": "/images/optimized/logo-lg.png",
-        "urlSm": "/images/optimized/logo-sm.png",
+        "url": "/images/optimized/logo-band-lg.png",
+        "urlSm": "/images/optimized/logo-band-sm.png",
         "variants": [
             {
-                "url": "/images/optimized/logo-sm.png",
+                "url": "/images/optimized/logo-band-sm.png",
                 "width": 96,
-                "height": 96,
-                "bytes": 3420
+                "height": 44,
+                "bytes": 1682
             },
             {
-                "url": "/images/optimized/logo-md.png",
+                "url": "/images/optimized/logo-band-md.png",
                 "width": 192,
-                "height": 192,
-                "bytes": 7863
+                "height": 88,
+                "bytes": 3336
             },
             {
-                "url": "/images/optimized/logo-lg.png",
+                "url": "/images/optimized/logo-band-lg.png",
                 "width": 384,
-                "height": 384,
-                "bytes": 18220
+                "height": 175,
+                "bytes": 6955
             }
         ]
     }

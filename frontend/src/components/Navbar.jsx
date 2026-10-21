@@ -7,9 +7,9 @@ import defaultImages from "../assets/site-images.json";
 
 const links = [
   ["/", "Inicio"],
-  ["/conciertos", "Directo"],
+  ["/conciertos", "Conciertos"],
   ["/musica", "Música"],
-  ["/galeria", "Archivo visual"],
+  ["/galeria", "Galería"],
 ];
 
 function Navbar() {
@@ -50,20 +50,14 @@ function Navbar() {
           <img
             src={logo.urlSm || logo.url}
             srcSet={imageSrcSet(logo)}
-            sizes="42px"
+            sizes="(max-width: 760px) 132px, 160px"
             alt=""
           />
-          <span>
-            Sons
-            <br />
-            of Aral
-          </span>
         </Link>
 
         <nav className="desktopNav" aria-label="Navegación principal">
-          {links.map(([to, label], index) => (
+          {links.map(([to, label]) => (
             <NavLink key={to} to={to} end={to === "/"} className="navLink">
-              <span>0{index + 1}</span>
               {label}
             </NavLink>
           ))}
@@ -89,7 +83,7 @@ function Navbar() {
         className={`mobileNav ${open ? "isOpen" : ""}`}
         aria-hidden={!open}
       >
-        {links.map(([to, label], index) => (
+        {links.map(([to, label]) => (
           <NavLink
             key={to}
             to={to}
@@ -97,7 +91,6 @@ function Navbar() {
             className="mobileNavLink"
             onClick={close}
           >
-            <span>0{index + 1}</span>
             {label}
           </NavLink>
         ))}

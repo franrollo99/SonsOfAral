@@ -1,24 +1,24 @@
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
   color-scheme: dark;
-  --ink: #09090b;
-  --ink-raised: #111116;
-  --surface: rgba(21, 21, 28, 0.78);
-  --surface-strong: #18181f;
+  --ink: #000000;
+  --ink-raised: #101010;
+  --surface: rgba(21, 21, 21, 0.78);
+  --surface-strong: #181818;
   --line: rgba(255, 255, 255, 0.11);
   --line-strong: rgba(255, 255, 255, 0.24);
-  --text: #f5f3f1;
-  --muted: #aaa8b0;
-  --faint: #6f6d76;
-  --signal: #ff3b38;
-  --signal-bright: #ff625c;
-  --violet: #8e5cff;
-  --lime: #ccff57;
+  --text: #ffffff;
+  --muted: #b8b8b8;
+  --faint: #919191;
+  --signal: #ffffff;
+  --signal-bright: #e0e0e0;
+  --violet: #b8b8b8;
+  --lime: #ffffff;
   --danger: #ff625c;
-  --font-display: "Barlow Condensed", Impact, sans-serif;
+  --font-display: "Oswald", Impact, sans-serif;
   --font-body: "Manrope", Arial, sans-serif;
-  --font-mono: "DM Mono", monospace;
+  --font-mono: var(--font-body);
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
   --radius: 18px;
   --page-width: 1240px;
@@ -27,57 +27,45 @@
 * {
   box-sizing: border-box;
 }
+
 html {
   scroll-behavior: smooth;
 }
+
 body {
-  min-width: 320px;
+  min-width: min(320px, 100%);
   margin: 0;
   overflow-x: hidden;
   color: var(--text);
   font-family: var(--font-body);
-  background:
-    radial-gradient(
-      circle at 88% 4%,
-      rgba(142, 92, 255, 0.15),
-      transparent 25rem
-    ),
-    radial-gradient(
-      circle at 7% 42%,
-      rgba(255, 59, 56, 0.1),
-      transparent 26rem
-    ),
-    var(--ink);
+  background: var(--ink);
 }
-body::before {
-  position: fixed;
-  z-index: -1;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.065;
-  content: "";
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
-}
+
 button,
 input,
 textarea,
 select {
   font: inherit;
 }
+
 button {
   color: inherit;
 }
+
 a {
   color: inherit;
 }
+
 img {
   max-width: 100%;
 }
+
 section {
   width: min(var(--page-width), calc(100% - 48px));
   margin: 0 auto;
   padding: clamp(3.5rem, 7vw, 7rem) 0;
 }
+
 h1,
 h2,
 h3,
@@ -85,23 +73,26 @@ h4,
 p {
   margin-top: 0;
 }
+
 h1,
 h2,
 h3,
 h4 {
   text-wrap: balance;
 }
+
 h1,
 .pageTitle {
   max-width: 14ch;
   margin-bottom: 1.5rem;
   font-family: var(--font-display);
   font-size: clamp(3.4rem, 8vw, 7.5rem);
-  font-weight: 800;
-  line-height: 0.83;
+  font-weight: 700;
+  line-height: 1.05;
   letter-spacing: -0.045em;
   text-transform: uppercase;
 }
+
 .eyebrow {
   display: flex;
   align-items: center;
@@ -114,15 +105,18 @@ h1,
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+
 .eyebrow::before {
   width: 24px;
   height: 1px;
   background: currentColor;
   content: "";
 }
+
 .errorMessage {
   color: var(--danger);
 }
+
 .btn,
 .button {
   display: inline-flex;
@@ -148,14 +142,15 @@ h1,
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
+
 .btn:hover,
 .button:hover {
   border-color: var(--text);
   background: var(--text);
   color: var(--ink);
-  box-shadow: 4px 4px 0 var(--signal);
-  transform: translate(-2px, -2px);
+  transform: translateY(-2px);
 }
+
 .btn:focus-visible,
 button:focus-visible,
 a:focus-visible,
@@ -165,30 +160,48 @@ textarea:focus-visible {
   outline: 2px solid var(--lime);
   outline-offset: 4px;
 }
+
 .btn-danger,
 .btn-red,
 .btn-primary {
   border-color: var(--signal);
   background: var(--signal);
+  color: var(--ink);
 }
+
 .btn-danger:hover,
 .btn-red:hover,
 .btn-primary:hover {
   border-color: var(--signal-bright);
   background: var(--signal-bright);
 }
+
 .btn-secondary {
   border-color: var(--line-strong);
   background: transparent;
 }
+
+/* Existing admin controls also inherit the neutral accent. */
+:root .adminCreateBtn,
+.adminSizeBtn.isOn,
+.adminActionBtn:hover,
+.adminCreateBtn:hover,
+.adminPagerBtn:hover:not(:disabled),
+.adminLinkBtn:hover,
+.adminBtn:hover {
+  color: var(--ink);
+}
+
 select option {
   background: var(--ink-raised);
 }
+
 @media (max-width: 640px) {
   section {
     width: min(100% - 32px, var(--page-width));
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -205,9 +218,11 @@ select option {
   outline: 2px solid var(--lime);
   outline-offset: 4px;
 }
+
 [aria-invalid="true"] {
   border-color: var(--danger);
 }
+
 .skipLink {
   position: fixed;
   top: 12px;
@@ -218,6 +233,7 @@ select option {
   color: var(--text);
   transform: translateY(-160%);
 }
+
 .skipLink:focus {
   transform: translateY(0);
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\CancionResource;
 use App\Models\Cancion;
+use Illuminate\Support\Facades\Storage;
 
 class CancionController extends Controller
 {
@@ -12,6 +13,7 @@ class CancionController extends Controller
      *     path="/api/canciones",
      *     summary="Obtener todas las canciones",
      *     tags={"Canciones"},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Lista de canciones"
@@ -30,12 +32,15 @@ class CancionController extends Controller
      *     path="/api/canciones/{id}",
      *     summary="Obtener una canción por ID",
      *     tags={"Canciones"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Información de la canción"
@@ -58,12 +63,15 @@ class CancionController extends Controller
      *     path="/api/canciones/{id}/audio",
      *     summary="Obtener audio de una canción",
      *     tags={"Canciones"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
+     *
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Audio de la canción"
@@ -78,21 +86,18 @@ class CancionController extends Controller
     {
         $cancion = Cancion::with('audio')->findOrFail($id);
 
-        if (!$cancion->audio) {
+        if (! $cancion->audio) {
             abort(404, 'La canción no tiene audio');
         }
 
-        $path = storage_path(
-            'app/public/' .
-                $cancion->audio->directorio . '/' .
-                $cancion->audio->archivo
-        );
+        $disk = Storage::disk('public');
+        $relativePath = $cancion->audio->directorio.'/'.$cancion->audio->archivo;
 
-        if (!file_exists($path)) {
+        if (! $disk->exists($relativePath)) {
             abort(404, 'Archivo no encontrado');
         }
 
-        return response()->file($path, [
+        return response()->file($disk->path($relativePath), [
             'Content-Type' => $cancion->audio->mime_type ?? 'audio/mpeg',
             'Access-Control-Allow-Origin' => '*',
         ]);

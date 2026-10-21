@@ -39,20 +39,50 @@ function Gallery() {
       : galeriasFiltradas;
 
   return (
-    <section>
-      <div className="galleryTop">
-        <div>
-          <p className="eyebrow">Archivo visual / sin filtro</p>
-          <h1 className="galleryTitle">Galería</h1>
+    <section className="galleryPage">
+      <h1 className="visually-hidden">Galería</h1>
+
+      <div className="galleryToolbar">
+        <div
+          className="galleryFilters"
+          role="group"
+          aria-label="Filtrar galerías"
+        >
+          <button
+            type="button"
+            className={`galleryFilterBtn ${filtro === "all" ? "isActive" : ""}`}
+            aria-pressed={filtro === "all"}
+            onClick={() => setFiltro("all")}
+          >
+            Todas
+          </button>
+
+          <button
+            type="button"
+            className={`galleryFilterBtn ${filtro === "concierto" ? "isActive" : ""}`}
+            aria-pressed={filtro === "concierto"}
+            onClick={() => setFiltro("concierto")}
+          >
+            Conciertos
+          </button>
+
+          <button
+            type="button"
+            className={`galleryFilterBtn ${filtro === "banda" ? "isActive" : ""}`}
+            aria-pressed={filtro === "banda"}
+            onClick={() => setFiltro("banda")}
+          >
+            Banda
+          </button>
         </div>
 
-        <div className="gallerySortWrap d-flex align-items-center gap-2">
+        <div className="gallerySortWrap">
           <label className="gallerySortLabel" htmlFor="gallerySort">
             Ordenar por
           </label>
           <select
             id="gallerySort"
-            className="form-select gallerySortSelect"
+            className="gallerySortSelect"
             value={orden}
             onChange={(e) => setOrden(e.target.value)}
           >
@@ -60,32 +90,6 @@ function Gallery() {
             <option value="oldest">Más antiguo</option>
           </select>
         </div>
-      </div>
-
-      <div className="galleryFilters d-flex gap-4 flex-wrap">
-        <button
-          type="button"
-          className={`galleryFilterBtn ${filtro === "all" ? "isActive" : ""}`}
-          onClick={() => setFiltro("all")}
-        >
-          Todas
-        </button>
-
-        <button
-          type="button"
-          className={`galleryFilterBtn ${filtro === "concierto" ? "isActive" : ""}`}
-          onClick={() => setFiltro("concierto")}
-        >
-          Conciertos
-        </button>
-
-        <button
-          type="button"
-          className={`galleryFilterBtn ${filtro === "banda" ? "isActive" : ""}`}
-          onClick={() => setFiltro("banda")}
-        >
-          Banda
-        </button>
       </div>
 
       {cargando && <p className="mt-4">Cargando galerías...</p>}

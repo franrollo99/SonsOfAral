@@ -27,8 +27,15 @@ Para lotes de galería, divide la subida si el conjunto supera el límite del se
 
 ## Respaldos estáticos
 
-Los originales de `frontend/public/images` se conservan. Para regenerar los
-respaldos tras cambiarlos manualmente:
+El logo original actual es `frontend/assets/originals/logo-band.png`, copiado de
+`LOGOS/LOGO_SOA_FORGOTTEN_TIMES/LOGOV2_WHITE.png`. Conserva su transparencia
+y proporción horizontal. La cabecera muestra solo el logo, sin otro nombre
+ni numeración en los enlaces.
+
+Los originales del logo y de la foto de inicio se conservan en
+`frontend/assets/originals`, fuera de `public`. No se incluyen en el build ni
+se sirven al visitante. Solo se publican sus variantes optimizadas.
+Para regenerar los respaldos tras cambiar esos originales manualmente:
 
 ```powershell
 cd backend
@@ -39,6 +46,17 @@ El comando genera los archivos en `frontend/public/images/optimized` y los
 manifiestos de dimensiones en `frontend/src/assets/site-images.json` y
 `backend/resources/site-images.json`. Estos archivos deben incluirse en el despliegue.
 Las subidas del panel usan el disco público de Laravel y requieren `php artisan storage:link`.
+
+No borres `assets/originals`: permite volver a generar las variantes sin perder
+calidad. Las versiones optimizadas y los dos manifiestos se mantienen en Git.
+
+## Comprobación visual
+
+Con Vite en marcha y Chrome instalado, ejecuta `npm run test:a11y` para comprobar
+menú móvil, formularios, foco, cierre de modales y navegación de la galería.
+`PUBLIC_DESIGN_CHECK=1` añade capturas y verificaciones en ocho anchos de pantalla,
+incluidos títulos, filtros, fotos verticales/horizontales y gestos táctiles.
+Las capturas se guardan en una carpeta temporal cuya ruta muestra la prueba.
 
 ## Pruebas
 

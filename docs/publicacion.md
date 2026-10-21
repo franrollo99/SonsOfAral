@@ -58,7 +58,7 @@ Antes de publicar:
 - Restringir Swagger y su JSON en el servidor o con middleware; actualmente su
   configuración no exige autenticación. No basta con ocultar el enlace.
 - Revisar acceso administrativo, recuperación, permisos y cargas de imágenes.
-- Revisar los textos legales existentes, que aún describen un proyecto académico.
+- Revisar que los textos legales reflejen el uso y los servicios reales de la web.
 - Monitorizar errores y espacio en disco. `/up` comprueba el arranque de Laravel,
   no demuestra que la base de datos ni el correo funcionen.
 

@@ -1,5 +1,7 @@
 import { useContent } from "../../hooks/useContent";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { formatConcertDate } from "../../lib/home-content.mjs";
+import ImageViewer from "../../components/ImageViewer";
 import "./Concerts.css";
 
 function normalizeUpcoming(raw) {
@@ -26,6 +28,7 @@ function normalizeUpcoming(raw) {
 
 function Conciertos() {
   const { data, loading: cargando, error } = useContent("/conciertos");
+  const [posterImage, setPosterImage] = useState(null);
   const conciertosRaw = useMemo(
     () => (Array.isArray(data) ? data : []),
     [data],
@@ -37,12 +40,8 @@ function Conciertos() {
   );
 
   return (
-    <section>
-      <header className="listingHeader">
-        <p className="eyebrow">Agenda / próxima señal</p>
-        <h1>Directo</h1>
-        <p>Próximas fechas, ruido y puntos de encuentro.</p>
-      </header>
+    <section className="concertPage">
+      <h1 className="visually-hidden">Próximos conciertos</h1>
       {cargando && <p role="status">Cargando conciertos...</p>}
       {error && !cargando && (
         <p className="errorMessage" role="alert">
@@ -55,20 +54,31 @@ function Conciertos() {
 
       {!cargando && !error && conciertos.length > 0 && (
         <div className="concertList">
-          {conciertos.map((concierto, index) => (
+          {conciertos.map((concierto) => (
             <article key={concierto.id} className="concierto">
-              <span className="concertIndex">0{index + 1}</span>
               <div className="concertTop">
-                <div>
-                  <h1 className="m-0">
-                    {concierto.lugar}{" "}
-                    <span>
-                      {concierto.municipio}, {concierto.provincia}
-                    </span>
-                  </h1>
-                </div>
-                <div className="concertDate">
-                  <h2 className="m-0">{concierto.fecha_formateada}</h2>
+                <time className="concertDate" dateTime={concierto.fecha}>
+                  {concierto.fecha_formateada ||
+                    concierto.fechaFormateada ||
+                    formatConcertDate(concierto.fecha)}
+                </time>
+                <div className="concertVenue">
+                  <h2>{concierto.lugar}</h2>
+                  {(concierto.municipio || concierto.provincia) && (
+                    <p className="concertLocation">
+                      {concierto.municipio && (
+                        <span className="concertMunicipality">
+                          {concierto.municipio}
+                        </span>
+                      )}
+                      {concierto.provincia && (
+                        <span className="concertProvince">
+                          {concierto.municipio ? ", " : ""}
+                          {concierto.provincia}
+                        </span>
+                      )}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -90,11 +100,28 @@ function Conciertos() {
                       </h4>
                     )}
 
+                  {concierto.cartel?.url && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-light concertPosterBtn"
+                      aria-label={`Ver cartel de ${concierto.lugar}`}
+                      aria-haspopup="dialog"
+                      onClick={() =>
+                        setPosterImage({
+                          url: concierto.cartel.url,
+                          alt: `Cartel de ${concierto.lugar}`,
+                        })
+                      }
+                    >
+                      Ver cartel ↗
+                    </button>
+                  )}
+
                   {concierto.entradaAnticipada &&
                     concierto.enlaceEntradaAnticipada && (
                       <a
                         href={concierto.enlaceEntradaAnticipada}
-                        className="btn btn-secondary entradaBtn"
+                        className="btn btn-primary entradaBtn"
                       >
                         Entrada anticipada
                       </a>
@@ -104,6 +131,9 @@ function Conciertos() {
             </article>
           ))}
         </div>
+      )}
+      {posterImage && (
+        <ImageViewer image={posterImage} onClose={() => setPosterImage(null)} />
       )}
     </section>
   );

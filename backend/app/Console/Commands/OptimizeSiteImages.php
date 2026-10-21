@@ -16,15 +16,17 @@ class OptimizeSiteImages extends Command
     public function handle(): int
     {
         $frontend = dirname(base_path()).'/frontend';
+        $originals = $frontend.'/assets/originals';
         $manager = ImageManager::gd();
         $manifest = [];
-        foreach (['home' => 'bandaSOA2.png', 'logo' => 'logo.png'] as $key => $source) {
+        foreach (['home' => 'bandaSOA2.png', 'logo' => 'logo-band.png'] as $key => $source) {
             $logo = $key === 'logo';
+            $filename = $logo ? 'logo-band' : $key;
             $variants = [];
             $widths = $logo ? ImageService::LOGO_WIDTHS : ImageService::PHOTO_WIDTHS;
             foreach ($widths as $size => $width) {
-                $image = $manager->read("{$frontend}/public/images/{$source}")->scaleDown(width: $width);
-                $url = '/images/optimized/'.$key.'-'.$size.($logo ? '.png' : '.webp');
+                $image = $manager->read("{$originals}/{$source}")->scaleDown(width: $width);
+                $url = '/images/optimized/'.$filename.'-'.$size.($logo ? '.png' : '.webp');
                 $encoded = (string) ($logo ? $image->toPng() : $image->toWebp(80));
                 File::ensureDirectoryExists("{$frontend}/public/images/optimized");
                 File::put("{$frontend}/public{$url}", $encoded);

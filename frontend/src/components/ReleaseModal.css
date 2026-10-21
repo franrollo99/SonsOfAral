@@ -1,0 +1,222 @@
+.releaseModalOverlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(14px);
+}
+
+.releaseModal {
+  position: relative;
+  width: min(1050px, 100%);
+  max-height: min(86vh, 850px);
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  background: var(--ink-raised);
+  box-shadow: var(--shadow);
+}
+
+.releaseModal .imageViewerClose {
+  border-color: var(--line-strong);
+  background: var(--ink-raised);
+  box-shadow: none;
+}
+
+.releaseModal .imageViewerClose:hover,
+.releaseModal .imageViewerClose:focus-visible {
+  background: var(--text);
+}
+
+.modalGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(1.4rem, 4vw, 3.5rem);
+}
+
+.cover {
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.releaseCoverFallback {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  margin: 0;
+  color: var(--muted);
+}
+
+.modalLeft {
+  gap: 0.75rem;
+}
+
+.smallMeta,
+.sub {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+  text-transform: uppercase;
+}
+
+.buttons {
+  margin-top: 1.6rem;
+}
+
+.btnWide {
+  width: 100%;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  margin-top: 1rem;
+  color: var(--signal-bright);
+}
+
+.releaseDescription {
+  margin: 2rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.divider {
+  border-color: var(--line);
+}
+
+.tracklist ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trackRow {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 0.7rem;
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 0.4rem;
+  transition: background 160ms ease;
+}
+
+.trackRow:hover,
+.trackRow.isActive {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trackIndex,
+.trackTime {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+}
+
+.trackTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trackName {
+  font-size: 0.86rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.trackPlayerRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.trackPlayBtn {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.trackPlayBtn:hover,
+.trackPlayBtn.isPlaying {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--ink);
+}
+
+.trackProgress {
+  flex: 1;
+  accent-color: var(--signal);
+}
+
+.trackProgressPlaceholder {
+  height: 1px;
+  background: var(--line);
+}
+
+.releaseModal {
+  animation: modal-enter 220ms ease-out;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .modalGrid {
+    grid-template-columns: 1fr;
+    padding-top: 64px;
+  }
+
+  .cover {
+    max-width: 320px;
+  }
+
+  .releaseModal {
+    max-height: 92dvh;
+  }
+
+  .trackTop {
+    display: block;
+  }
+
+  .trackTime {
+    display: block;
+    margin-top: 0.35rem;
+  }
+}
